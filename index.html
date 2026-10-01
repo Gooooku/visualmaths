@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icone.svg">
+<link rel="apple-touch-icon" href="icone.svg">
+<meta name="theme-color" content="#0b1024">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>VisualMaths — animations de mathématiques</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg1:#0a0f22; --bg2:#1a2150; --card:rgba(255,255,255,.05); --cardHover:rgba(255,255,255,.08); --stroke:rgba(255,255,255,.12);
+  --ink:#eef1ff; --muted:#9aa3cc; --x:#ff7a85; --y:#5ee3a1; --z:#6fa8ff; --theo:#b69cff; --app:#ffae55; --acc:#3ee6ff;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    --bg1:#f4f6ff; --bg2:#dfe4fb; --card:rgba(255,255,255,.75); --cardHover:#fff; --stroke:rgba(20,26,58,.1);
+    --ink:#141a3a; --muted:#5a6390; --x:#e2404f; --y:#12a36a; --z:#2f6fe0; --theo:#7c4ddb; --app:#d9730a; --acc:#0098c7;
+    color-scheme: light;
+  }
+}
+:root[data-theme="light"]{
+  --bg1:#f4f6ff; --bg2:#dfe4fb; --card:rgba(255,255,255,.75); --cardHover:#fff; --stroke:rgba(20,26,58,.1);
+  --ink:#141a3a; --muted:#5a6390; --x:#e2404f; --y:#12a36a; --z:#2f6fe0; --theo:#7c4ddb; --app:#d9730a; --acc:#0098c7;
+  color-scheme: light;
+}
+:root{ box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); }
+*,*::before,*::after{ box-sizing:inherit; }
+html{ scroll-padding-top:env(safe-area-inset-top,0px); background:var(--bg1); }
+body{ margin:0; min-height:100vh; color:var(--ink); font-family:"Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+  background:radial-gradient(110% 70% at 80% 0%, var(--bg2) 0%, var(--bg1) 60%) fixed, var(--bg1); }
+.wrap{ max-width:1180px; margin:0 auto; padding:0 24px 64px; }
+header{ display:grid; grid-template-columns:1fr minmax(0, 560px); align-items:center; gap:32px; padding:48px 0 28px; }
+.hero{ margin:0; position:relative; }
+.hero img{ display:block; width:100%; height:auto; border-radius:22px; border:1px solid var(--stroke); box-shadow:0 24px 60px rgba(0,0,0,.35); }
+.hero::before{ content:''; position:absolute; inset:-18px; z-index:-1; border-radius:32px; background:radial-gradient(60% 60% at 50% 50%, color-mix(in srgb, var(--acc) 35%, transparent), transparent 70%); filter:blur(18px); }
+.kicker{ display:inline-flex; align-items:center; gap:8px; font-size:13px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); }
+.kicker i{ width:28px; height:4px; border-radius:99px; background:linear-gradient(90deg, var(--x), var(--y), var(--z)); }
+h1{ margin:14px 0 0; font-size:clamp(44px, 7vw, 84px); line-height:1; letter-spacing:-.035em; font-weight:800; }
+h1 span{ background:linear-gradient(90deg, var(--acc), var(--theo)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.chapter{ margin-top:40px; }
+.chap-head{ display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:18px; }
+.chap-head h2{ margin:0; font-size:28px; letter-spacing:-.02em; }
+.chap-head p{ margin:4px 0 0; color:var(--muted); font-size:15px; }
+.chap-num{ font-size:13px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--acc); }
+.series{ display:inline-flex; align-items:center; gap:8px; padding:10px 16px; border-radius:99px; border:1px solid var(--stroke); background:var(--card);
+  color:var(--ink); text-decoration:none; font-weight:700; font-size:14px; transition:background .2s, transform .2s; }
+.series:hover{ background:var(--cardHover); transform:translateY(-1px); }
+.grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:20px; }
+.card{ position:relative; display:flex; flex-direction:column; border-radius:20px; overflow:hidden; border:1px solid var(--stroke); background:var(--card);
+  color:inherit; text-decoration:none; backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); transition:transform .25s ease, background .25s, box-shadow .25s; }
+.card:hover{ transform:translateY(-4px); background:var(--cardHover); box-shadow:0 18px 40px rgba(0,0,0,.28); }
+.card:focus-visible{ outline:3px solid var(--acc); outline-offset:3px; }
+.thumb{ position:relative; aspect-ratio:16/9; overflow:hidden; background:#0a0f22; }
+.thumb img{ width:100%; height:100%; object-fit:cover; display:block; transition:transform .5s ease; }
+.card:hover .thumb img{ transform:scale(1.05); }
+.play{ position:absolute; inset:0; display:grid; place-items:center; opacity:0; transition:opacity .25s; background:linear-gradient(180deg, rgba(10,15,34,0) 30%, rgba(10,15,34,.55)); }
+.play span{ width:58px; height:58px; border-radius:50%; display:grid; place-items:center; background:rgba(255,255,255,.92); color:#0a0f22; font-size:22px; padding-left:4px; box-shadow:0 8px 24px rgba(0,0,0,.35); }
+.card:hover .play, .card:focus-visible .play{ opacity:1; }
+.num{ position:absolute; left:12px; top:12px; width:30px; height:30px; border-radius:50%; display:grid; place-items:center; font-weight:800; font-size:14px;
+  background:rgba(10,15,34,.7); color:#fff; border:1px solid rgba(255,255,255,.2); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); }
+.body{ padding:16px 18px 18px; display:flex; flex-direction:column; gap:8px; flex:1; }
+.meta{ display:flex; align-items:center; gap:8px; font-size:12px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; }
+.tag{ padding:4px 9px; border-radius:99px; }
+.tag.theorie{ color:var(--theo); background:color-mix(in srgb, var(--theo) 16%, transparent); }
+.tag.application{ color:var(--app); background:color-mix(in srgb, var(--app) 16%, transparent); }
+.dur{ color:var(--muted); letter-spacing:0; text-transform:none; font-weight:600; font-size:13px; }
+.card h3{ margin:0; font-size:19px; line-height:1.25; letter-spacing:-.01em; }
+.card p{ margin:0; color:var(--muted); font-size:14.5px; line-height:1.45; }
+.soon{ border:1.5px dashed var(--stroke); border-radius:20px; display:grid; place-items:center; text-align:center; padding:28px; color:var(--muted); font-weight:600; min-height:160px; }
+footer{ margin-top:56px; color:var(--muted); font-size:13px; text-align:center; }
+@media (max-width: 820px){ header{ grid-template-columns:1fr; gap:22px; padding-top:32px; } }
+@media (prefers-reduced-motion: reduce){ .card, .thumb img, .series{ transition:none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="intro">
+      <div class="kicker"><i></i>Animations interactives</div>
+      <h1>Visual<span>Maths</span></h1>
+    </div>
+    <figure class="hero"><img src="hero.jpg" alt="Un élève lance une vidéo parmi des écrans d’animations de mathématiques" width="559" height="317"></figure>
+  </header>
+  <main id="chapters"></main>
+  <footer>VisualMaths</footer>
+</div>
+<script>
+/* ============================================================
+   LISTE DES VIDÉOS — pour ajouter une vidéo, copie un bloc { … }
+   dans la liste « videos » du bon chapitre, et mets le fichier .html
+   et sa vignette (image 16/9) dans le dépôt.
+   tag : "theorie" ou "application"
+   ============================================================ */
+const CHAPITRES = [
+  {
+    titre: "Géométrie vectorielle",
+    description: "Points, vecteurs et droites dans l’espace.",
+    serie: { texte: "▶ Droite + applications à la suite", lien: "droite-complete.html" },
+    videos: [
+      { titre: "Points et vecteurs dans l’espace", texte: "Placer un point dans un repère 3D, dessiner un vecteur, calculer les composantes de AB.", lien: "points-vecteurs.html", image: "thumb-points.jpg", duree: "2 min 23", tag: "theorie" },
+      { titre: "La droite dans l’espace", texte: "La représentation paramétrique construite point par point, puis les équations à partir de deux points.", lien: "droite-theorie.html", image: "thumb-droite.jpg", duree: "2 min 21", tag: "theorie" },
+      { titre: "Application : deux drones", texte: "À l’aide de leurs équations paramétriques, les deux drones vont-ils se percuter ?", lien: "droite-drones.html", image: "thumb-drones.jpg", duree: "1 min 05", tag: "application" },
+      { titre: "Application : le rayon d’énergie", texte: "On remplace les coordonnées de la cible dans les équations : le rayon va-t-il la toucher ?", lien: "droite-rayon.html", image: "thumb-rayon.jpg", duree: "1 min 06", tag: "application" }
+    ]
+  }
+];
+const TAGS = { theorie: "Théorie", application: "Application" };
+const root = document.getElementById('chapters');
+const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+CHAPITRES.forEach((ch, ci) => {
+  const sec = document.createElement('section'); sec.className = 'chapter'; sec.setAttribute('aria-labelledby', 'ch' + ci);
+  sec.innerHTML = '<div class="chap-head"><div><div class="chap-num">Chapitre ' + (ci + 1) + '</div><h2 id="ch' + ci + '">' + esc(ch.titre) + '</h2><p>' + esc(ch.description) + '</p></div>'
+    + (ch.serie ? '<a class="series" href="' + ch.serie.lien + '">' + esc(ch.serie.texte) + '</a>' : '') + '</div>';
+  const grid = document.createElement('div'); grid.className = 'grid';
+  ch.videos.forEach((v, i) => {
+    const a = document.createElement('a'); a.className = 'card'; a.href = v.lien;
+    a.innerHTML = '<div class="thumb"><img src="' + v.image + '" alt="" loading="lazy"><div class="play"><span>▶</span></div><div class="num">' + (i + 1) + '</div></div>'
+      + '<div class="body"><div class="meta"><span class="tag ' + v.tag + '">' + (TAGS[v.tag] || v.tag) + '</span><span class="dur">' + esc(v.duree) + '</span></div>'
+      + '<h3>' + esc(v.titre) + '</h3><p>' + esc(v.texte) + '</p></div>';
+    grid.appendChild(a);
+  });
+  const soon = document.createElement('div'); soon.className = 'soon'; soon.textContent = 'D’autres vidéos arrivent bientôt…'; grid.appendChild(soon);
+  sec.appendChild(grid); root.appendChild(sec);
+});
+if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js');
+</script>
+</body>
+</html>
