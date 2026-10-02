@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icone.svg">
+<link rel="apple-touch-icon" href="icone.svg">
+<meta name="theme-color" content="#0b1024">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Application — l’ombre de l’obélisque</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link id="gf" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&family=STIX+Two+Text:ital,wght@1,500&display=swap" rel="stylesheet">
+<style>
+:root{ --ink:#fff; --muted:#d9cde6; --glass:rgba(22,12,32,.62); --stroke:rgba(255,255,255,.16);
+  --H:#ffc24a; --d:#ff8a3d; --t:#c7a6ff; --E:#6dff94; --miss:#ff6b6b; --hit:#6dff94; color-scheme:dark; }
+@media (prefers-color-scheme: light){ :root:not([data-theme="dark"]){ --glass:rgba(22,12,32,.58); } }
+:root[data-theme="light"]{ --glass:rgba(22,12,32,.58); }
+:root{ box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); }
+*,*::before,*::after{ box-sizing:inherit; }
+html{ height:100%; scroll-padding-top:env(safe-area-inset-top,0px); }
+body{ height:100%; margin:0; background:#2a1838; color:var(--ink); overflow:hidden; font-family:"Manrope", system-ui, -apple-system, "Segoe UI", sans-serif; }
+.m{ font-family:"STIX Two Text","Cambria Math","Times New Roman",serif; font-style:italic; font-weight:500; }
+.vec{ position:relative; display:inline-block; }
+.vec::after{ content:"→"; position:absolute; left:52%; top:-.58em; transform:translateX(-50%); font-size:.72em; font-style:normal; line-height:1; }
+.cH{ color:var(--H); } .cd{ color:var(--d); } .ct{ color:var(--t); } .cE{ color:var(--E); } .cMiss{ color:var(--miss); } .cHit{ color:var(--hit); }
+.stage{ position:relative; width:100%; height:100%; overflow:hidden; touch-action:none; --u:min(1vw, 1.78vh); }
+canvas{ position:absolute; inset:0; width:100%; height:100%; display:block; }
+#labels{ position:absolute; inset:0; pointer-events:none; }
+.lb{ position:absolute; transform:translate(-50%,-50%); font-weight:700; font-size:calc(var(--u)*1.7); white-space:nowrap; text-shadow:0 0 3px #1a1022, 0 0 7px #1a1022, 0 0 12px rgba(26,16,34,.8); }
+.lb.ax{ font-size:calc(var(--u)*1.9); color:#fff; }
+.lb.tick{ font-size:calc(var(--u)*1.1); font-weight:600; color:#f1e4f7; opacity:.85; }
+.lb .coord{ font-size:.9em; }
+.glass{ background:var(--glass); border:1px solid var(--stroke); box-shadow:0 10px 30px rgba(0,0,0,.25); backdrop-filter:blur(16px) saturate(1.2); -webkit-backdrop-filter:blur(16px) saturate(1.2); }
+.title{ position:absolute; inset:0; display:grid; place-content:center; text-align:center; pointer-events:none; }
+.title .box{ padding:calc(var(--u)*3) calc(var(--u)*5); border-radius:calc(var(--u)*2.4); }
+.title p{ margin:0 0 calc(var(--u)*1); font-size:calc(var(--u)*2.2); color:var(--muted); font-weight:600; }
+.title h1{ margin:0; font-weight:800; font-size:calc(var(--u)*5); letter-spacing:-.02em; line-height:1.05; }
+.caption{ position:absolute; left:calc(var(--u)*3.5); top:calc(var(--u)*3); max-width:min(46%, 30em); pointer-events:none;
+  padding:calc(var(--u)*1.5) calc(var(--u)*2.2); border-radius:calc(var(--u)*1.6); font-size:calc(var(--u)*2.1); font-weight:700; line-height:1.25; }
+.caption > span{ display:block; }
+.card{ position:absolute; right:calc(var(--u)*3); top:calc(var(--u)*3 + 50px); width:21em; padding:calc(var(--u)*1.4) calc(var(--u)*1.8);
+  border-radius:calc(var(--u)*1.8); font-size:calc(var(--u)*1.5); }
+.blk + .blk{ margin-top:calc(var(--u)*1.3); padding-top:calc(var(--u)*1.3); border-top:1px solid var(--stroke); }
+.blk h2{ margin:0 0 .45em; font-size:1em; font-weight:800; display:flex; align-items:center; gap:.5em; }
+.blk h2 i{ width:.8em; height:.8em; border-radius:50%; display:inline-block; }
+.data{ display:flex; gap:.3em 1.3em; flex-wrap:wrap; font-size:1.05em; }
+.data > div{ white-space:nowrap; }
+.eq{ overflow:hidden; }
+.sys{ margin-top:.55em; border-left:2px solid var(--muted); border-radius:12px 0 0 12px; padding:.1em 0 .1em .7em; display:grid; gap:.12em; font-size:1.12em; }
+.test{ margin-top:.55em; display:grid; gap:.25em; font-size:1.02em; font-variant-numeric:tabular-nums; }
+.test div{ white-space:nowrap; display:grid; grid-template-columns:1.6em 1fr auto; align-items:baseline; }
+.test .res{ font-weight:800; min-width:3.2em; text-align:right; }
+.verdict{ margin-top:.55em; font-weight:800; min-height:1.3em; white-space:nowrap; }
+.ctrl{ position:absolute; right:calc(var(--u)*3); top:calc(var(--u)*3); display:flex; gap:8px; }
+.ctrl button, .ctrl a.home{ font:inherit; font-weight:700; font-size:14px; padding:9px 15px; border-radius:99px; color:#fff; cursor:pointer; }
+.ctrl button:focus-visible{ outline:3px solid var(--H); outline-offset:2px; }
+.seek{ position:absolute; left:0; right:0; bottom:0; padding:28px calc(var(--u)*3) calc(var(--u)*1.2) calc(var(--u)*3.5); display:flex; align-items:center; gap:14px; transition:opacity .25s; }
+.seek input{ flex:1; accent-color:var(--H); height:22px; cursor:pointer; }
+.seek span{ font-size:14px; font-weight:700; color:#fff; font-variant-numeric:tabular-nums; min-width:6.5em; text-align:right; text-shadow:0 0 6px #000; }
+@media (hover: hover){ .seek{ opacity:0; } .seek:hover, .seek:has(input:focus-visible), .seek.drag{ opacity:1; } }
+#flash{ position:absolute; inset:0; background:#fff6d8; opacity:0; pointer-events:none; }
+@media (max-aspect-ratio: 1/1){
+  .stage{ --u:min(1.9vw, 1.2vh); }
+  .card{ left:calc(var(--u)*2.5); right:calc(var(--u)*2.5); width:auto; top:calc(var(--u)*2.5); font-size:calc(var(--u)*1.5); padding:calc(var(--u)*1.2) calc(var(--u)*1.6); }
+  .blk + .blk{ margin-top:calc(var(--u)*1); padding-top:calc(var(--u)*1); }
+  .ctrl{ left:calc(var(--u)*2.5); right:calc(var(--u)*2.5); top:auto; bottom:calc(var(--u)*2 + 36px); flex-wrap:wrap; gap:6px; }
+  .ctrl button, .ctrl a.home{ padding:7px 11px; font-size:13px; }
+  .caption{ left:calc(var(--u)*2.5); right:calc(var(--u)*2.5); max-width:none; top:auto; bottom:calc(var(--u)*2 + 128px); font-size:calc(var(--u)*2.5); }
+  .seek{ padding:10px calc(var(--u)*3) calc(var(--u)*2); }
+}
+.line{ white-space:nowrap; font-variant-numeric:tabular-nums; }
+.final{ position:absolute; left:calc(var(--u)*3.5); bottom:calc(var(--u)*3.5 + 26px); width:min(44%, 28em); pointer-events:none; font-size:calc(var(--u)*1.9); font-weight:700; line-height:1.3;
+  padding:calc(var(--u)*1.3) calc(var(--u)*1.8); border-radius:calc(var(--u)*1.4); background:var(--glass); border:1px solid var(--stroke); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); }
+.caption{ top:auto !important; bottom:calc(var(--u)*3.5 + 26px); font-size:calc(var(--u)*1.9) !important; }
+@media (max-aspect-ratio: 1/1){ .final{ left:calc(var(--u)*2.5); width:calc(100% - var(--u)*5); bottom:calc(var(--u)*2 + 128px); font-size:calc(var(--u)*2.4); } .caption{ bottom:calc(var(--u)*2 + 128px); } }
+.ctrl a.home{ text-decoration:none; display:inline-flex; align-items:center; }
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <canvas id="c" aria-label="Animation 3D : on calcule où tombe l'ombre du sommet d'un obélisque pour trouver un trésor"></canvas>
+  <div id="labels"></div>
+  <div id="flash"></div>
+  <div class="title" id="title"><div class="box glass"><p>Application · intersection d’une droite et d’un plan</p><h1>L’ombre de l’obélisque</h1></div></div>
+  <div class="card glass" id="card" style="opacity:0">
+    <div class="blk">
+      <h2><i style="background:var(--H)"></i>Le soleil</h2>
+      <div class="data"><div>rayons de direction <span class="m cH vec">d</span> = <span class="cH">(2 ; 1 ; −3)</span></div></div>
+    </div>
+    <div class="blk" id="blkS" style="opacity:0">
+      <h2><i style="background:var(--t)"></i>Le sommet <span class="m ct">S</span><span class="ct">(0 ; 0 ; 6)</span></h2>
+      <div class="sys" id="sysS"><div id="S0"><span class="m">x</span> = <span class="cH">2</span><span class="m">t</span></div><div id="S1"><span class="m">y</span> = <span class="m">t</span></div><div id="S2"><span class="m">z</span> = <span class="ct">6</span> − <span class="cH">3</span><span class="m">t</span></div></div>
+      <div class="line" id="L0" style="margin-top:.45em">sol&nbsp;: <span class="m">z</span> = 0 ⇔ 6 − 3<span class="m">t</span> = 0 ⇔ <span class="m">t</span> = 2</div>
+      <div class="line" id="L1" style="font-weight:800; margin-top:.2em">ombre&nbsp;: <span class="m cMiss">S’</span><span class="cMiss">(4 ; 2 ; 0)</span></div>
+    </div>
+    <div class="blk" id="blkC" style="opacity:0">
+      <h2><i style="background:var(--E)"></i>Contour de l’ombre</h2>
+      <div class="line" id="cnt"></div>
+    </div>
+  </div>
+  <div class="caption glass" id="caption" style="opacity:0"><span id="captxt"></span></div>
+  <div class="final" id="final" style="opacity:0">L’ombre d’un point s’obtient en coupant le rayon de soleil qui passe par ce point avec le sol, le plan <b>z = 0</b>.</div>
+  <div class="ctrl"><a class="home glass" href="index.html" aria-label="Retour à l'accueil">← Accueil</a><button class="glass" id="rot" aria-pressed="false">Rotation auto : non</button><button class="glass" id="voice" aria-pressed="false">Activer la voix</button><button class="glass" id="sound" aria-pressed="false">Activer le son</button><button class="glass" id="pause">Pause</button><button class="glass" id="replay">Rejouer</button></div>
+  <div class="seek"><input type="range" id="seek" min="0" max="76" step="0.1" value="0" aria-label="Position dans l'animation"><span id="clock">0:00 / 1:16</span></div>
+</div>
+<script src="three.min.js"></script>
+<script src="OrbitControls.js"></script>
+<script>
+(function(){
+  const REC = /[?&]record/.test(location.search);
+  const clamp = x => Math.max(0, Math.min(1, x));
+  const ease = x => x<.5 ? 4*x*x*x : 1-Math.pow(-2*x+2,3)/2;
+  const sine = x => -(Math.cos(Math.PI*x)-1)/2;
+  const lerp = (a,b,k) => a + (b-a)*k;
+  const rnd = (() => { let x = 424242; return () => ((x = (x*16807) % 2147483647) / 2147483647); })();
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const $ = id => document.getElementById(id);
+  const M = (x,y,z) => new THREE.Vector3(x, z, -y);
+  const Mv = a => M(a[0],a[1],a[2]);
+
+  const stage = $('stage'), canvas = $('c');
+  const renderer = new THREE.WebGLRenderer({canvas, antialias:true, preserveDrawingBuffer:REC});
+  renderer.setPixelRatio(REC ? 1 : Math.min(devicePixelRatio||1, 2));
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(36, 16/9, 0.1, 600);
+  // ---------- ciel de crépuscule ----------
+  const sky = (() => { const c = document.createElement('canvas'); c.width = 16; c.height = 512; const x = c.getContext('2d'), g = x.createLinearGradient(0,0,0,512);
+    g.addColorStop(0,'#1d1233'); g.addColorStop(.35,'#4b2a6b'); g.addColorStop(.58,'#c4506a'); g.addColorStop(.72,'#ff9a5a'); g.addColorStop(.8,'#ffd28a'); g.addColorStop(1,'#ffd28a');
+    x.fillStyle = g; x.fillRect(0,0,16,512); const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding; return t; })();
+  const skyM = new THREE.Mesh(new THREE.SphereGeometry(400, 32, 16), new THREE.MeshBasicMaterial({map:sky, side:THREE.BackSide, fog:false}));
+  scene.add(skyM);
+  scene.fog = new THREE.Fog('#c46a62', 50, 240);
+
+  // ---------- matériaux cel-shading ----------
+  const grad = (() => { const d = new Uint8Array([70, 70, 70, 255, 150, 150, 150, 255, 255, 255, 255, 255]); const t = new THREE.DataTexture(d, 3, 1, THREE.RGBAFormat);
+    t.minFilter = t.magFilter = THREE.NearestFilter; t.generateMipmaps = false; t.needsUpdate = true; return t; })();
+  const toon = (color, extra) => new THREE.MeshToonMaterial(Object.assign({color, gradientMap:grad}, extra||{}));
+  const lineMat = new THREE.MeshBasicMaterial({color:'#17111f', side:THREE.BackSide});
+  function part(parent, geo, mat, pos, opts){ opts = opts || {};
+    const m = new THREE.Mesh(geo, mat); if (pos) m.position.set(pos[0], pos[1], pos[2]);
+    if (opts.rot) m.rotation.set(opts.rot[0], opts.rot[1], opts.rot[2]); if (opts.scale) m.scale.set(opts.scale[0], opts.scale[1], opts.scale[2]);
+    m.castShadow = true; parent.add(m);
+    if (opts.line !== false){ const o = new THREE.Mesh(geo, lineMat); o.scale.setScalar(opts.line || 1.07); m.add(o); }
+    return m; }
+  function limb(parent, len, r0, r1, mat, pos){ const g = new THREE.Group(); if (pos) g.position.set(pos[0], pos[1], pos[2]); parent.add(g);
+    const geo = new THREE.CylinderGeometry(r1, r0, len, 16); geo.translate(0, -len/2, 0);
+    part(g, geo, mat, null, {line:1.08}); part(g, new THREE.SphereGeometry(r0*1.02, 16, 12), mat, [0,0,0], {line:1.08}); return g; }
+
+  // ---------- le guerrier (design original) ----------
+  function buildHero(){
+    const skin = toon('#f1c8a4'), suit = toon('#1f2330'), vest = toon('#c9322f'), gold = toon('#f2b43a'), white = toon('#f4f4f6'), hairM = toon('#e9eef6'), tip = toon('#3fd0c9'), boot = toon('#3a2a22');
+    const root = new THREE.Group(), pelvis = new THREE.Group(); pelvis.position.y = .98; root.add(pelvis);
+    part(pelvis, new THREE.SphereGeometry(.2, 20, 14), suit, [0,0,0], {scale:[1.1,.8,.85]});
+    const torso = new THREE.Group(); pelvis.add(torso);
+    part(torso, new THREE.CylinderGeometry(.24, .19, .5, 20), vest, [0,.3,0], {scale:[1,1,.78]});
+    part(torso, new THREE.SphereGeometry(.24, 20, 14, 0, Math.PI*2, 0, Math.PI/2), vest, [0,.55,0], {scale:[1.05,.55,.8]});
+    part(torso, new THREE.TorusGeometry(.2, .035, 10, 28), gold, [0,.07,0], {rot:[Math.PI/2,0,0], scale:[1,.82,1]});
+    part(torso, new THREE.BoxGeometry(.08, .34, .02), suit, [0,.33,.15], {line:1.15});
+    const neck = part(torso, new THREE.CylinderGeometry(.07, .08, .1, 12), skin, [0,.66,0]);
+    const head = new THREE.Group(); head.position.y = .82; torso.add(head);
+    part(head, new THREE.SphereGeometry(.16, 24, 18), skin, [0,0,0], {scale:[.95,1.08,1]});
+    part(head, new THREE.SphereGeometry(.07, 12, 10), skin, [0,-.09,.05], {scale:[1.3,.8,1], line:false});
+    [-1,1].forEach(s => {
+      part(head, new THREE.SphereGeometry(.028, 12, 10), white, [s*.058, .01, .138], {scale:[1,1.25,.5], line:1.2});
+      part(head, new THREE.SphereGeometry(.015, 10, 8), toon('#1d1a2a'), [s*.056, .005, .15], {scale:[1,1.3,.5], line:false});
+      part(head, new THREE.BoxGeometry(.06, .013, .01), toon('#1d1a2a'), [s*.058, .05, .15], {rot:[0,0,s*-.3], line:false});
+      part(head, new THREE.SphereGeometry(.03, 10, 8), skin, [s*.155, 0, 0], {scale:[.5,1,.8]});
+    });
+    part(head, new THREE.BoxGeometry(.05, .008, .01), toon('#7a3b33'), [0,-.075,.148], {line:false});
+    part(head, new THREE.TorusGeometry(.158, .02, 8, 32), white, [0,.06,0], {rot:[Math.PI/2 - .12, 0, 0]});
+    [[-.04, .05], [.05, -.03]].forEach(([dx, dz], i) => part(head, new THREE.BoxGeometry(.03, .3, .012), white, [dx, -.06, -.17], {rot:[.35 + i*.15, 0, dz]}));
+    // cheveux en pointes, balayés vers l'arrière
+    const spikes = [[0,.14,.06, -.5,0,0,.2],[.08,.12,.02,-.9,0,-.6,.22],[-.08,.12,.02,-.9,0,.6,.22],[0,.1,-.08,-1.9,0,0,.3],[.1,.06,-.06,-2.2,0,-.9,.26],
+      [-.1,.06,-.06,-2.2,0,.9,.26],[.05,.14,-.03,-1.3,0,-.3,.28],[-.05,.14,-.03,-1.3,0,.3,.28],[0,.02,-.13,-2.6,0,0,.24],[.12,-.02,-.02,-2.4,0,-1.3,.18],[-.12,-.02,-.02,-2.4,0,1.3,.18]];
+    spikes.forEach(([x,y,z,rx,ry,rz,h]) => { const g = new THREE.Group(); g.position.set(x, y, z); g.rotation.set(rx, ry, rz); head.add(g);
+      const c = new THREE.ConeGeometry(.075, h, 8); c.translate(0, h/2, 0); part(g, c, hairM, [0,0,0], {line:1.1});
+      const t2 = new THREE.ConeGeometry(.033, h*.35, 8); t2.translate(0, h*.175, 0); part(g, t2, tip, [0, h*.66, 0], {line:false}); });
+    const arms = [-1,1].map(s => { const sh = limb(torso, .3, .075, .065, suit, [s*.29,.55,0]);
+      part(sh, new THREE.SphereGeometry(.11, 14, 10), vest, [s*.02,.02,0], {scale:[1.1,.8,1]});
+      const el = limb(sh, .27, .06, .05, skin, [0,-.3,0]); el.position.y = -.3;
+      part(el, new THREE.TorusGeometry(.058, .026, 8, 20), gold, [0,-.2,0], {rot:[Math.PI/2,0,0]});
+      const hand = part(el, new THREE.SphereGeometry(.06, 14, 10), skin, [0,-.31,0], {scale:[.85,1.1,.6]}); return {sh, el, hand}; });
+    const legs = [-1,1].map(s => { const hip = limb(pelvis, .45, .1, .08, suit, [s*.11,-.05,0]);
+      const kn = limb(hip, .43, .075, .06, suit, [0,-.45,0]);
+      part(kn, new THREE.CylinderGeometry(.085, .07, .2, 14), boot, [0,-.34,0]);
+      part(kn, new THREE.BoxGeometry(.13, .08, .26), boot, [0,-.45,.05]); return {hip, kn}; });
+    return {root, pelvis, torso, head, arms, legs};
+  }
+
+  // ---------- l'adversaire (design original) ----------
+  function buildRival(){
+    const armor = toon('#2b2f3d'), plate = toon('#454b5e'), skin = toon('#7b8a9a'), glow = new THREE.MeshBasicMaterial({color:'#62ff8a'}), capeM = toon('#5b1830', {side:THREE.DoubleSide}), horn = toon('#d9d2c2');
+    const root = new THREE.Group(), pelvis = new THREE.Group(); pelvis.position.y = 1.05; root.add(pelvis);
+    part(pelvis, new THREE.SphereGeometry(.21, 20, 14), armor, [0,0,0], {scale:[1.05,.8,.85]});
+    const torso = new THREE.Group(); pelvis.add(torso);
+    part(torso, new THREE.CylinderGeometry(.27, .18, .56, 6), plate, [0,.32,0], {scale:[1,1,.75]});
+    part(torso, new THREE.BoxGeometry(.3, .03, .02), glow, [0,.4,.19], {line:false}); part(torso, new THREE.BoxGeometry(.03, .28, .02), glow, [0,.26,.17], {line:false});
+    [-1,1].forEach(s => { const sp = part(torso, new THREE.ConeGeometry(.13, .3, 5), plate, [s*.32,.62,0], {rot:[0,0,-s*.9]}); });
+    const head = new THREE.Group(); head.position.y = .82; torso.add(head);
+    part(head, new THREE.SphereGeometry(.15, 20, 16), armor, [0,0,0], {scale:[.92,1.12,1]});
+    part(head, new THREE.BoxGeometry(.2, .05, .06), armor, [0,-.02,.12], {line:1.15});
+    [-1,1].forEach(s => { part(head, new THREE.BoxGeometry(.055, .014, .01), glow, [s*.05,.02,.152], {rot:[0,0,s*.35], line:false});
+      const h = new THREE.Group(); h.position.set(s*.1,.1,0); h.rotation.z = -s*.5; head.add(h);
+      const c1 = new THREE.ConeGeometry(.045, .28, 8); c1.translate(0,.14,0); const m1 = part(h, c1, horn, [0,0,0], {line:1.12}); m1.rotation.x = -.5; });
+    // cape
+    const cg = new THREE.PlaneGeometry(.8, 1.5, 8, 14); cg.translate(0, -.75, 0);
+    const cape = part(torso, cg, capeM, [0,.62,-.2], {line:false}); cape.userData.base = cg.attributes.position.array.slice();
+    const arms = [-1,1].map(s => { const sh = limb(torso, .32, .08, .07, armor, [s*.31,.55,0]);
+      const el = limb(sh, .28, .065, .055, skin, [0,-.32,0]); el.position.y = -.32;
+      part(el, new THREE.CylinderGeometry(.075, .07, .14, 6), plate, [0,-.16,0]);
+      const hand = part(el, new THREE.SphereGeometry(.058, 14, 10), skin, [0,-.31,0], {scale:[.85,1.1,.6]}); return {sh, el, hand}; });
+    const legs = [-1,1].map(s => { const hip = limb(pelvis, .46, .1, .08, armor, [s*.11,-.05,0]);
+      const kn = limb(hip, .45, .075, .06, armor, [0,-.46,0]); part(kn, new THREE.ConeGeometry(.09, .22, 6), plate, [0,-.4,.02], {rot:[Math.PI,0,0]}); return {hip, kn}; });
+    return {root, pelvis, torso, head, arms, legs, cape};
+  }
+
+  // poses (angles en radians)
+  const P = {
+    idle:   {sx:[.15,.15], sz:[-.25,.25], el:[-.35,-.35], hz:[.12,-.12], hx:[0,0], kn:[.05,.05], tx:0, ty:0, py:0},
+    charge: {sx:[-.55,-.55], sz:[.55,-.55], el:[-1.9,-1.9], hz:[.38,-.38], hx:[-.25,.15], kn:[.55,.45], tx:.12, ty:.25, py:-.14},
+    fire:   {sx:[-1.52,-1.52], sz:[.2,-.2], el:[-.08,-.08], hz:[.35,-.35], hx:[-.45,.35], kn:[.35,.55], tx:-.2, ty:0, py:-.1}
+  };
+  function mix(a, b, k){ const o = {}; for (const key in a){ o[key] = Array.isArray(a[key]) ? a[key].map((v,i) => lerp(v, b[key][i], k)) : lerp(a[key], b[key], k); } return o; }
+  function applyPose(ch, p){
+    ch.arms.forEach((a,i) => { a.sh.rotation.set(p.sx[i], 0, p.sz[i]); a.el.rotation.set(p.el[i], 0, 0); });
+    ch.legs.forEach((l,i) => { l.hip.rotation.set(p.hx[i], 0, p.hz[i]); l.kn.rotation.set(p.kn[i], 0, 0); });
+    ch.torso.rotation.set(p.tx, p.ty, 0); ch.pelvis.position.y = .98 + p.py;
+  }
+  const RP = {sx:[-.2,-1.1], sz:[-.35,.15], el:[-.5,-.6], hz:[.06,-.1], hx:[.2,.1], kn:[.5,.35], tx:.05, ty:-.15, py:0};
+
+  // ---------- décor : plateau rocheux ----------
+  const ground = new THREE.PlaneGeometry(400, 400, 160, 160); ground.rotateX(-Math.PI/2);
+  const gp = ground.attributes.position;
+  for (let i=0;i<gp.count;i++){ const x = gp.getX(i), z = gp.getZ(i), r = Math.hypot(x, z);
+    const n = Math.sin(x*.07)*Math.cos(z*.06)*2 + Math.sin(x*.19+1)*Math.sin(z*.17)*.6 + Math.sin(x*.5)*Math.cos(z*.45)*.12;
+    gp.setY(i, n*clamp((r-14)/30) - .02); }
+  ground.computeVertexNormals();
+  const groundM = new THREE.Mesh(ground, toon('#b9784c')); groundM.receiveShadow = true; scene.add(groundM);
+  const rockM = toon('#9b5f44'), rockM2 = toon('#7d4a38');
+  function rock(x, z, h, r, m){ const g = new THREE.DodecahedronGeometry(1, 1); const p = g.attributes.position;
+    for (let i=0;i<p.count;i++){ p.setXYZ(i, p.getX(i)*(1+(rnd()-.5)*.25), p.getY(i), p.getZ(i)*(1+(rnd()-.5)*.25)); } g.computeVertexNormals();
+    const mesh = part(scene, g, m || rockM, [x, h*.45, z], {scale:[r, h*.55, r], line:false}); mesh.receiveShadow = true; return mesh; }
+  for (let i=0;i<34;i++){ const a = rnd()*Math.PI*2, d = 34 + rnd()*70; rock(Math.cos(a)*d + 4, Math.sin(a)*d, 3 + rnd()*14, 1.5 + rnd()*4, i%3 ? rockM : rockM2); }
+  for (let i=0;i<18;i++){ const a = rnd()*Math.PI*2, d = 6 + rnd()*14; rock(Math.cos(a)*d + 4, Math.sin(a)*d - 3, .2 + rnd()*.5, .2 + rnd()*.5, rockM2); }
+  for (let i=0;i<9;i++){ const a = i/9*Math.PI*2 + .3, d = 150 + rnd()*40; const m = new THREE.Mesh(new THREE.CylinderGeometry(14 + rnd()*20, 20 + rnd()*22, 20 + rnd()*30, 7), toon('#8a4b52'));
+    m.position.set(Math.cos(a)*d, 8, Math.sin(a)*d); scene.add(m); }
+
+  // lumière
+  scene.add(new THREE.HemisphereLight('#ffd9b8', '#5b3656', .32));
+  const sun = new THREE.DirectionalLight('#ffd6a0', 1.1); sun.position.set(-20, 26, 18); sun.target.position.set(4, 1, -1); scene.add(sun, sun.target);
+  sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048); Object.assign(sun.shadow.camera, {left:-14, right:14, top:14, bottom:-14, near:1, far:80}); sun.shadow.bias = -.0008;
+
+
+  const hero = buildHero(); scene.add(hero.root);
+  const back = x => { const c=1.7, c3=c+1; return 1 + c3*Math.pow(x-1,3) + c*Math.pow(x-1,2); };
+
+  // ---------- données ----------
+  const D = [2, 1, -3], S = [0, 0, 6], TOP = [[.5,.5,4.5],[-.5,.5,4.5],[-.5,-.5,4.5],[.5,-.5,4.5]], BASE = [[.75,.75,0],[-.75,.75,0],[-.75,-.75,0],[.75,-.75,0]];
+  const shadowOf = p => { const t = -p[2]/D[2]; return [p[0] + t*D[0], p[1] + t*D[1], 0]; };
+  const S2 = shadowOf(S);                       // (4 ; 2 ; 0)
+  const K = { legend:[3.6, 7], axes:10.5, apex:15, sun:18.5, ray:[23, 26], eq:[23.5, 24.5, 25.5], z0:28, res:31.5, reveal:35, check:38.5, corners:[41.5, 44.5], hull:[45, 46.5],
+              walk:[48, 53.5], dig:[54, 58.5], chest:[57.2, 59.2], open:59.6, found:60, final:64.5 };
+  const END = 72, SLOW = 1.05;
+  const V_ = '<span class="m vec cH">d</span>';
+  const caps = [
+    [0.3, ''],
+    [K.legend[0], 'Une légende raconte qu’un trésor est enterré…'],
+    [K.legend[1], '… là où tombe l’ombre du sommet de l’obélisque.'],
+    [K.axes, 'Un repère\u00a0: l’origine <span class="m">O</span> au pied de l’obélisque, le sol est le plan <span class="m">z</span> = 0.'],
+    [K.apex, 'Le sommet de l’obélisque est le point <span style="white-space:nowrap"><span class="m ct">S</span>(0 ; 0 ; 6)</span>.'],
+    [K.sun, 'Les rayons du soleil sont parallèles\u00a0: ils ont tous la direction <span style="white-space:nowrap">' + V_ + ' = (2 ; 1 ; −3)</span>.'],
+    [K.ray[0], 'Le rayon qui passe par <span class="m ct">S</span>\u00a0: <span class="m">x</span> = 2<span class="m">t</span>, <span class="m">y</span> = <span class="m">t</span>, <span class="m">z</span> = 6 − 3<span class="m">t</span>.'],
+    [K.z0, 'L’ombre est au sol\u00a0: <span class="m">z</span> = 0. Donc 6 − 3<span class="m">t</span> = 0 et <span class="m">t</span> = 2.'],
+    [K.res, 'Alors <span class="m">x</span> = 2·2 = 4 et <span class="m">y</span> = 2\u00a0: l’ombre du sommet tombe en <span style="white-space:nowrap"><span class="m cMiss">S’</span>(4 ; 2 ; 0)</span>.'],
+    [K.reveal, 'Vérifions\u00a0: le soleil sort des nuages…'],
+    [K.check, '… et l’ombre réelle du sommet tombe exactement sur le point calculé.'],
+    [K.corners[0], 'Même calcul pour les quatre coins du haut\u00a0: on obtient tout le contour de l’ombre.'],
+    [K.walk[0], 'Le guerrier va creuser à l’endroit calculé…'],
+    [K.found, 'Le trésor était bien là\u00a0!'],
+    [K.final, '']
+  ];
+  const VOICE = [
+    [0.3, "Application. L'ombre de l'obélisque."],
+    [K.legend[0], "Une légende raconte qu'un trésor est enterré…"],
+    [K.legend[1], "… là où tombe l'ombre du sommet de l'obélisque."],
+    [K.axes, "Un repère : l'origine O au pied de l'obélisque. Le sol est le plan z égal zéro."],
+    [K.apex, "Le sommet de l'obélisque est le point S, de coordonnées zéro, zéro, six."],
+    [K.sun, "Les rayons du soleil sont parallèles : ils ont tous la direction d, de composantes deux, un, moins trois."],
+    [K.ray[0], "Le rayon qui passe par S : x égal deux t, y égal t, z égal six moins trois t."],
+    [K.z0, "L'ombre est au sol : z égal zéro. Donc six moins trois t égal zéro, et t égal deux."],
+    [K.res, "Alors x égal deux fois deux, soit quatre, et y égal deux : l'ombre du sommet tombe au point S prime, de coordonnées quatre, deux, zéro."],
+    [K.reveal, "Vérifions : le soleil sort des nuages…"],
+    [K.check, "… et l'ombre réelle du sommet tombe exactement sur le point calculé."],
+    [K.corners[0], "Même calcul pour les quatre coins du haut : on obtient tout le contour de l'ombre."],
+    [K.walk[0], "Le guerrier va creuser à l'endroit calculé…"],
+    [K.found, "Le trésor était bien là !"],
+    [K.final, "L'ombre d'un point s'obtient en coupant le rayon de soleil qui passe par ce point avec le sol, le plan z égal zéro."]
+  ];
+
+  // ---------- soleil ----------
+  const sunDir = Mv([-D[0], -D[1], -D[2]]).normalize();        // vers le soleil
+  const center = M(2, 1, 0);
+  sun.position.copy(center).addScaledVector(sunDir, 30); sun.target.position.copy(center);
+  Object.assign(sun.shadow.camera, {left:-11, right:11, top:11, bottom:-11, near:1, far:70}); sun.shadow.camera.updateProjectionMatrix(); sun.shadow.mapSize.set(2048, 2048);
+  const glowTex = (() => { const c = document.createElement('canvas'); c.width = c.height = 128; const x = c.getContext('2d'), g = x.createRadialGradient(64,64,0,64,64,64);
+    g.addColorStop(0,'rgba(255,255,255,1)'); g.addColorStop(.25,'rgba(255,255,255,.8)'); g.addColorStop(.6,'rgba(255,255,255,.2)'); g.addColorStop(1,'rgba(255,255,255,0)'); x.fillStyle = g; x.fillRect(0,0,128,128); return new THREE.CanvasTexture(c); })();
+  const spr = (color, size, add) => { const s = new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex, color, transparent:true, depthWrite:false, blending: add === false ? THREE.NormalBlending : THREE.AdditiveBlending, fog:false})); s.scale.setScalar(size); s.visible = false; scene.add(s); return s; };
+  const sunDisk = spr('#fff1c2', 60), sunHalo = spr('#ffb24a', 160);
+  sunDisk.position.copy(center).addScaledVector(sunDir, 260); sunHalo.position.copy(sunDisk.position);
+  // nuages (voile qui se dissipe)
+  const clouds = []; for (let i=0;i<7;i++){ const c = spr('#6b4a6e', 70 + rnd()*40, false); c.position.copy(sunDisk.position).add(new THREE.Vector3((rnd()-.5)*90, (rnd()-.5)*50, (rnd()-.5)*90)); clouds.push(c); }
+
+  // ---------- obélisque ----------
+  function obeliskGeo(){ const B = BASE.map(Mv), Tp = TOP.map(Mv), A = Mv(S), tri = [];
+    for (let i=0;i<4;i++){ const j = (i+1)%4; tri.push(B[i], B[j], Tp[j], B[i], Tp[j], Tp[i]); tri.push(Tp[i], Tp[j], A); }
+    const g = new THREE.BufferGeometry().setFromPoints(tri); g.computeVertexNormals(); return g; }
+  const stoneM = toon('#d8c29a');
+  const obelisk = part(scene, obeliskGeo(), stoneM, null, {line:1.03}); obelisk.castShadow = true; obelisk.receiveShadow = true;
+  const plinth = part(scene, new THREE.BoxGeometry(2.2, .25, 2.2), toon('#b89f78'), [0, .12, 0], {line:1.04}); plinth.receiveShadow = true;
+  const glyphs = new THREE.Mesh(new THREE.PlaneGeometry(.5, 2.4), new THREE.MeshBasicMaterial({map:(() => { const c = document.createElement('canvas'); c.width = 64; c.height = 256; const x = c.getContext('2d');
+    x.strokeStyle = 'rgba(90,60,30,.75)'; x.lineWidth = 4; for (let k=0;k<7;k++){ const y = 16 + k*34; x.beginPath(); if (k%3 === 0){ x.arc(32, y+10, 10, 0, Math.PI*2); } else if (k%3 === 1){ x.moveTo(14, y); x.lineTo(50, y+20); x.moveTo(50, y); x.lineTo(14, y+20); } else { x.moveTo(32, y); x.lineTo(32, y+22); x.moveTo(18, y+11); x.lineTo(46, y+11); } x.stroke(); }
+    return new THREE.CanvasTexture(c); })(), transparent:true}));
+  glyphs.position.copy(M(.64, 0, 2.4)); glyphs.rotation.y = Math.PI/2; glyphs.rotation.z = 0; scene.add(glyphs);
+  glyphs.quaternion.setFromUnitVectors(new THREE.Vector3(0,0,1), new THREE.Vector3(.99, .05, 0).normalize());
+
+  // ---------- repère, rayons, marques ----------
+  const UP = new THREE.Vector3(0,1,0);
+  const axMat = new THREE.MeshBasicMaterial({color:'#2a2033', transparent:true});
+  function rod(r, mat){ const g = new THREE.CylinderGeometry(r, r, 1, 12); g.translate(0,.5,0); const m = new THREE.Mesh(g, mat); m.visible = false; scene.add(m); return m; }
+  function setRod(m, a, b){ const d = b.clone().sub(a), len = d.length(); if (len < .005){ m.visible = false; return; } m.visible = true; m.position.copy(a); m.quaternion.setFromUnitVectors(UP, d.normalize()); m.scale.y = len; }
+  const axes = [[M(0,0,0), M(7,0,0)], [M(0,0,0), M(0,5,0)], [M(0,0,0), M(0,0,7.2)]].map(([a,b]) => { const r = rod(.03, axMat), cone = new THREE.Mesh(new THREE.ConeGeometry(.1, .34, 16), axMat); cone.visible = false; scene.add(cone); return {r, cone, a, b}; });
+  function growAxes(k){ axes.forEach(ax => { const e = ax.a.clone().lerp(ax.b, Math.max(k, .001)); setRod(ax.r, ax.a, e); ax.cone.visible = k > .01; ax.cone.position.copy(e); ax.cone.quaternion.setFromUnitVectors(UP, ax.b.clone().sub(ax.a).normalize()); }); }
+  const gpts = []; for (let x=-1;x<=7;x++){ gpts.push(M(x,-2,.02), M(x,5,.02)); } for (let y=-2;y<=5;y++){ gpts.push(M(-1,y,.02), M(7,y,.02)); }
+  const gridL = new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(gpts), new THREE.LineBasicMaterial({color:'#5a3a3e', transparent:true, opacity:0})); scene.add(gridL);
+  const rayMat = new THREE.MeshBasicMaterial({color:'#ffd35c', transparent:true, depthWrite:false, blending:THREE.AdditiveBlending});
+  const bgRays = []; for (let i=0;i<9;i++){ const o = [-3 + (i%3)*3.5, -3 + Math.floor(i/3)*3.2]; const top = [o[0] - 2.4, o[1] - 1.2, 9.6]; bgRays.push({m:rod(.02, rayMat), a:top, ph:i*.37}); }
+  const sRayMat = new THREE.MeshBasicMaterial({color:'#ff5cc8', transparent:true, depthWrite:false});
+  const sRay = rod(.035, sRayMat), cRays = TOP.map(() => rod(.022, sRayMat));
+  const dArrow = { sh:rod(.04, new THREE.MeshBasicMaterial({color:'#ffcf4a'})), cone:new THREE.Mesh(new THREE.ConeGeometry(.12, .34, 18), new THREE.MeshBasicMaterial({color:'#ffcf4a'})) }; dArrow.cone.visible = false; scene.add(dArrow.cone);
+  const markTex = (() => { const c = document.createElement('canvas'); c.width = c.height = 128; const x = c.getContext('2d'); x.strokeStyle = '#e83b3b'; x.lineWidth = 16; x.lineCap = 'round';
+    x.beginPath(); x.moveTo(24,24); x.lineTo(104,104); x.moveTo(104,24); x.lineTo(24,104); x.stroke(); return new THREE.CanvasTexture(c); })();
+  const xMark = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({map:markTex, transparent:true, depthWrite:false})); xMark.rotation.x = -Math.PI/2; xMark.position.copy(Mv(S2)).setY(.03); xMark.visible = false; scene.add(xMark);
+  const sDot = spr('#c7a6ff', .6), s2Dot = spr('#ff6b6b', .7);
+  sDot.position.copy(Mv(S)); s2Dot.position.copy(Mv(S2)).setY(.06);
+  const cornerDots = TOP.map(p => { const s = spr('#ff9ad8', .35); s.position.copy(Mv(shadowOf(p))).setY(.05); return s; });
+  // contour calculé de l'ombre (enveloppe convexe des points projetés)
+  const pts2 = BASE.map(p => [p[0], p[1]]).concat(TOP.map(p => shadowOf(p)).map(p => [p[0], p[1]])).concat([[S2[0], S2[1]]]);
+  const hull = (() => { const P = pts2.slice().sort((a,b) => a[0]-b[0] || a[1]-b[1]), cr = (o,a,b) => (a[0]-o[0])*(b[1]-o[1]) - (a[1]-o[1])*(b[0]-o[0]); const lo = [], up = [];
+    P.forEach(p => { while (lo.length >= 2 && cr(lo[lo.length-2], lo[lo.length-1], p) <= 0) lo.pop(); lo.push(p); });
+    P.slice().reverse().forEach(p => { while (up.length >= 2 && cr(up[up.length-2], up[up.length-1], p) <= 0) up.pop(); up.push(p); }); return lo.slice(0,-1).concat(up.slice(0,-1)); })();
+  const hullLine = new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(hull.map(([x,y]) => M(x, y, .04))), new THREE.LineDashedMaterial({color:'#ff5cc8', dashSize:.25, gapSize:.12, transparent:true, opacity:0})); hullLine.computeLineDistances(); scene.add(hullLine);
+
+  // ---------- trésor ----------
+  const chest = new THREE.Group(); scene.add(chest);
+  const wood = toon('#8a5a2b'), gold = toon('#f2b43a');
+  part(chest, new THREE.BoxGeometry(.9, .5, .6), wood, [0, .25, 0], {line:1.05});
+  [-.35, .35].forEach(x => part(chest, new THREE.BoxGeometry(.08, .52, .62), gold, [x, .25, 0], {line:false}));
+  const lid = new THREE.Group(); lid.position.set(0, .5, -.3); chest.add(lid);
+  part(lid, new THREE.CylinderGeometry(.3, .3, .9, 16, 1, false, 0, Math.PI), wood, [0, 0, .3], {rot:[0, 0, Math.PI/2], line:1.05});
+  const treasureGlow = spr('#ffd35c', 2.2);
+  chest.position.copy(Mv(S2)); chest.rotation.y = .5; chest.visible = false;
+  const dirt = []; for (let i=0;i<22;i++){ const m = new THREE.Mesh(new THREE.SphereGeometry(.06 + rnd()*.05, 6, 5), toon('#a26a40')); m.visible = false; scene.add(m); dirt.push({m, v:new THREE.Vector3((rnd()-.5)*2.2, 2 + rnd()*1.6, (rnd()-.5)*2.2), ph:rnd()}); }
+  const sparkles = []; for (let i=0;i<16;i++) sparkles.push({s:spr('#fff0a8', .25), a:rnd()*6.28, r:.3 + rnd()*.6, sp:.5 + rnd()});
+
+  // ---------- étiquettes ----------
+  const box = $('labels'), labels = [];
+  function label(html, cls){ const el = document.createElement('div'); el.className = 'lb' + (cls ? ' ' + cls : ''); el.innerHTML = html; box.appendChild(el); const o = {el, pos:new THREE.Vector3(), a:0, dx:0, dy:0}; labels.push(o); return o; }
+  const Lx = label('<span class="m">x</span>', 'ax'), Ly = label('<span class="m">y</span>', 'ax'), Lz = label('<span class="m">z</span>', 'ax'), LO = label('<span class="m">O</span>', 'ax');
+  Lx.pos.copy(M(7.6,0,0)); Ly.pos.copy(M(0,5.6,0)); Lz.pos.copy(M(0,0,7.7)); LO.pos.copy(M(0,0,0)); LO.dx = -16; LO.dy = 16;
+  const ticks = []; for (let i=1;i<=6;i++){ const l = label(String(i), 'tick'); l.pos.copy(M(i,-.4,0)); ticks.push(l); } for (let i=1;i<=4;i++){ const l = label(String(i), 'tick'); l.pos.copy(M(-.45,i,0)); ticks.push(l); }
+  const LS = label('<span class="m ct">S</span><span class="coord ct">(0 ; 0 ; 6)</span>'); LS.pos.copy(Mv(S)); LS.dx = 62; LS.dy = -6;
+  const Ld = label('<span class="m vec cH">d</span><span class="coord cH"> = (2 ; 1 ; −3)</span>'); Ld.dy = -20;
+  const LS2 = label('<span class="m cMiss">S’</span><span class="coord cMiss">(4 ; 2 ; 0)</span>'); LS2.pos.copy(Mv(S2)); LS2.dy = 30;
+  const tmp = new THREE.Vector3();
+  function placeLabels(){ const w = stage.clientWidth, h = stage.clientHeight;
+    for (const l of labels){ tmp.copy(l.pos).project(camera); const vis = l.a > .01 && tmp.z < 1; l.el.style.opacity = vis ? l.a : 0;
+      if (vis){ l.el.style.left = ((tmp.x+1)/2*w + l.dx) + 'px'; l.el.style.top = ((1-tmp.y)/2*h + l.dy) + 'px'; } } }
+
+  // ---------- le guerrier : marche puis creuse ----------
+  const H0 = [-1.2, -3.6, 0], H1 = [S2[0] - 1.05, S2[1] - .45, 0];
+  const yawTo = (a, b) => { const v = Mv(b).sub(Mv(a)); return Math.atan2(v.x, v.z); };
+  function heroAt(T){
+    const kw = clamp((T-K.walk[0])/(K.walk[1]-K.walk[0])), e = sine(kw), pos = [lerp(H0[0], H1[0], e), lerp(H0[1], H1[1], e), 0];
+    hero.root.position.copy(Mv(pos));
+    let pose = P.idle;
+    if (T < K.walk[0]) hero.root.rotation.y = yawTo(H0, [0, 0, 0]);
+    else if (T < K.walk[1]){ hero.root.rotation.y = yawTo(H0, H1); const ph = Math.sin((T-K.walk[0])*7.5), st = Math.min(1, kw*8, (1-kw)*8);
+      pose = {sx:[.5*ph*st, -.5*ph*st], sz:[-.15,.15], el:[-.4,-.4], hz:[.06,-.06], hx:[-.55*ph*st, .55*ph*st], kn:[.35*Math.max(0,ph)*st+.05, .35*Math.max(0,-ph)*st+.05], tx:.06, ty:0, py:-.02*Math.abs(ph)*st}; }
+    else { hero.root.rotation.y = lerp(yawTo(H0, H1), yawTo(H1, S2), clamp((T-K.walk[1])/.5));
+      if (T < K.dig[1] + .4){ const dk = clamp((T-K.dig[0])/.5)*(1 - clamp((T-K.dig[1])/.4)), ph = .5 + .5*Math.sin((T-K.dig[0])*6);
+        pose = mix(P.idle, {sx:[-1.25 + .6*ph, -1.25 + .6*ph], sz:[.25,-.25], el:[-.3,-.3], hz:[.3,-.3], hx:[-.5,.2], kn:[.7,.5], tx:.55 - .25*ph, ty:0, py:-.18}, dk); }
+      else { const jk = clamp((T-K.found)/.4)*(1 - clamp((T-K.found-1.6)/.6)); pose = mix(P.idle, {sx:[-2.6,-2.6], sz:[-.3,.3], el:[-.2,-.2], hz:[.15,-.15], hx:[0,0], kn:[.05,.05], tx:-.1, ty:0, py:.1*Math.sin((T-K.found)*9)}, jk); } }
+    applyPose(hero, pose);
+  }
+
+  // ---------- caméra ----------
+  const SHOTS = {
+    WIDE:{t:M(1.5,1,2.4), az:.95, el:.32, r:24}, MAIN:{t:M(1.8,1,2), az:.45, el:.3, r:16}, APEX:{t:M(0,0,5.6), az:.35, el:.18, r:7.5},
+    SUN:{t:M(1.2,.4,2.6), az:.15, el:.2, r:19}, X:{t:M(3.4,1.6,.6), az:.5, el:.6, r:7.5}, TOPV:{t:M(2,1,0), az:.45, el:1.0, r:14},
+    HERO:null, CHEST:{t:M(S2[0]-.4, S2[1]-.2, .6), az:.15, el:.3, r:5.5}, FINAL:{t:M(1.8,1,2), az:.55, el:.36, r:18} };
+  const shot = (n, T) => n === 'HERO' ? {t:hero.root.position.clone().add(new THREE.Vector3(0, 1.2, 0)), az:.3, el:.22, r:8.5} : SHOTS[n];
+  const KEYS = [[0,'WIDE'],[3.4,'MAIN'],[14.6,'MAIN'],[15.6,'APEX'],[17.8,'APEX'],[19,'SUN'],[22.4,'SUN'],[23.6,'MAIN'],[37.6,'MAIN'],[38.6,'X'],[40.8,'X'],[41.6,'TOPV'],[47.2,'TOPV'],[48.4,'HERO'],[53.4,'HERO'],[54.4,'CHEST'],[63.6,'CHEST'],[65,'FINAL'],[END,'FINAL']];
+  const ROT = { on:false, clock:0 };
+  let controls = null, userMoved = false, lastTouch = 0; const BACK = { start:0, pos:null, tgt:null };
+  if (!REC){ controls = new THREE.OrbitControls(camera, canvas); controls.enableDamping = true; controls.enablePan = false; controls.minDistance = 3; controls.maxDistance = 40; controls.maxPolarAngle = Math.PI/2 - .03;
+    controls.addEventListener('start', () => { userMoved = true; ROT.on = false; lastTouch = performance.now(); if (window.__rotBtn) window.__rotBtn(); });
+    controls.addEventListener('change', () => { if (userMoved) lastTouch = performance.now(); }); }
+  function releaseCam(){ BACK.start = performance.now(); BACK.pos = camera.position.clone(); BACK.tgt = controls.target.clone(); userMoved = false; }
+  function cameraAt(T){
+    if (userMoved && typeof playing !== 'undefined' && playing && performance.now() - lastTouch > 5000) releaseCam();
+    if (userMoved){ controls.update(); return; }
+    let i = 0; while (i < KEYS.length-2 && T >= KEYS[i+1][0]) i++;
+    const [t0, a] = KEYS[i], [t1, b] = KEYS[i+1], A = shot(a, T), B = shot(b, T), w = a === b ? 0 : ease(clamp((T-t0)/(t1-t0)));
+    let tgt = A.t.clone().lerp(B.t, w); const az = lerp(A.az, B.az, w) + (reduce ? 0 : .04*Math.sin(T*.2) + ROT.clock*2*Math.PI/90), el = lerp(A.el, B.el, w), r = lerp(A.r, B.r, w);
+    let pos = new THREE.Vector3(tgt.x + r*Math.cos(el)*Math.sin(az), tgt.y + r*Math.sin(el), tgt.z + r*Math.cos(el)*Math.cos(az));
+    if (BACK.start){ const kb = clamp((performance.now() - BACK.start)/1600), eb = ease(kb); pos = BACK.pos.clone().lerp(pos, eb); tgt = BACK.tgt.clone().lerp(tgt, eb); if (kb >= 1) BACK.start = 0; }
+    camera.position.copy(pos); camera.lookAt(tgt); if (controls) controls.target.copy(tgt);
+  }
+
+  // ---------- rendu d'un instant ----------
+  const titleEl = $('title'), card = $('card'), captxt = $('captxt'), capEl = $('caption'), finalEl = $('final'), flash = $('flash');
+  let capIdx = -2, shadowsOn = null;
+  function renderAt(T){
+    titleEl.style.opacity = clamp((T-.2)/.6)*(1 - clamp((T-3)/.6));
+    heroAt(T);
+    // soleil voilé puis dégagé
+    const kr = clamp((T-K.reveal)/1.6), sunUp = clamp((T-K.sun)/1.5);
+    sun.intensity = .25 + .95*kr; const want = kr > .05; if (want !== shadowsOn){ shadowsOn = want; sun.castShadow = want; }
+    sunDisk.visible = sunHalo.visible = true; sunDisk.material.opacity = .35 + .65*Math.max(sunUp*.5, kr); sunHalo.material.opacity = .15 + .5*kr;
+    clouds.forEach((c, i) => { c.visible = kr < 1; c.material.opacity = .85*(1 - kr); c.position.y += 0; });
+    // repère
+    growAxes(ease(clamp((T-K.axes)/1.4))); Lx.a = Ly.a = Lz.a = LO.a = clamp((T-K.axes-1)/.5); ticks.forEach(l => l.a = clamp((T-K.axes-1.2)/.6)); gridL.material.opacity = .45*clamp((T-K.axes)/1.4);
+    // sommet S
+    sDot.visible = T >= K.apex; sDot.scale.setScalar(.6*(1 + .2*Math.sin(T*5))); LS.a = clamp((T-K.apex-.3)/.5);
+    // rayons parallèles
+    bgRays.forEach(o => { const vis = T >= K.sun && T < K.reveal + 6; if (!vis){ o.m.visible = false; return; } const k = ((T - K.sun)*.35 + o.ph) % 1, a = Mv(o.a), dir = Mv(D).normalize();
+      const p0 = a.clone().addScaledVector(dir, k*6), p1 = p0.clone().addScaledVector(dir, 2.2); setRod(o.m, p0, p1); });
+    rayMat.opacity = .55*sunUp*(1 - clamp((T-K.reveal-4)/2));
+    const kd = ease(clamp((T-K.sun-.5)/1)), dEnd = Mv(S).addScaledVector(Mv(D).normalize(), 1.6*kd);
+    if (kd > .02 && T < K.ray[0] + 1){ const a = Mv(S), dd = dEnd.clone().sub(a), len = dd.length(), h = Math.min(.34, len*.5), dir = dd.clone().normalize();
+      setRod(dArrow.sh, a, a.clone().addScaledVector(dir, len-h)); dArrow.cone.visible = true; dArrow.cone.position.copy(a).addScaledVector(dir, len-h/2); dArrow.cone.quaternion.setFromUnitVectors(UP, dir); }
+    else { dArrow.sh.visible = dArrow.cone.visible = false; }
+    Ld.pos.copy(dEnd); Ld.a = clamp((T-K.sun-1.4)/.4)*(1 - clamp((T-K.ray[0])/.6));
+    // rayon par S jusqu'au sol
+    const ks = ease(clamp((T-K.ray[0])/(K.ray[1]-K.ray[0])));
+    if (ks > 0) setRod(sRay, Mv(S), Mv(S).lerp(Mv(S2), ks)); else sRay.visible = false;
+    sRayMat.opacity = .95*(1 - .6*clamp((T-K.walk[0])/1.5));
+    xMark.visible = T >= K.res; xMark.scale.setScalar(Math.max(.001, back(clamp((T-K.res)/.6)))); xMark.material.opacity = 1 - clamp((T-K.dig[0])/1.5);
+    s2Dot.visible = T >= K.res && T < K.dig[0]; s2Dot.scale.setScalar(.7*(1 + .25*Math.sin(T*6)));
+    LS2.a = clamp((T-K.res-.2)/.4)*(1 - clamp((T-K.walk[0])/1));
+    // coins du haut et contour
+    TOP.forEach((p, i) => { const t0 = K.corners[0] + i*.7, k = ease(clamp((T-t0)/.8)); if (k > 0 && T < K.walk[0] + 1) setRod(cRays[i], Mv(p), Mv(p).lerp(Mv(shadowOf(p)), k)); else cRays[i].visible = false;
+      cornerDots[i].visible = k >= 1 && T < K.walk[0] + 1; });
+    hullLine.material.opacity = .95*clamp((T-K.hull[0])/(K.hull[1]-K.hull[0]))*(1 - clamp((T-K.walk[0])/1.5));
+    // trésor
+    const kc = ease(clamp((T-K.chest[0])/(K.chest[1]-K.chest[0]))); chest.visible = kc > 0; chest.position.copy(Mv(S2)).setY(-.55 + .55*kc);
+    lid.rotation.x = -1.9*ease(clamp((T-K.open)/.8));
+    treasureGlow.visible = T >= K.open; treasureGlow.position.copy(Mv(S2)).setY(.75); treasureGlow.scale.setScalar(2.2*(1 + .15*Math.sin(T*4))*clamp((T-K.open)/.6)); treasureGlow.material.opacity = .9;
+    sparkles.forEach(o => { o.s.visible = T >= K.open; if (!o.s.visible) return; const ph = ((T - K.open)*o.sp + o.a) % 1; o.s.position.copy(Mv(S2)).add(new THREE.Vector3(Math.cos(o.a*7)*o.r, .6 + ph*1.6, Math.sin(o.a*7)*o.r)); o.s.material.opacity = 1 - ph; });
+    dirt.forEach(o => { const e = ((T - K.dig[0])*1.4 + o.ph) % 1, on = T >= K.dig[0] && T < K.dig[1]; o.m.visible = on; if (!on) return;
+      o.m.position.copy(Mv(S2)).add(new THREE.Vector3(o.v.x*e*.5, o.v.y*e - 4.9*e*e*.9, o.v.z*e*.5)); if (o.m.position.y < .03) o.m.position.y = .03; });
+    flash.style.opacity = T >= K.reveal && T < K.reveal + .5 ? .3*(1 - (T-K.reveal)/.5) : (T >= K.open && T < K.open + .4 ? .25*(1 - (T-K.open)/.4) : 0);
+    // panneau
+    const cOp = clamp((T-K.sun)/.6); card.style.opacity = cOp; card.style.transform = 'translateY(' + (1-cOp)*10 + 'px)';
+    $('blkS').style.opacity = clamp((T-K.ray[0])/.5); K.eq.forEach((s0,i) => $('S'+i).style.opacity = clamp((T-s0)/.5));
+    $('L0').style.opacity = clamp((T-K.z0)/.5); $('L1').style.opacity = clamp((T-K.res)/.5);
+    const bc = $('blkC'); bc.style.display = T < K.corners[0] ? 'none' : ''; bc.style.opacity = clamp((T-K.corners[0])/.5);
+    const nC = TOP.filter((p, i) => T >= K.corners[0] + i*.7 + .8).length; $('cnt').innerHTML = 'coins du haut projetés\u00a0: <b>' + nC + '</b> / 4';
+    finalEl.style.opacity = clamp((T-K.final)/.8);
+    let ci = -1; caps.forEach((c,i) => { if (T >= c[0]) ci = i; });
+    if (ci !== capIdx){ capIdx = ci; captxt.innerHTML = ci >= 0 ? caps[ci][1] : ''; }
+    capEl.style.opacity = (ci >= 0 && caps[ci][1]) ? clamp((T - caps[ci][0])/.35) : 0;
+    cameraAt(T); renderer.render(scene, camera); placeLabels();
+  }
+
+  function resize(){ const w = stage.clientWidth, h = stage.clientHeight; if (!w || !h) return;
+    renderer.setSize(w, h, false); camera.aspect = w/h; camera.fov = w/h < 1 ? 64 : 36;
+    if (w/h >= 1) camera.setViewOffset(w, h, w*.13, h*.02, w, h); else camera.setViewOffset(w, h, 0, -h*.04, w, h);
+    camera.updateProjectionMatrix(); }
+  new ResizeObserver(resize).observe(stage); resize();
+  if (REC){ window.renderAt = T => { resize(); renderAt(T/SLOW); }; window.END = END*SLOW; return; }
+
+  // ---------- son ----------
+  const AU = { ctx:null, on:false, master:null, noise:null, wind:null, nextDig:0 };
+  function auInit(){
+    const C = new (window.AudioContext || window.webkitAudioContext)();
+    const comp = C.createDynamicsCompressor(); comp.threshold.value = -12; comp.ratio.value = 4; comp.connect(C.destination);
+    const m = C.createGain(); m.gain.value = 0; m.connect(comp);
+    const nb = C.createBuffer(1, C.sampleRate*2, C.sampleRate), d = nb.getChannelData(0); for (let i=0;i<d.length;i++) d[i] = Math.random()*2-1;
+    AU.ctx = C; AU.master = m; AU.noise = nb;
+    const wg = C.createGain(); wg.gain.value = 0; const wf = C.createBiquadFilter(); wf.type = 'bandpass'; wf.frequency.value = 500; wf.Q.value = .6;
+    const ws = C.createBufferSource(); ws.buffer = nb; ws.loop = true; const lfo = C.createOscillator(); lfo.frequency.value = .13; const lg = C.createGain(); lg.gain.value = 260; lfo.connect(lg); lg.connect(wf.frequency);
+    ws.connect(wf); wf.connect(wg); wg.connect(m); ws.start(); lfo.start(); AU.wind = wg;
+    const pg = C.createGain(); pg.gain.value = 0; const pf = C.createBiquadFilter(); pf.type = 'lowpass'; pf.frequency.value = 700;
+    [110, 164.8, 220, 277.2].forEach((f,i) => { const o = C.createOscillator(); o.type = 'triangle'; o.frequency.value = f; o.detune.value = (i-1.5)*6; o.connect(pf); o.start(); }); pf.connect(pg); pg.connect(m); AU.pad = pg;
+  }
+  function out(pan){ const C = AU.ctx; if (!C.createStereoPanner) return AU.master; const p = C.createStereoPanner(); p.pan.value = pan||0; p.connect(AU.master); return p; }
+  function tone(f, vol, decay, pan, type, delay){ const C = AU.ctx, t = C.currentTime + (delay||0), o = C.createOscillator(), g = C.createGain();
+    vol = Math.max(vol, .0002); o.type = type || 'sine'; o.frequency.value = f; g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol, t+.005); g.gain.exponentialRampToValueAtTime(.0001, t+decay);
+    o.connect(g); g.connect(out(pan)); o.start(t); o.stop(t+decay+.05); return o; }
+  const beep = (f, vol, dur, pan, delay) => { tone(f, vol, dur || .09, pan, 'sine', delay); tone(f*2, vol*.1, (dur || .09)*.8, pan, 'square', delay); };
+  function noiseBurst(dur, f0, f1, vol, type, delay, pan){ const C = AU.ctx, t = C.currentTime + (delay||0), src = C.createBufferSource(); src.buffer = AU.noise; src.loop = true;
+    const f = C.createBiquadFilter(); f.type = type || 'lowpass'; f.frequency.setValueAtTime(f0, t); f.frequency.exponentialRampToValueAtTime(f1, t+dur*.9);
+    const g = C.createGain(); g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol, t+.01); g.gain.exponentialRampToValueAtTime(.0001, t+dur);
+    src.connect(f); f.connect(g); g.connect(out(pan)); src.start(t); src.stop(t+dur+.05); }
+  function drum(f, vol, delay){ const o = tone(f*2.2, vol, .5, 0, 'sine', delay); const t = AU.ctx.currentTime + (delay||0); o.frequency.setValueAtTime(f*2.2, t); o.frequency.exponentialRampToValueAtTime(f, t+.12); noiseBurst(.08, 900, 300, vol*.3, 'lowpass', delay); }
+  function boom(){ noiseBurst(3, 5000, 90, .9, 'lowpass'); const sub = tone(95, .9, 2.2, 0, 'sine'); sub.frequency.setValueAtTime(95, AU.ctx.currentTime); sub.frequency.exponentialRampToValueAtTime(28, AU.ctx.currentTime + 1.3);
+    for (let i=0;i<20;i++) noiseBurst(.05, 3000, 2000, .15, 'bandpass', .05 + Math.random()*1.1, Math.random()*1.4-.7); }
+  const midi = mm => 440*Math.pow(2,(mm-69)/12);
+  const FX = [[.3, () => { drum(55, .4); drum(55, .3, .45); }], [K.legend[0], () => [69, 72, 76].forEach((mm, j) => tone(midi(mm), .06, 1.6, 0, 'sine', j*.25))],
+    [K.axes, () => noiseBurst(1.2, 300, 2400, .1, 'bandpass')], [K.apex, () => { beep(880, .1, .1); beep(1320, .1, .14, 0, .12); }],
+    [K.sun, () => noiseBurst(3, 300, 3000, .1, 'bandpass')], [K.ray[0], () => { const o = tone(1200, .06, 2.6, 0); o.frequency.exponentialRampToValueAtTime(300, AU.ctx.currentTime + 2.5); }],
+    [K.z0, () => beep(1240, .08, .08)], [K.res, () => { tone(midi(84), .12, 1.4); tone(midi(91), .08, 1.4, 0, 'sine', .12); }],
+    [K.reveal, () => { noiseBurst(2.4, 200, 4000, .2, 'bandpass'); [60, 64, 67, 72].forEach((mm, j) => tone(midi(mm), .07, 3, -.3+.2*j, 'sine', j*.06)); }],
+    [K.check, () => [84, 88].forEach((mm, j) => tone(midi(mm), .1, 1, 0, 'sine', j*.14))], [K.hull[0], () => noiseBurst(1.4, 600, 2500, .08, 'bandpass')],
+    [K.chest[0], () => noiseBurst(1.6, 2000, 200, .25, 'lowpass')], [K.open, () => { noiseBurst(.25, 3000, 800, .2, 'bandpass'); [72, 76, 79, 84, 88].forEach((mm, j) => tone(midi(mm), .1, 1.6, -.4+.2*j, 'sine', .15 + j*.09)); }],
+    [K.final, () => [60, 64, 67, 72].forEach((mm, j) => tone(midi(mm), .06, 3, -.3+.2*j, 'sine', j*.05))]];
+  TOP.forEach((p, i) => FX.push([K.corners[0] + i*.7 + .8, () => beep(1400 + i*120, .06, .06)]));
+  for (let k=0;k<12;k++) FX.push([K.walk[0] + .2 + k*.42, () => noiseBurst(.06, 900, 400, .12, 'lowpass')]);
+  for (let k=0;k<7;k++) FX.push([K.dig[0] + .3 + k*.6, () => { noiseBurst(.18, 1800, 300, .3, 'lowpass'); tone(150, .15, .12, 0, 'triangle'); }]);
+  function audioTick(a, b){ if (!AU.on || b <= a) return; FX.forEach(([tm, fn]) => { if (tm > a && tm <= b) fn(); }); }
+  function audioFrame(T){ if (!AU.ctx) return; const now = AU.ctx.currentTime, live = AU.on && playing;
+    AU.wind.gain.setTargetAtTime(live && T > .2 ? .05 : 0, now, .5); AU.pad.gain.setTargetAtTime(live && T > K.legend[0] && T < END - 2 ? .02 : 0, now, .8); }
+  function masterTo(v){ if (!AU.ctx) return; const t = AU.ctx.currentTime; AU.master.gain.cancelScheduledValues(t); AU.master.gain.setTargetAtTime(v, t, .15); }
+
+  // ---------- voix off ----------
+  const VO = { on:false, busy:false, until:0, voice:null, supported: 'speechSynthesis' in window };
+  function pickVoice(){ if (!VO.supported) return; const vs = speechSynthesis.getVoices().filter(v => /^fr/i.test(v.lang)); if (!vs.length) return;
+    const score = v => (/natural|online|neural/i.test(v.name) ? 8 : 0) + (/google/i.test(v.name) ? 4 : 0) + (/fr-CH/i.test(v.lang) ? 2 : 0) + (/fr-FR/i.test(v.lang) ? 1 : 0) + (v.localService ? 0 : 1);
+    VO.voice = vs.sort((a,b) => score(b) - score(a))[0]; }
+  if (VO.supported){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+  function say(text){ if (!VO.supported) return; speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text);
+    u.lang = VO.voice ? VO.voice.lang : 'fr-FR'; if (VO.voice) u.voice = VO.voice; u.rate = .97;
+    u.onstart = () => { VO.busy = true; if (AU.on) masterTo(.45); }; u.onend = u.onerror = () => { VO.busy = false; if (AU.on && playing) masterTo(.9); };
+    VO.busy = true; VO.until = performance.now() + (text.length*.085/.97 + 2)*1000; speechSynthesis.speak(u); }
+  function hush(){ if (VO.supported) speechSynthesis.cancel(); VO.busy = false; }
+  function voiceTick(a, b){ if (!VO.on || b <= a) return; for (const [tm, txt] of VOICE){ if (tm > a && tm <= b) say(txt); } }
+  function holdForVoice(prev, next){ if (!VO.on || !VO.busy || performance.now() > VO.until) return next; for (const [tm] of VOICE){ if (tm > prev && tm <= next) return Math.max(prev, tm - .001); } return next; }
+
+  // ---------- commandes ----------
+  let T = 0, playing = true, last = performance.now();
+  const pauseBtn = $('pause'), replayBtn = $('replay'), soundBtn = $('sound'), voiceBtn = $('voice'), rotBtn = $('rot'), seekEl = $('seek'), clockEl = $('clock');
+  function setRotBtn(){ rotBtn.textContent = 'Rotation auto : ' + (ROT.on ? 'oui' : 'non'); rotBtn.setAttribute('aria-pressed', ROT.on); }
+  window.__rotBtn = setRotBtn;
+  rotBtn.addEventListener('click', () => { ROT.on = !ROT.on; if (ROT.on) userMoved = false; setRotBtn(); });
+  pauseBtn.addEventListener('click', () => { if (T >= END){ T = 0; playing = true; hush(); } else playing = !playing; pauseBtn.textContent = playing ? 'Pause' : 'Lecture';
+    if (VO.supported){ if (playing) speechSynthesis.resume(); else speechSynthesis.pause(); } if (AU.on) masterTo(playing ? .9 : 0); });
+  replayBtn.addEventListener('click', () => { hush(); T = -0.001; playing = true; userMoved = false; ROT.on = false; ROT.clock = 0; setRotBtn(); pauseBtn.textContent = 'Pause'; if (AU.on) masterTo(.9); });
+  soundBtn.addEventListener('click', () => { if (!AU.ctx) auInit(); AU.ctx.resume(); AU.on = !AU.on; soundBtn.textContent = AU.on ? 'Couper le son' : 'Activer le son'; soundBtn.setAttribute('aria-pressed', AU.on); masterTo(AU.on && playing ? .9 : 0); });
+  voiceBtn.addEventListener('click', () => { if (!VO.supported){ voiceBtn.textContent = 'Voix indisponible'; return; }
+    VO.on = !VO.on; voiceBtn.textContent = VO.on ? 'Couper la voix' : 'Activer la voix'; voiceBtn.setAttribute('aria-pressed', VO.on);
+    if (!VO.on){ hush(); if (AU.on && playing) masterTo(.9); return; } pickVoice();
+    if (T < .3){ say(VOICE[0][1]); T = .301; } else { let cur = null; for (const v of VOICE){ if (v[0] <= T) cur = v; } if (cur && T - cur[0] < 3) say(cur[1]); } });
+  seekEl.max = (END*SLOW).toFixed(1);
+  let skipAudio = false, dragging = false;
+  const mmss = x => { x = Math.max(0, Math.round(x)); return Math.floor(x/60) + ':' + String(x%60).padStart(2,'0'); };
+  function jump(sec){ T = Math.max(0, Math.min(END, sec/SLOW)); skipAudio = true; hush(); if (T >= END){ playing = false; pauseBtn.textContent = 'Lecture'; } }
+  const seekBox = seekEl.parentElement;
+  seekEl.addEventListener('pointerdown', () => { dragging = true; seekBox.classList.add('drag'); });
+  window.addEventListener('pointerup', () => { if (dragging) seekEl.blur(); dragging = false; seekBox.classList.remove('drag'); });
+  seekEl.addEventListener('input', () => jump(parseFloat(seekEl.value)));
+  document.addEventListener('keydown', e => { if (e.target.tagName === 'BUTTON' && (e.key === ' ' || e.key === 'Enter')) return; if (e.target === seekEl && e.key.startsWith('Arrow')) return;
+    if (e.key === ' '){ e.preventDefault(); pauseBtn.click(); } else if (e.key === 'ArrowLeft') jump(T*SLOW - 5); else if (e.key === 'ArrowRight') jump(T*SLOW + 5); });
+  function loop(now){
+    const dt = Math.min(.1, (now-last)/1000); last = now; const prevT = T;
+    if (ROT.on) ROT.clock += dt;
+    if (playing){ T = holdForVoice(prevT, Math.min(END, T + dt/SLOW)); if (T >= END){ playing = false; pauseBtn.textContent = 'Lecture'; } }
+    if (skipAudio) skipAudio = false; else { audioTick(prevT, T); voiceTick(prevT, T); }
+    audioFrame(T);
+    if (!dragging) seekEl.value = (T*SLOW).toFixed(1); clockEl.textContent = mmss(T*SLOW) + ' / ' + mmss(END*SLOW);
+    renderAt(Math.max(0, T)); requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
+</script>
+<script>if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js');</script>
+</body>
+</html>

@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icone.svg">
+<link rel="apple-touch-icon" href="icone.svg">
+<meta name="theme-color" content="#0b1024">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Intersections d'une droite avec les plans de coordonnées</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link id="gf" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&family=STIX+Two+Text:ital,wght@1,500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg1:#0a0f22; --bg2:#1a2150; --ink:#eef1ff; --muted:#8e97c4; --glass:rgba(255,255,255,.06); --stroke:rgba(255,255,255,.14);
+  --x:#ff7a85; --y:#5ee3a1; --z:#6fa8ff; --A:#ffc857; --B:#b69cff; --C:#ff4fa3; --uc:#3ee6ff; --w:#ffae55; --grid:#3a4478;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    --bg1:#f4f6ff; --bg2:#dfe4fb; --ink:#141a3a; --muted:#5a6390; --glass:rgba(255,255,255,.7); --stroke:rgba(20,26,58,.12);
+    --x:#e2404f; --y:#12a36a; --z:#2f6fe0; --A:#c98a00; --B:#7c4ddb; --C:#d81b7a; --uc:#0098c7; --w:#d9730a; --grid:#b8c0e6;
+    color-scheme: light;
+  }
+}
+:root[data-theme="light"]{
+  --bg1:#f4f6ff; --bg2:#dfe4fb; --ink:#141a3a; --muted:#5a6390; --glass:rgba(255,255,255,.7); --stroke:rgba(20,26,58,.12);
+  --x:#e2404f; --y:#12a36a; --z:#2f6fe0; --A:#c98a00; --B:#7c4ddb; --C:#d81b7a; --uc:#0098c7; --w:#d9730a; --grid:#b8c0e6;
+  color-scheme: light;
+}
+:root{ box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); }
+*,*::before,*::after{ box-sizing:inherit; }
+html{ height:100%; scroll-padding-top:env(safe-area-inset-top,0px); }
+body{ height:100%; margin:0; background:var(--bg1); color:var(--ink); overflow:hidden; font-family:"Manrope", system-ui, -apple-system, "Segoe UI", sans-serif; }
+.m{ font-family:"STIX Two Text","Cambria Math","Times New Roman",serif; font-style:italic; font-weight:500; }
+.cu{ color:var(--uc); } .cw{ color:var(--w); } .cP{ color:var(--B); } .cQ{ color:var(--A); }
+.vec{ position:relative; display:inline-block; }
+.vec.w::after{ transform:translateX(-50%) scaleX(2.1); }
+.vec::after{ content:"→"; position:absolute; left:52%; top:-.58em; transform:translateX(-50%); font-size:.72em; font-style:normal; line-height:1; }
+.cv{ color:var(--uc); } .cI{ color:var(--x); } .cJ{ color:var(--y); } .cK{ color:var(--z); }
+.cx{ color:var(--x); } .cy{ color:var(--y); } .cz{ color:var(--z); } .cA{ color:var(--A); } .cB{ color:var(--B); } .cC{ color:var(--C); }
+.stage{ position:relative; width:100%; height:100%; overflow:hidden; touch-action:none;
+  background: radial-gradient(120% 90% at 70% 20%, var(--bg2) 0%, var(--bg1) 62%); --u:min(1vw, 1.78vh); }
+canvas{ position:absolute; inset:0; display:block; width:100%; height:100%; }
+#labels{ position:absolute; inset:0; pointer-events:none; }
+.lb{ position:absolute; transform:translate(-50%,-50%); font-weight:700; font-size:calc(var(--u)*1.8); white-space:nowrap; }
+.lb .m{ font-size:1.12em; }
+.lb.tick{ font-size:calc(var(--u)*1.15); font-weight:600; color:var(--muted); }
+.lb.step{ font-size:calc(var(--u)*1.65); }
+.lb.ghost{ font-size:calc(var(--u)*1.25); font-weight:600; color:var(--muted); }
+.title{ position:absolute; inset:0; display:grid; place-content:center; text-align:center; pointer-events:none; }
+.title h1{ margin:0; font-weight:800; font-size:calc(var(--u)*5.2); letter-spacing:-.02em; line-height:1.05; }
+.title p{ margin:calc(var(--u)*1.4) 0 0; font-size:calc(var(--u)*2.2); color:var(--muted); font-weight:600; }
+.caption{ position:absolute; left:calc(var(--u)*4); bottom:calc(var(--u)*4.5 + 20px); max-width:min(45%, 30em); pointer-events:none;
+  font-size:calc(var(--u)*2.7); font-weight:700; line-height:1.22; letter-spacing:-.01em; }
+.caption > span{ display:block; }
+.caption .bar{ display:block; width:calc(var(--u)*6); height:calc(var(--u)*.5); border-radius:99px; margin-bottom:calc(var(--u)*1.4);
+  background:linear-gradient(90deg, var(--x), var(--y), var(--z)); }
+.card{ position:absolute; right:calc(var(--u)*3.5); bottom:calc(var(--u)*3.5 + 20px); padding:calc(var(--u)*2) calc(var(--u)*2.4);
+  background:var(--glass); border:1px solid var(--stroke); border-radius:calc(var(--u)*1.8);
+  backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); font-size:calc(var(--u)*1.8); width:20em; }
+.card h3{ margin:0 0 .5em; font-size:.82em; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:800; }
+.steps{ margin:0; padding:0; list-style:none; display:grid; gap:.25em; }
+.steps li{ display:flex; align-items:center; gap:.6em; padding:.18em .5em; margin:0 -.5em; border-radius:.5em; transition:background .3s; }
+.steps li b{ display:inline-grid; place-items:center; width:1.45em; height:1.45em; border-radius:50%; font-size:.85em; color:#0a0f22; flex:none; }
+.steps li.on{ background:rgba(255,255,255,.09); }
+.pts{ margin-top:calc(var(--u)*1.6); padding-top:calc(var(--u)*1.4); border-top:1px solid var(--stroke); display:grid; gap:.3em; font-size:1.15em; font-variant-numeric:tabular-nums; }
+.pt{ white-space:nowrap; }
+.pt span.k{ display:inline-block; min-width:.9em; text-align:center; border-radius:.35em; padding:0 .12em; transition:background .25s, transform .25s; }
+.pt span.k.on{ background:rgba(255,255,255,.14); transform:scale(1.15); }
+.ctrl{ position:absolute; right:calc(var(--u)*3.5); top:calc(var(--u)*3); display:flex; gap:8px; }
+.ctrl button, .ctrl a.home{ font:inherit; font-weight:700; font-size:14px; padding:9px 15px; border-radius:99px; border:1px solid var(--stroke);
+  background:var(--glass); color:var(--ink); cursor:pointer; backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); }
+.ctrl button:focus-visible{ outline:3px solid var(--z); outline-offset:2px; }
+.seek{ position:absolute; left:0; right:0; bottom:0; padding:28px calc(var(--u)*3.5) calc(var(--u)*1.2) calc(var(--u)*4); display:flex; align-items:center; gap:14px; transition:opacity .25s; }
+.seek input{ flex:1; accent-color:var(--C); height:22px; cursor:pointer; }
+.seek input:focus-visible{ outline:3px solid var(--z); outline-offset:2px; }
+.seek span{ font-size:14px; font-weight:600; color:var(--muted); font-variant-numeric:tabular-nums; min-width:6.5em; text-align:right; }
+@media (hover: hover){ .seek{ opacity:0; } .seek:hover, .seek:has(input:focus-visible), .seek.drag{ opacity:1; } }
+.rec .ctrl, .rec .seek{ display:none; }
+.rec *{ transition:none !important; }
+@media (max-aspect-ratio: 1/1){
+  .stage{ --u:min(1.9vw, 1.2vh); }
+  .card{ left:calc(var(--u)*2.5); right:calc(var(--u)*2.5); top:calc(var(--u)*2.5); bottom:auto; width:auto; font-size:calc(var(--u)*1.7); padding:calc(var(--u)*1.4) calc(var(--u)*1.8); }
+  .pts{ grid-template-columns:repeat(3, auto); justify-content:space-between; }
+  .ctrl{ left:calc(var(--u)*2.5); right:calc(var(--u)*2.5); top:auto; bottom:calc(var(--u)*2 + 34px); flex-wrap:wrap; gap:6px; }
+  .ctrl button, .ctrl a.home{ padding:7px 11px; font-size:13px; }
+  .caption{ left:calc(var(--u)*2.5); right:calc(var(--u)*2.5); max-width:none; bottom:calc(var(--u)*2 + 128px); font-size:calc(var(--u)*3); }
+  .seek{ padding:10px calc(var(--u)*3) calc(var(--u)*2); }
+}
+.rows{ margin-top:calc(var(--u)*1.4); padding-top:calc(var(--u)*1.3); border-top:1px solid var(--stroke); display:grid; gap:.55em; }
+.row{ display:grid; gap:.1em; font-variant-numeric:tabular-nums; }
+.row .l1{ white-space:nowrap; font-size:.95em; }
+.row .l2{ white-space:nowrap; font-weight:800; font-size:1.05em; }
+.row .tag{ display:inline-block; min-width:3.3em; font-weight:800; }
+.sys{ border-left:2px solid var(--muted); border-radius:12px 0 0 12px; padding:.1em 0 .1em .7em; display:grid; gap:.1em; margin-top:.5em; font-size:1.05em; }
+.lb.plane{ font-size:calc(var(--u)*1.35); font-weight:700; }
+.ctrl a.home{ text-decoration:none; display:inline-flex; align-items:center; }
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <canvas id="c" aria-label="Animation 3D : une droite traverse les plans xOy, xOz et yOz, on calcule les points d'intersection"></canvas>
+  <div id="labels"></div>
+  <div class="title" id="title"><div><h1>Intersections d’une droite<br>avec les plans de coordonnées</h1><p>les plans xOy, xOz et yOz</p></div></div>
+  <div class="card" id="card" style="opacity:0">
+    <h3>La droite d</h3>
+    <div><span class="m cA">A</span><span class="cA">(1 ; −3 ; 3)</span>&emsp;<span id="dv" style="opacity:0"><span class="m vec cv">v</span> = <span class="cv">(1 ; 1 ; −3)</span></span></div>
+    <div class="sys" id="sys" style="opacity:0">
+      <div id="E0"><span class="m">x</span> = <span class="cA">1</span> + <span class="cv">1</span>·<span class="m cC">t</span></div>
+      <div id="E1"><span class="m">y</span> = <span class="cA">−3</span> + <span class="cv">1</span>·<span class="m cC">t</span></div>
+      <div id="E2"><span class="m">z</span> = <span class="cA">3</span> − <span class="cv">3</span>·<span class="m cC">t</span></div>
+    </div>
+    <div class="rows" id="rows" style="opacity:0">
+      <div class="row" id="rowI"><div class="l1"><span class="tag cI">yOz</span><span class="m cI">x</span> = 0 ⇔ 1 + <span class="m cC">t</span> = 0 ⇔ <span class="m cC">t</span> = −1</div><div class="l2"><span class="m cI">I</span><span class="cI">(0 ; −4 ; 6)</span></div></div>
+      <div class="row" id="rowJ"><div class="l1"><span class="tag cJ">xOz</span><span class="m cJ">y</span> = 0 ⇔ −3 + <span class="m cC">t</span> = 0 ⇔ <span class="m cC">t</span> = 3</div><div class="l2"><span class="m cJ">J</span><span class="cJ">(4 ; 0 ; −6)</span></div></div>
+      <div class="row" id="rowK"><div class="l1"><span class="tag cK">xOy</span><span class="m cK">z</span> = 0 ⇔ 3 − 3<span class="m cC">t</span> = 0 ⇔ <span class="m cC">t</span> = 1</div><div class="l2"><span class="m cK">K</span><span class="cK">(2 ; −2 ; 0)</span></div></div>
+    </div>
+  </div>
+  <div class="caption" id="caption" style="opacity:0"><i class="bar"></i><span id="captxt"></span></div>
+  <div class="ctrl"><a class="home" href="index.html" aria-label="Retour à l'accueil">← Accueil</a><button id="rot" aria-pressed="false">Rotation auto : non</button><button id="voice" aria-pressed="false">Activer la voix</button><button id="sound" aria-pressed="false">Activer le son</button><button id="pause">Pause</button><button id="replay">Rejouer</button></div>
+  <div class="seek"><input type="range" id="seek" min="0" max="101" step="0.1" value="0" aria-label="Position dans l'animation"><span id="clock">0:00 / 1:41</span></div>
+</div>
+<script src="three.min.js"></script>
+<script src="OrbitControls.js"></script>
+<script>
+(function(){
+  const REC = /[?&]record/.test(location.search); if (REC) document.body.classList.add('rec');
+  const $ = id => document.getElementById(id);
+  const M = (x,y,z) => new THREE.Vector3(x, z, -y);
+  const Mv = a => M(a[0],a[1],a[2]);
+  const clamp = x => Math.max(0, Math.min(1, x));
+  const ease = x => x<.5 ? 4*x*x*x : 1-Math.pow(-2*x+2,3)/2;
+  const sine = x => -(Math.cos(Math.PI*x)-1)/2;
+  const back = x => { const c=1.7, c3=c+1; return 1 + c3*Math.pow(x-1,3) + c*Math.pow(x-1,2); };
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const isDark = () => { const c = new THREE.Color(css('--bg1')); return (c.r+c.g+c.b) < 1.2; };
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const fr = n => String(n).replace('.', ',').replace('-', '−');
+
+  // ---------- données ----------
+  const A = [1, -3, 3], V = [1, 1, -3];
+  const at = t => [A[0] + t*V[0], A[1] + t*V[1], A[2] + t*V[2]];
+  const T0 = -1.45, T1 = 3.35;
+  const PTS = [
+    {n:'I', col:'--x', t:-1, plane:'yOz', k:{c1:42, c2:45.5, go:[45.5, 48.5], show:48.8}},
+    {n:'J', col:'--y', t:3, plane:'xOz', k:{c1:52.5, c2:56, go:[56, 60], show:60.3}},
+    {n:'K', col:'--z', t:1, plane:'xOy', k:{c1:64, c2:67.5, go:[67.5, 70], show:70.3}}
+  ];
+  PTS.forEach(p => p.c = at(p.t));
+  const K = { axes:4, xOy:5.5, xOz:14.5, yOz:23.5, A:32.5, v:34, line:[35.5, 38.5], eq:[36, 37.2, 38.4], q:40, concl:74 };
+  const END = 84, SLOW = 1.2;
+  const caps = [
+    [0.3, ''],
+    [K.axes, 'Le repère de l’espace et ses trois plans de coordonnées.'],
+    [K.xOy, 'Le plan <span class="cK">xOy</span>, le «\u00a0sol\u00a0».'],
+    [K.xOy+2, 'Le point se déplace dans le plan\u00a0: <span class="m">x</span> et <span class="m">y</span> changent, mais <span class="m cK">z</span> reste toujours égal à 0.'],
+    [K.xOz, 'Le plan <span class="cJ">xOz</span>, vertical.'],
+    [K.xOz+2, 'Cette fois, <span class="m">x</span> et <span class="m">z</span> changent, mais <span class="m cJ">y</span> reste toujours égal à 0.'],
+    [K.yOz, 'Le plan <span class="cI">yOz</span>, vertical lui aussi.'],
+    [K.yOz+2, '<span class="m">y</span> et <span class="m">z</span> changent, mais <span class="m cI">x</span> reste toujours égal à 0.'],
+    [K.A, 'La droite <span class="m">d</span> passe par <span style="white-space:nowrap"><span class="m cA">A</span>(1 ; −3 ; 3)</span> avec le vecteur directeur <span style="white-space:nowrap"><span class="m vec cv">v</span> = (1 ; 1 ; −3)</span>.'],
+    [K.q, 'Elle traverse les trois plans. En quels points\u00a0?'],
+    [42, 'Plan <span class="cI">yOz</span>\u00a0: on pose <span class="m cI">x</span> = 0, donc 1 + <span class="m">t</span> = 0 et <span class="m">t</span> = −1.'],
+    [45.5, 'Alors <span class="m">y</span> = −3 + (−1) = −4 et <span class="m">z</span> = 3 − 3·(−1) = 6.'],
+    [48.8, 'Le point <span style="white-space:nowrap"><span class="m cI">I</span>(0 ; −4 ; 6)</span>.'],
+    [52.5, 'Plan <span class="cJ">xOz</span>\u00a0: on pose <span class="m cJ">y</span> = 0, donc −3 + <span class="m">t</span> = 0 et <span class="m">t</span> = 3.'],
+    [56, 'Alors <span class="m">x</span> = 1 + 3 = 4 et <span class="m">z</span> = 3 − 3·3 = −6.'],
+    [60.3, 'Le point <span style="white-space:nowrap"><span class="m cJ">J</span>(4 ; 0 ; −6)</span>, sous le sol.'],
+    [64, 'Plan <span class="cK">xOy</span>\u00a0: on pose <span class="m cK">z</span> = 0, donc 3 − 3<span class="m">t</span> = 0 et <span class="m">t</span> = 1.'],
+    [67.5, 'Alors <span class="m">x</span> = 1 + 1 = 2 et <span class="m">y</span> = −3 + 1 = −2.'],
+    [70.3, 'Le point <span style="white-space:nowrap"><span class="m cK">K</span>(2 ; −2 ; 0)</span>.'],
+    [K.concl, 'Méthode\u00a0: on annule la coordonnée du plan, on calcule <span class="m">t</span>, puis les deux autres coordonnées.']
+  ];
+  const VOICE = [
+    [0.3, "Intersections d'une droite avec les plans de coordonnées."],
+    [K.axes, "Le repère de l'espace et ses trois plans de coordonnées."],
+    [K.xOy, "Le plan x O y, le sol."],
+    [K.xOy+2, "Le point se déplace dans le plan : x et y changent, mais z reste toujours égal à zéro."],
+    [K.xOz, "Le plan x O z, vertical."],
+    [K.xOz+2, "Cette fois, x et z changent, mais y reste toujours égal à zéro."],
+    [K.yOz, "Le plan y O z, vertical lui aussi."],
+    [K.yOz+2, "y et z changent, mais x reste toujours égal à zéro."],
+    [K.A, "La droite d passe par le point A, de coordonnées un, moins trois, trois, avec le vecteur directeur v, de composantes un, un, moins trois."],
+    [K.q, "Elle traverse les trois plans. En quels points ?"],
+    [42, "Plan y O z : on pose x égal zéro. Donc un plus t égal zéro, et t égal moins un."],
+    [45.5, "Alors y égal moins trois plus moins un, soit moins quatre. Et z égal trois moins trois fois moins un, soit six."],
+    [48.8, "Le point I, de coordonnées zéro, moins quatre, six."],
+    [52.5, "Plan x O z : on pose y égal zéro. Donc moins trois plus t égal zéro, et t égal trois."],
+    [56, "Alors x égal un plus trois, soit quatre. Et z égal trois moins trois fois trois, soit moins six."],
+    [60.3, "Le point J, de coordonnées quatre, zéro, moins six. Il est sous le sol."],
+    [64, "Plan x O y : on pose z égal zéro. Donc trois moins trois t égal zéro, et t égal un."],
+    [67.5, "Alors x égal un plus un, soit deux. Et y égal moins trois plus un, soit moins deux."],
+    [70.3, "Le point K, de coordonnées deux, moins deux, zéro."],
+    [K.concl, "Pour trouver l'intersection avec un plan de coordonnées : on annule la coordonnée correspondante, on calcule t, puis les deux autres coordonnées."]
+  ];
+
+  // ---------- rendu ----------
+  const stage = $('stage'), canvas = $('c');
+  const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true, preserveDrawingBuffer:REC});
+  renderer.setPixelRatio(REC ? 1 : Math.min(devicePixelRatio||1, 2)); renderer.setClearColor(0x000000, 0);
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(36, 16/9, 0.1, 300);
+  const target = M(1.4, -1.2, -.3);
+  const baseOff = M(17, 11, 9), baseR = baseOff.length(), baseAz = Math.atan2(baseOff.x, baseOff.z), baseEl = Math.asin(baseOff.y/baseR);
+  const UP = new THREE.Vector3(0,1,0);
+  const gc = document.createElement('canvas'); gc.width = gc.height = 128; const g2 = gc.getContext('2d'), grd = g2.createRadialGradient(64,64,0,64,64,64);
+  grd.addColorStop(0,'rgba(255,255,255,1)'); grd.addColorStop(.18,'rgba(255,255,255,.95)'); grd.addColorStop(.32,'rgba(255,255,255,.35)'); grd.addColorStop(1,'rgba(255,255,255,0)');
+  g2.fillStyle = grd; g2.fillRect(0,0,128,128); const glowTex = new THREE.CanvasTexture(gc);
+  const glow = size => { const s = new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex, transparent:true, depthWrite:false})); s.scale.setScalar(size); s.userData.size = size; s.visible = false; scene.add(s); return s; };
+  function line(a, b, opacity){ const l = new THREE.Line(new THREE.BufferGeometry().setFromPoints([a, b]), new THREE.LineBasicMaterial({transparent:true, opacity})); scene.add(l); return l; }
+  const RX = [-2, 6], RY = [-6, 4], RZ = [-7, 7.5];
+  const AX = [['--x', M(RX[0],0,0), M(RX[1]+.6,0,0)], ['--y', M(0,RY[0],0), M(0,RY[1]+.6,0)], ['--z', M(0,0,RZ[0]), M(0,0,RZ[1])]].map(([col, a, b]) => {
+    const neg = line(a, new THREE.Vector3(), .45), pos = line(new THREE.Vector3(), b, .95);
+    const cone = new THREE.Mesh(new THREE.ConeGeometry(.12, .4, 18), new THREE.MeshBasicMaterial({transparent:true})); cone.position.copy(b); cone.quaternion.setFromUnitVectors(UP, b.clone().normalize()); scene.add(cone);
+    return {col, a, b, neg, pos, cone}; });
+  function growAxes(k){ AX.forEach(ax => { const e = ax.b.clone().multiplyScalar(Math.max(k,.001)), s = ax.a.clone().multiplyScalar(Math.max(k,.001));
+    ax.pos.geometry.setFromPoints([new THREE.Vector3(), e]); ax.neg.geometry.setFromPoints([s, new THREE.Vector3()]); ax.cone.position.copy(e); ax.cone.visible = k > .02; ax.pos.visible = ax.neg.visible = k > 0; }); }
+  // plans de coordonnées : surface teintée + bord + quadrillage léger
+  function plane(corners, col){ const g = new THREE.Group(); scene.add(g);
+    const geo = new THREE.BufferGeometry().setFromPoints([corners[0], corners[1], corners[2], corners[0], corners[2], corners[3]]); geo.computeVertexNormals();
+    const fill = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({transparent:true, opacity:0, side:THREE.DoubleSide, depthWrite:false})); g.add(fill);
+    const edge = new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(corners), new THREE.LineBasicMaterial({transparent:true, opacity:0})); g.add(edge);
+    return {g, fill, edge, col}; }
+  const PL = {
+    xOy: plane([M(RX[0],RY[0],0), M(RX[1],RY[0],0), M(RX[1],RY[1],0), M(RX[0],RY[1],0)], '--z'),
+    xOz: plane([M(RX[0],0,RZ[0]), M(RX[1],0,RZ[0]), M(RX[1],0,RZ[1]-.5), M(RX[0],0,RZ[1]-.5)], '--y'),
+    yOz: plane([M(0,RY[0],RZ[0]), M(0,RY[1],RZ[0]), M(0,RY[1],RZ[1]-.5), M(0,RY[0],RZ[1]-.5)], '--x') };
+  const gp = []; for (let i=RX[0];i<=RX[1];i++){ gp.push(M(i,RY[0],0), M(i,RY[1],0)); } for (let i=RY[0];i<=RY[1];i++){ gp.push(M(RX[0],i,0), M(RX[1],i,0)); }
+  const grid = new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(gp), new THREE.LineBasicMaterial({transparent:true, opacity:0})); scene.add(grid);
+  // droite, point A, vecteur v
+  function tube(r){ const g = new THREE.CylinderGeometry(r, r, 1, 16); g.translate(0,.5,0); const m = new THREE.Mesh(g, new THREE.MeshBasicMaterial({transparent:true, depthWrite:false})); m.visible = false; scene.add(m); return m; }
+  function setTube(m, a, b, alpha){ const d = b.clone().sub(a), len = d.length(); if (len < .01 || alpha <= .01){ m.visible = false; return; }
+    m.visible = true; m.position.copy(a); m.quaternion.setFromUnitVectors(UP, d.normalize()); m.scale.y = len; m.material.opacity = alpha; }
+  const lineCore = tube(.035), lineGlow = tube(.12);
+  const aCore = new THREE.Mesh(new THREE.SphereGeometry(.13, 24, 16), new THREE.MeshBasicMaterial()); aCore.visible = false; scene.add(aCore); const aHalo = glow(1.2);
+  const vMat = new THREE.MeshBasicMaterial({transparent:true}); const vSh = tube(.05); vSh.material = vMat; const vCone = new THREE.Mesh(new THREE.ConeGeometry(.15, .42, 24), vMat); vCone.visible = false; scene.add(vCone);
+  const cur = glow(1.1), curCore = new THREE.Mesh(new THREE.SphereGeometry(.09, 18, 12), new THREE.MeshBasicMaterial({color:'#ffffff'})); curCore.visible = false; scene.add(curCore);
+  PTS.forEach(p => { p.core = new THREE.Mesh(new THREE.SphereGeometry(.15, 24, 16), new THREE.MeshBasicMaterial()); p.core.visible = false; scene.add(p.core); p.halo = glow(1.5);
+    p.ring = new THREE.Mesh(new THREE.RingGeometry(.3, .36, 48), new THREE.MeshBasicMaterial({transparent:true, side:THREE.DoubleSide, depthWrite:false})); p.ring.visible = false; scene.add(p.ring); });
+
+  // point sonde : il se promène dans chaque plan pendant sa présentation
+  const probe = glow(.9), probeCore = new THREE.Mesh(new THREE.SphereGeometry(.1, 18, 12), new THREE.MeshBasicMaterial({color:'#ffffff'})); probeCore.visible = false; scene.add(probe, probeCore);
+  const probeDrop = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3(0,1,0)]), new THREE.LineDashedMaterial({color:'#ffffff', dashSize:.15, gapSize:.1, transparent:true, opacity:.5}));
+  probeDrop.visible = false; scene.add(probeDrop);
+  const PROBE = {
+    xOy: {zero:2, col:'--z', f:u => [2 + 2.6*Math.sin(.9*u), -1 + 3.2*Math.cos(.7*u), 0]},
+    xOz: {zero:1, col:'--y', f:u => [2 + 2.6*Math.sin(.8*u), 0, 2.6*Math.sin(1.1*u + .6)]},
+    yOz: {zero:0, col:'--x', f:u => [0, -1 + 3.2*Math.sin(.8*u), 2.6*Math.cos(.9*u + .3)]} };
+
+  // ---------- étiquettes ----------
+  const box = $('labels'), labels = [];
+  function label(html, col, cls){ const el = document.createElement('div'); el.className = 'lb' + (cls ? ' ' + cls : ''); el.innerHTML = html; box.appendChild(el);
+    const o = {el, col, pos:new THREE.Vector3(), a:0, dx:0, dy:0}; labels.push(o); return o; }
+  const LX = label('<span class="m">x</span>', '--x'), LY = label('<span class="m">y</span>', '--y'), LZ = label('<span class="m">z</span>', '--z'), LO = label('<span class="m">O</span>', '--muted');
+  LX.pos.copy(M(RX[1]+1.2,0,0)); LY.pos.copy(M(0,RY[1]+1.2,0)); LZ.pos.copy(M(0,0,RZ[1]+.6)); LO.pos.copy(M(0,0,0)); LO.dx = -14; LO.dy = 14;
+  const tickL = [];
+  for (let i=RX[0];i<=RX[1];i+=2) if (i){ const l = label(fr(i), null, 'tick'); l.pos.copy(M(i,-.55,0)); tickL.push(l); }
+  for (let i=RY[0];i<=RY[1];i+=2) if (i){ const l = label(fr(i), null, 'tick'); l.pos.copy(M(.55,i,0)); tickL.push(l); }
+  for (let i=-6;i<=6;i+=2) if (i){ const l = label(fr(i), null, 'tick'); l.pos.copy(M(-.45,0,i)); tickL.push(l); }
+  const LP = { xOy: label('plan <b>xOy</b> · <span class="m">z</span> = 0', '--z', 'plane'), xOz: label('plan <b>xOz</b> · <span class="m">y</span> = 0', '--y', 'plane'), yOz: label('plan <b>yOz</b> · <span class="m">x</span> = 0', '--x', 'plane') };
+  LP.xOy.pos.copy(M(RX[1]-.5, RY[0]+.6, 0)); LP.xOz.pos.copy(M(RX[0]+.6, 0, 6.4)); LP.yOz.pos.copy(M(0, RY[1]-.6, 4.5));
+  const LA = label('<span class="m">A</span>(1 ; −3 ; 3)', '--A'); LA.pos.copy(Mv(A)); LA.dx = 64;
+  const Lv = label('<span class="m vec">v</span>', '--uc'); Lv.pos.copy(Mv(at(1))); Lv.dx = 18; Lv.dy = -14;
+  const Ld = label('<span class="m">d</span>', '--C'); Ld.pos.copy(Mv(at(T1 - .3))); Ld.dx = 18;
+  PTS.forEach(p => { p.L = label('<span class="m">' + p.n + '</span>(' + p.c.map(fr).join(' ; ') + ')', p.col); p.L.pos.copy(Mv(p.c)); p.L.dx = p.n === 'I' ? -78 : 80; p.L.dy = p.n === 'K' ? 18 : -6; });
+  const LPr = label('', null); LPr.dx = 0; LPr.dy = -34; LPr.el.style.fontSize = 'calc(var(--u)*2.1)'; LPr.el.style.textShadow = '0 0 6px var(--bg1), 0 0 12px var(--bg1)';
+  const fmt1 = n => '<span style="display:inline-block; min-width:2.2em; text-align:right">' + (Math.abs(n) < .05 ? '0,0' : n.toFixed(1).replace('.', ',').replace('-', '−')) + '</span>';
+  const tmp = new THREE.Vector3();
+  function placeLabels(){ const w = stage.clientWidth, h = stage.clientHeight;
+    for (const l of labels){ tmp.copy(l.pos).project(camera); const vis = l.a > .01 && tmp.z < 1; l.el.style.opacity = vis ? l.a : 0;
+      if (vis){ l.el.style.left = ((tmp.x+1)/2*w + l.dx) + 'px'; l.el.style.top = ((1-tmp.y)/2*h + l.dy) + 'px'; } } }
+
+  function applyTheme(){
+    const dark = isDark(), c = n => new THREE.Color(css(n)), blend = dark ? THREE.AdditiveBlending : THREE.NormalBlending;
+    AX.forEach(ax => { ax.pos.material.color = c(ax.col); ax.neg.material.color = c(ax.col); ax.cone.material.color = c(ax.col); });
+    Object.values(PL).forEach(p => { p.fill.material.color = c(p.col); p.edge.material.color = c(p.col); });
+    grid.material.color = c('--grid');
+    lineCore.material.color = dark ? new THREE.Color('#ffd1e8') : c('--C'); lineGlow.material.color = c('--C'); lineGlow.material.blending = blend;
+    aCore.material.color = c('--A'); aHalo.material.color = c('--A'); aHalo.material.blending = blend; vMat.color = c('--uc');
+    cur.material.color = new THREE.Color(dark ? '#ffffff' : css('--C')); cur.material.blending = blend; curCore.material.color = new THREE.Color(dark ? '#ffffff' : css('--C'));
+    PTS.forEach(p => { p.core.material.color = c(p.col); p.halo.material.color = c(p.col); p.halo.material.blending = blend; p.ring.material.color = c(p.col); });
+    labels.forEach(l => { if (l.col) l.el.style.color = css(l.col); });
+  }
+
+  // ---------- caméra ----------
+  const ROT = { on:false, clock:0 };
+  let controls = null, userMoved = false;
+  if (!REC){ controls = new THREE.OrbitControls(camera, canvas); controls.enableDamping = true; controls.enablePan = false; controls.minDistance = 8; controls.maxDistance = 60; controls.target.copy(target);
+    controls.addEventListener('start', () => { userMoved = true; ROT.on = false; if (window.__rotBtn) window.__rotBtn(); }); }
+  function cameraAt(T){
+    if (userMoved){ controls.update(); return; }
+    const intro = 1 - ease(clamp(T/5)), rc = REC ? 0 : ROT.clock;
+    const low = sine(clamp((T-55.5)/2))*(1 - sine(clamp((T-63)/2)));
+    const az = baseAz - .35*intro + (reduce ? 0 : .1*Math.sin(T*.11) + rc*2*Math.PI/80);
+    const el = baseEl + .12*intro - .15*low, r = baseR*(1.45 + .25*intro);
+    camera.position.set(target.x + r*Math.cos(el)*Math.sin(az), target.y + r*Math.sin(el), target.z + r*Math.cos(el)*Math.cos(az));
+    camera.lookAt(target); if (controls) controls.target.copy(target);
+  }
+
+  // ---------- rendu d'un instant ----------
+  const titleEl = $('title'), card = $('card'), captxt = $('captxt'), capEl = $('caption');
+  let capIdx = -2;
+  function renderAt(T){
+    titleEl.style.opacity = clamp((T-.2)/.6)*(1 - clamp((T-3.4)/.6));
+    growAxes(ease(clamp((T-K.axes)/1.5)));
+    LX.a = LY.a = LZ.a = clamp((T-K.axes-1.2)/.5); LO.a = clamp((T-K.axes-1.3)/.5); tickL.forEach(l => l.a = .8*clamp((T-K.axes-1.4)/.6));
+    // plans : apparition, puis mise en avant pendant le calcul correspondant
+    const focus = { yOz: PTS[0], xOz: PTS[1], xOy: PTS[2] };
+    Object.entries(PL).forEach(([n, p]) => { const t0 = K[n], k = clamp((T-t0)/1), q = focus[n].k;
+      const hot = T >= q.c1 && T < q.show + 1.5 ? sine(clamp((T-q.c1)/.6))*(1 - clamp((T-q.show-1)/.5)) : 0;
+      const intro = sine(clamp((T-t0)/.8))*(1 - clamp((T-t0-8.2)/.8));
+      p.fill.material.opacity = (isDark() ? .07 : .1)*k + .12*hot + .08*intro; p.edge.material.opacity = .5*k + .4*hot;
+      LP[n].a = clamp((T-t0-.3)/.5)*(T >= K.concl ? 1 : (.45 + .55*Math.max(intro, hot))); });
+    grid.material.opacity = (isDark() ? .3 : .45)*clamp((T-K.xOy)/1.2);
+    // point sonde
+    let pr = null; Object.entries(PROBE).forEach(([n, P]) => { const t0 = K[n]; if (T >= t0 + .8 && T < t0 + 8.6) pr = [n, P, T - t0 - .8]; });
+    probe.visible = probeCore.visible = !!pr; probeDrop.visible = false; LPr.a = 0;
+    if (pr){ const [n, P, u] = pr, c = P.f(u*.8), fade = clamp(u/.6)*(1 - clamp((u-7.2)/.6)), pos = Mv(c);
+      probe.position.copy(pos); probeCore.position.copy(pos); probe.scale.setScalar(.9*Math.max(.001, fade)); probeCore.scale.setScalar(Math.max(.001, fade));
+      probe.material.color = new THREE.Color(css(P.col)); probe.material.blending = isDark() ? THREE.AdditiveBlending : THREE.NormalBlending;
+      if (n !== 'xOy'){ probeDrop.visible = true; probeDrop.geometry.setFromPoints([pos, M(c[0], c[1], 0)]); probeDrop.computeLineDistances(); probeDrop.material.opacity = .45*fade; }
+      LPr.pos.copy(pos); LPr.a = fade;
+      LPr.el.innerHTML = '(' + c.map((v, i) => i === P.zero ? '<b style="display:inline-block; min-width:2.2em; text-align:right; color:' + css(P.col) + '; background:color-mix(in srgb, ' + css(P.col) + ' 22%, transparent); border-radius:.3em; padding:0 .15em">0</b>' : fmt1(v)).join(' ; ') + ')';
+      LPr.el.style.color = css('--ink'); }
+    // droite
+    const aFade = 1 - clamp((T-K.q+.5)/1);
+    const sa = back(clamp((T-K.A)/.6))*aFade; aCore.visible = aHalo.visible = T >= K.A && sa > .001; aCore.position.copy(Mv(A)); aHalo.position.copy(Mv(A)); aCore.scale.setScalar(Math.max(.001, sa)); aHalo.scale.setScalar(1.2*Math.max(.001, sa));
+    LA.a = clamp((T-K.A-.3)/.4)*aFade;
+    const kv = ease(clamp((T-K.v)/1)), vEnd = Mv(at(kv));
+    if (kv > .02 && aFade > .01){ vMat.opacity = aFade; const d = vEnd.clone().sub(Mv(A)), len = d.length(), h = Math.min(.42, len*.5), dir = d.clone().normalize(); setTube(vSh, Mv(A), Mv(A).addScaledVector(dir, len-h), aFade);
+      vCone.visible = true; vCone.position.copy(Mv(A)).addScaledVector(dir, len-h/2); vCone.quaternion.setFromUnitVectors(UP, dir); vCone.scale.setScalar(h/.42); } else { vSh.visible = vCone.visible = false; }
+    Lv.a = clamp((T-K.v-.8)/.4)*aFade;
+    const kl = sine(clamp((T-K.line[0])/(K.line[1]-K.line[0])));
+    if (kl > 0){ const a = Mv(at(lerpT(0, T0, kl))), b = Mv(at(lerpT(0, T1, kl))); setTube(lineCore, a, b, .95); setTube(lineGlow, a, b, .35); } else { lineCore.visible = lineGlow.visible = false; }
+    Ld.a = clamp((T-K.line[1])/.5);
+    // curseur qui parcourt la droite jusqu'au plan
+    let curT = null;
+    PTS.forEach((p, i) => { const k = p.k;
+      if (T >= k.go[0] - .6 && T < k.show + .4){ const e = ease(clamp((T-k.go[0])/(k.go[1]-k.go[0]))); curT = p.t*e; }
+      const s = T < k.show ? 0 : back(clamp((T-k.show)/.7)); p.core.visible = p.halo.visible = s > .001;
+      p.core.position.copy(Mv(p.c)); p.halo.position.copy(Mv(p.c)); p.core.scale.setScalar(Math.max(.001, s)); p.halo.scale.setScalar(1.5*Math.max(.001, s));
+      const rk = clamp((T-k.show)/1.2); p.ring.visible = T >= k.show && rk < 1; p.ring.position.copy(Mv(p.c)); p.ring.lookAt(camera.position); p.ring.scale.setScalar(1 + rk*3); p.ring.material.opacity = (1-rk)*.9;
+      p.L.a = clamp((T-k.show-.2)/.4); });
+    cur.visible = curCore.visible = curT !== null;
+    if (curT !== null){ const pp = Mv(at(curT)); cur.position.copy(pp); curCore.position.copy(pp); cur.scale.setScalar(1.1*(1 + .12*Math.sin(T*7))); }
+    // panneau
+    const cOp = clamp((T-K.A)/.6); card.style.opacity = cOp; card.style.transform = 'translateY(' + (1-cOp)*10 + 'px)';
+    $('dv').style.opacity = clamp((T-K.v)/.5); $('sys').style.opacity = clamp((T-K.eq[0]+.3)/.5); K.eq.forEach((s0,i) => $('E'+i).style.opacity = clamp((T-s0)/.5));
+    $('rows').style.opacity = clamp((T-K.q)/.5);
+    [['rowI', PTS[0]], ['rowJ', PTS[1]], ['rowK', PTS[2]]].forEach(([id, p]) => { const r = $(id); r.children[0].style.opacity = clamp((T-p.k.c1-.3)/.5); r.children[1].style.opacity = clamp((T-p.k.show)/.5);
+      r.style.background = T >= p.k.c1 && T < p.k.show + 2 ? 'rgba(255,255,255,.06)' : 'transparent'; r.style.borderRadius = '.5em'; r.style.margin = '0 -.5em'; r.style.padding = '.15em .5em'; });
+    // légende
+    let ci = -1; caps.forEach((c,i) => { if (T >= c[0]) ci = i; });
+    if (ci !== capIdx){ capIdx = ci; captxt.innerHTML = ci >= 0 ? caps[ci][1] : ''; }
+    capEl.style.opacity = (ci >= 0 && caps[ci][1]) ? clamp((T - caps[ci][0])/.35) : 0;
+    cameraAt(T); renderer.render(scene, camera); placeLabels();
+  }
+  const lerpT = (a, b, k) => a + (b-a)*k;
+
+  function resize(){ const w = stage.clientWidth, h = stage.clientHeight; if (!w || !h) return;
+    renderer.setSize(w, h, false); camera.aspect = w/h; camera.fov = w/h < 1 ? 62 : 36;
+    if (w/h >= 1) camera.setViewOffset(w, h, w*.13, h*.1, w, h); else camera.setViewOffset(w, h, 0, -h*.02, w, h);
+    camera.updateProjectionMatrix(); }
+  new ResizeObserver(resize).observe(stage); resize();
+  applyTheme();
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
+  new MutationObserver(applyTheme).observe(document.documentElement, {attributes:true, attributeFilter:['data-theme']});
+  if (REC){ window.renderAt = T => { resize(); renderAt(T/SLOW); }; window.END = END*SLOW; return; }
+
+  // ---------- son ----------
+  const AU = { ctx:null, on:false, master:null, noise:null };
+  const midi = m => 440*Math.pow(2,(m-69)/12);
+  const CHORDS = [[48,55,60,64,71],[45,52,57,60,67],[41,48,53,57,64],[43,50,55,62,65]], CHS = 6, ARP = .375;
+  function auInit(){
+    const C = new (window.AudioContext || window.webkitAudioContext)();
+    const comp = C.createDynamicsCompressor(); comp.threshold.value = -14; comp.ratio.value = 4; comp.connect(C.destination);
+    const m = C.createGain(); m.gain.value = 0; m.connect(comp);
+    const nb = C.createBuffer(1, C.sampleRate*2, C.sampleRate), d = nb.getChannelData(0); for (let i=0;i<d.length;i++) d[i] = Math.random()*2-1;
+    AU.ctx = C; AU.master = m; AU.noise = nb; }
+  function out(pan){ const C = AU.ctx; if (!C.createStereoPanner) return AU.master; const p = C.createStereoPanner(); p.pan.value = pan||0; p.connect(AU.master); return p; }
+  function pad(k){ const C = AU.ctx, t = C.currentTime, notes = CHORDS[k%4], dur = 8.5;
+    const lp = C.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1300;
+    const g = C.createGain(); g.gain.setValueAtTime(.0001, t); g.gain.linearRampToValueAtTime(.028, t+2.2); g.gain.setValueAtTime(.025, t+dur-2.4); g.gain.linearRampToValueAtTime(.0001, t+dur);
+    lp.connect(g); g.connect(out(0));
+    notes.forEach(n => { const f = n < 50 ? midi(n+12) : midi(n); [-12, 0, 13].forEach(det => { const o = C.createOscillator(); o.type = 'triangle'; o.frequency.value = f; o.detune.value = det; o.connect(lp); o.start(t); o.stop(t+dur); }); });
+    const b = C.createOscillator(), bg = C.createGain(); b.frequency.value = midi(notes[0]-12); bg.gain.setValueAtTime(.0001, t); bg.gain.linearRampToValueAtTime(.09, t+1); bg.gain.linearRampToValueAtTime(.0001, t+7);
+    b.connect(bg); bg.connect(out(0)); b.start(t); b.stop(t+7); }
+  function tone(f, vol, decay, pan, type){ const C = AU.ctx, t = C.currentTime, o = C.createOscillator(), g = C.createGain(); vol = Math.max(vol, .0002);
+    o.type = type || 'sine'; o.frequency.value = f; g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol, t+.004); g.gain.exponentialRampToValueAtTime(.0001, t+decay);
+    o.connect(g); g.connect(out(pan)); o.start(t); o.stop(t+decay+.05); return o; }
+  function pop(f, big, pan){ const t = AU.ctx.currentTime, d = big ? .16 : .09, o = tone(f, big ? .35 : .18, d, pan); o.frequency.setValueAtTime(f*1.9, t); o.frequency.exponentialRampToValueAtTime(f, t+.05); tone(f*2, big ? .08 : .04, d*.7, pan); }
+  function chime(f, vol, pan){ [[1,1,2.2],[2.01,.45,1.4],[3.02,.2,.9],[4.1,.12,.6]].forEach(([h,a,dd]) => tone(f*h, vol*a, dd, pan)); }
+  function glide(f0, f1, dur, vol, pan){ const o = tone(f0, vol, dur, pan, 'sine'); o.frequency.setValueAtTime(f0, AU.ctx.currentTime); o.frequency.exponentialRampToValueAtTime(f1, AU.ctx.currentTime + dur*.9); }
+  const FX = [[.4, () => chime(midi(79), .08, 0)], [K.axes, () => glide(300, 900, 1.6, .05, 0)],
+    [K.xOy, () => glide(300, 600, 1.2, .05, 0)], [K.xOz, () => glide(350, 700, 1.2, .05, 0)], [K.yOz, () => glide(400, 800, 1.2, .05, 0)],
+    [K.A, () => chime(midi(84), .1, 0)], [K.v, () => glide(400, 1200, 1, .05, 0)], [K.line[0], () => glide(300, 1400, 2.6, .05, 0)], [K.q, () => chime(midi(88), .07, 0)]];
+  K.eq.forEach(s0 => FX.push([s0, () => pop(midi(76), true, 0)]));
+  PTS.forEach((p, i) => { const k = p.k, base = [72, 74, 76][i];
+    FX.push([k.c1, () => pop(midi(base), true, 0)], [k.c2, () => pop(midi(base+4), true, 0)], [k.go[0], () => glide(500, 900, k.go[1]-k.go[0], .04, 0)], [k.show, () => chime(midi(base+12), .14, 0)]); });
+  FX.push([K.concl, () => [72,76,79,84].forEach((m,j) => setTimeout(() => AU.on && chime(midi(m), .06, -.3+.2*j), j*90))]);
+  function audioTick(a, b){ if (!AU.on || b <= a) return; FX.forEach(([tm, fn]) => { if (tm > a && tm <= b) fn(); });
+    if (Math.floor(b/CHS) > Math.floor(a/CHS) && b < END - 1) pad(Math.floor(b/CHS));
+    if (b > 4 && b < END - 2){ for (let i=Math.floor(a/ARP)+1;i<=Math.floor(b/ARP);i++){ const n = CHORDS[Math.floor(i*ARP/CHS)%4], pat = [n[1],n[2],n[3],n[4],n[3],n[2]];
+      tone(midi(pat[i%6]+12), .04*Math.min(1, (i*ARP-4)/3), 1, .35*Math.sin(i*.9)); } } }
+  function masterTo(v){ if (!AU.ctx) return; const t = AU.ctx.currentTime; AU.master.gain.cancelScheduledValues(t); AU.master.gain.setTargetAtTime(v, t, .15); }
+
+  // ---------- voix off ----------
+  const VO = { on:false, busy:false, until:0, voice:null, supported:'speechSynthesis' in window };
+  function pickVoice(){ if (!VO.supported) return; const vs = speechSynthesis.getVoices().filter(v => /^fr/i.test(v.lang)); if (!vs.length) return;
+    const score = v => (/natural|online|neural/i.test(v.name) ? 8 : 0) + (/google/i.test(v.name) ? 4 : 0) + (/fr-CH/i.test(v.lang) ? 2 : 0) + (/fr-FR/i.test(v.lang) ? 1 : 0) + (v.localService ? 0 : 1);
+    VO.voice = vs.sort((a,b) => score(b) - score(a))[0]; }
+  if (VO.supported){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+  function say(text){ if (!VO.supported) return; speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text);
+    u.lang = VO.voice ? VO.voice.lang : 'fr-FR'; if (VO.voice) u.voice = VO.voice; u.rate = .95;
+    u.onstart = () => { VO.busy = true; if (AU.on) masterTo(.4); }; u.onend = u.onerror = () => { VO.busy = false; if (AU.on && playing) masterTo(.9); };
+    VO.busy = true; VO.until = performance.now() + (text.length*.085/.95 + 2)*1000; speechSynthesis.speak(u); }
+  function hush(){ if (VO.supported) speechSynthesis.cancel(); VO.busy = false; }
+  function voiceTick(a, b){ if (!VO.on || b <= a) return; for (const [tm, txt] of VOICE){ if (tm > a && tm <= b) say(txt); } }
+  function holdForVoice(prev, next){ if (!VO.on || !VO.busy || performance.now() > VO.until) return next; for (const [tm] of VOICE){ if (tm > prev && tm <= next) return Math.max(prev, tm - .001); } return next; }
+
+  // ---------- commandes ----------
+  let T = 0, playing = true, last = performance.now();
+  const pauseBtn = $('pause'), replayBtn = $('replay'), soundBtn = $('sound'), voiceBtn = $('voice'), rotBtn = $('rot'), seekEl = $('seek'), clockEl = $('clock');
+  function setRotBtn(){ rotBtn.textContent = 'Rotation auto : ' + (ROT.on ? 'oui' : 'non'); rotBtn.setAttribute('aria-pressed', ROT.on); }
+  window.__rotBtn = setRotBtn;
+  rotBtn.addEventListener('click', () => { ROT.on = !ROT.on; if (ROT.on) userMoved = false; setRotBtn(); });
+  pauseBtn.addEventListener('click', () => { if (T >= END){ T = 0; playing = true; hush(); } else playing = !playing; pauseBtn.textContent = playing ? 'Pause' : 'Lecture';
+    if (VO.supported){ if (playing) speechSynthesis.resume(); else speechSynthesis.pause(); } if (AU.on) masterTo(playing ? .9 : 0); });
+  replayBtn.addEventListener('click', () => { hush(); T = -0.001; playing = true; userMoved = false; ROT.on = false; ROT.clock = 0; setRotBtn(); pauseBtn.textContent = 'Pause'; if (AU.on) masterTo(.9); });
+  soundBtn.addEventListener('click', () => { if (!AU.ctx) auInit(); AU.ctx.resume(); AU.on = !AU.on; soundBtn.textContent = AU.on ? 'Couper le son' : 'Activer le son'; soundBtn.setAttribute('aria-pressed', AU.on);
+    masterTo(AU.on && playing ? .9 : 0); if (AU.on && T < END - 1) pad(Math.floor(T/CHS)); });
+  voiceBtn.addEventListener('click', () => { if (!VO.supported){ voiceBtn.textContent = 'Voix indisponible'; return; }
+    VO.on = !VO.on; voiceBtn.textContent = VO.on ? 'Couper la voix' : 'Activer la voix'; voiceBtn.setAttribute('aria-pressed', VO.on);
+    if (!VO.on){ hush(); if (AU.on && playing) masterTo(.9); return; } pickVoice();
+    if (T < .3){ say(VOICE[0][1]); T = .301; } else { let cur = null; for (const v of VOICE){ if (v[0] <= T) cur = v; } if (cur && T - cur[0] < 3) say(cur[1]); } });
+  seekEl.max = (END*SLOW).toFixed(1);
+  let skipAudio = false, dragging = false;
+  const mmss = x => { x = Math.max(0, Math.round(x)); return Math.floor(x/60) + ':' + String(x%60).padStart(2,'0'); };
+  function jump(sec){ T = Math.max(0, Math.min(END, sec/SLOW)); skipAudio = true; hush(); if (T >= END){ playing = false; pauseBtn.textContent = 'Lecture'; } if (AU.on && playing && T < END - 1) pad(Math.floor(T/CHS)); }
+  const seekBox = seekEl.parentElement;
+  seekEl.addEventListener('pointerdown', () => { dragging = true; seekBox.classList.add('drag'); });
+  window.addEventListener('pointerup', () => { if (dragging) seekEl.blur(); dragging = false; seekBox.classList.remove('drag'); });
+  seekEl.addEventListener('input', () => jump(parseFloat(seekEl.value)));
+  document.addEventListener('keydown', e => { if (e.target.tagName === 'BUTTON' && (e.key === ' ' || e.key === 'Enter')) return; if (e.target === seekEl && e.key.startsWith('Arrow')) return;
+    if (e.key === ' '){ e.preventDefault(); pauseBtn.click(); } else if (e.key === 'ArrowLeft') jump(T*SLOW - 5); else if (e.key === 'ArrowRight') jump(T*SLOW + 5); });
+  function loop(now){
+    const dt = Math.min(.1, (now-last)/1000); last = now; const prevT = T;
+    if (ROT.on) ROT.clock += dt;
+    if (playing){ T = holdForVoice(prevT, Math.min(END, T + dt/SLOW)); if (T >= END){ playing = false; pauseBtn.textContent = 'Lecture'; } }
+    if (skipAudio) skipAudio = false; else { audioTick(prevT, T); voiceTick(prevT, T); }
+    if (!dragging) seekEl.value = (T*SLOW).toFixed(1); clockEl.textContent = mmss(T*SLOW) + ' / ' + mmss(END*SLOW);
+    renderAt(Math.max(0, T)); requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
+</script>
+<script>if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js');</script>
+</body>
+</html>

@@ -100,13 +100,16 @@ footer{ margin-top:56px; color:var(--muted); font-size:13px; text-align:center; 
 const CHAPITRES = [
   {
     titre: "Géométrie vectorielle",
-    description: "Points, vecteurs et droites dans l’espace.",
-    serie: { texte: "▶ Droite + applications à la suite", lien: "droite-complete.html" },
+    description: "Points, vecteurs, droites et plans dans l’espace.",
+    series: [ { texte: "▶ Droite + applications à la suite", lien: "droite-complete.html" }, { texte: "▶ Plans + applications à la suite", lien: "plans-complete.html" } ],
     videos: [
       { titre: "Points et vecteurs dans l’espace", texte: "Placer un point dans un repère 3D, dessiner un vecteur, calculer les composantes de AB.", lien: "points-vecteurs.html", image: "thumb-points.jpg", duree: "2 min 23", tag: "theorie" },
       { titre: "La droite dans l’espace", texte: "La représentation paramétrique construite point par point, puis les équations à partir de deux points.", lien: "droite-theorie.html", image: "thumb-droite.jpg", duree: "2 min 21", tag: "theorie" },
       { titre: "Application : deux drones", texte: "À l’aide de leurs équations paramétriques, les deux drones vont-ils se percuter ?", lien: "droite-drones.html", image: "thumb-drones.jpg", duree: "1 min 05", tag: "application" },
-      { titre: "Application : le rayon d’énergie", texte: "On remplace les coordonnées de la cible dans les équations : le rayon va-t-il la toucher ?", lien: "droite-rayon.html", image: "thumb-rayon.jpg", duree: "1 min 06", tag: "application" }
+      { titre: "Application : le rayon d’énergie", texte: "On remplace les coordonnées de la cible dans les équations : le rayon va-t-il la toucher ?", lien: "droite-rayon.html", image: "thumb-rayon.jpg", duree: "1 min 06", tag: "application" },
+      { titre: "Intersections avec les plans de coordonnées", texte: "Les plans xOy, xOz et yOz, puis les points où une droite les traverse.", lien: "plans-intersections.html", image: "thumb-plans.jpg", duree: "1 min 41", tag: "theorie" },
+      { titre: "Application : l’ombre de l’obélisque", texte: "Où tombe l’ombre du sommet ? Le rayon de soleil coupe le sol… et révèle un trésor.", lien: "plans-obelisque.html", image: "thumb-obelisque.jpg", duree: "1 min 16", tag: "application" },
+      { titre: "Application : du robot 3D à l’écran", texte: "Comment un ordinateur transforme un objet 3D en image : chaque pixel est l’intersection d’un rayon avec l’écran.", lien: "plans-robot.html", image: "thumb-robot.jpg", duree: "1 min 36", tag: "application" }
     ]
   }
 ];
@@ -116,7 +119,7 @@ const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','
 CHAPITRES.forEach((ch, ci) => {
   const sec = document.createElement('section'); sec.className = 'chapter'; sec.setAttribute('aria-labelledby', 'ch' + ci);
   sec.innerHTML = '<div class="chap-head"><div><div class="chap-num">Chapitre ' + (ci + 1) + '</div><h2 id="ch' + ci + '">' + esc(ch.titre) + '</h2><p>' + esc(ch.description) + '</p></div>'
-    + (ch.serie ? '<a class="series" href="' + ch.serie.lien + '">' + esc(ch.serie.texte) + '</a>' : '') + '</div>';
+    + '<div style="display:flex; flex-wrap:wrap; gap:8px">' + (ch.series || []).map(x => '<a class="series" href="' + x.lien + '">' + esc(x.texte) + '</a>').join('') + '</div></div>';
   const grid = document.createElement('div'); grid.className = 'grid';
   ch.videos.forEach((v, i) => {
     const a = document.createElement('a'); a.className = 'card'; a.href = v.lien;
