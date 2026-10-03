@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icone.svg">
+<link rel="apple-touch-icon" href="icone.svg">
+<meta name="theme-color" content="#0b1024">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>La valeur absolue — distance, définition et équations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link id="gf" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&family=STIX+Two+Text:ital,wght@1,500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg1:#070b1c; --bg2:#151b46; --ink:#eef1ff; --muted:#8e97c4; --glass:rgba(255,255,255,.06); --stroke:rgba(255,255,255,.14);
+  --bip:#3ee6ff; --zap:#ff4f6d; --zip:#c77dff; --pos:#3ee6ff; --neg:#ff5cc8; --a:#ffd23f; --star:#ffd23f; --x:#ff7a85; --y:#5ee3a1; --wall:#2f5bff; --ok:#6dff94;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light){ :root:not([data-theme="dark"]){ --glass:rgba(255,255,255,.08); } }
+:root[data-theme="light"]{ --glass:rgba(255,255,255,.08); }
+:root{ box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); }
+*,*::before,*::after{ box-sizing:inherit; }
+html{ height:100%; scroll-padding-top:env(safe-area-inset-top,0px); }
+body{ height:100%; margin:0; background:var(--bg1); color:var(--ink); overflow:hidden; font-family:"Manrope", system-ui, -apple-system, "Segoe UI", sans-serif; }
+.m{ font-family:"STIX Two Text","Cambria Math","Times New Roman",serif; font-style:italic; font-weight:500; }
+.cB{ color:var(--bip); } .cZ{ color:var(--zap); } .cI{ color:var(--zip); } .cS{ color:var(--star); } .cx{ color:var(--x); } .cy{ color:var(--y); } .cOk{ color:var(--ok); } .mu{ color:var(--muted); }
+.stage{ position:relative; width:100%; height:100%; overflow:hidden; background:radial-gradient(120% 90% at 70% 15%, var(--bg2) 0%, var(--bg1) 62%); --u:min(1vw, 1.78vh); }
+canvas{ position:absolute; inset:0; width:100%; height:100%; display:block; }
+.title{ position:absolute; inset:0; display:grid; place-content:center; text-align:center; pointer-events:none; }
+.title h1{ margin:0; font-weight:800; font-size:calc(var(--u)*5.4); letter-spacing:-.02em; line-height:1.05; }
+.title p{ margin:calc(var(--u)*1.4) 0 0; font-size:calc(var(--u)*2.2); color:var(--muted); font-weight:600; }
+.caption{ position:absolute; left:calc(var(--u)*4); bottom:calc(var(--u)*4.5 + 20px); max-width:min(46%, 30em); pointer-events:none; font-size:calc(var(--u)*2.1); font-weight:700; line-height:1.25; }
+.caption > span{ display:block; }
+.caption .bar{ display:block; width:calc(var(--u)*6); height:calc(var(--u)*.5); border-radius:99px; margin-bottom:calc(var(--u)*1.2); background:linear-gradient(90deg, var(--bip), var(--zip), var(--zap)); }
+.card{ position:absolute; right:calc(var(--u)*3.5); bottom:calc(var(--u)*3.5 + 20px); width:21em; padding:calc(var(--u)*1.8) calc(var(--u)*2.2); font-size:calc(var(--u)*1.7);
+  background:var(--glass); border:1px solid var(--stroke); border-radius:calc(var(--u)*1.8); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); }
+.card h3{ margin:0 0 .5em; font-size:.8em; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:800; }
+.sec{ display:grid; gap:.35em; }
+.line{ white-space:nowrap; font-variant-numeric:tabular-nums; }
+.big{ font-size:1.25em; }
+.hr{ height:1px; background:var(--stroke); margin:.6em 0; }
+.num{ display:inline-block; min-width:1.6em; text-align:right; }
+table.cmp{ border-collapse:collapse; width:100%; font-variant-numeric:tabular-nums; }
+table.cmp td, table.cmp th{ padding:.25em .3em; text-align:left; white-space:nowrap; }
+table.cmp th{ font-size:.82em; color:var(--muted); font-weight:700; }
+.ctrl{ position:absolute; right:calc(var(--u)*3.5); top:calc(var(--u)*3); display:flex; gap:8px; }
+.ctrl button, .ctrl a.home{ font:inherit; font-weight:700; font-size:14px; padding:9px 15px; border-radius:99px; border:1px solid var(--stroke); background:var(--glass); color:var(--ink); cursor:pointer; backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); }
+.ctrl button:focus-visible{ outline:3px solid var(--bip); outline-offset:2px; }
+.seek{ position:absolute; left:0; right:0; bottom:0; padding:28px calc(var(--u)*3.5) calc(var(--u)*1.2) calc(var(--u)*4); display:flex; align-items:center; gap:14px; transition:opacity .25s; }
+.seek input{ flex:1; accent-color:var(--bip); height:22px; cursor:pointer; }
+.seek span{ font-size:14px; font-weight:600; color:var(--muted); font-variant-numeric:tabular-nums; min-width:6.5em; text-align:right; }
+@media (hover: hover){ .seek{ opacity:0; } .seek:hover, .seek:has(input:focus-visible), .seek.drag{ opacity:1; } }
+.rec .ctrl, .rec .seek{ display:none; } .rec *{ transition:none !important; }
+@media (max-aspect-ratio: 1/1){
+  .stage{ --u:min(1.9vw, 1.2vh); }
+  .card{ left:calc(var(--u)*2.5); right:calc(var(--u)*2.5); top:calc(var(--u)*2.5); bottom:auto; width:auto; font-size:calc(var(--u)*1.7); }
+  .ctrl{ left:calc(var(--u)*2.5); right:calc(var(--u)*2.5); top:auto; bottom:calc(var(--u)*2 + 34px); flex-wrap:wrap; gap:6px; }
+  .ctrl button, .ctrl a.home{ padding:7px 11px; font-size:13px; }
+  .caption{ left:calc(var(--u)*2.5); right:calc(var(--u)*2.5); max-width:none; bottom:calc(var(--u)*2 + 90px); font-size:calc(var(--u)*2.6); }
+  .seek{ padding:10px calc(var(--u)*3) calc(var(--u)*2); }
+}
+.cP{ color:var(--pos); } .cN{ color:var(--neg); } .cA{ color:var(--a); }
+.cases{ display:grid; grid-template-columns:auto 1fr; gap:.15em .6em; border-left:2px solid var(--muted); border-radius:12px 0 0 12px; padding:.15em 0 .15em .7em; margin:.3em 0; }
+.ex{ display:grid; gap:.25em; font-variant-numeric:tabular-nums; }
+.ctrl a.home{ text-decoration:none; display:inline-flex; align-items:center; }
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <canvas id="c" aria-label="Animation : la valeur absolue comme distance à zéro, son graphe en V, puis la résolution d'équations avec valeur absolue"></canvas>
+  <div class="title" id="title"><div><h1>La valeur absolue</h1><p>une distance, une définition, des équations</p></div></div>
+  <div class="card" id="card" style="opacity:0">
+    <div class="sec" id="sec1">
+      <h3>Valeur absolue = distance à 0</h3>
+      <div class="ex">
+        <div class="line" id="e1"><span class="m">|</span><span class="cP">4</span><span class="m">|</span> = <b>4</b></div>
+        <div class="line" id="e2"><span class="m">|</span><span class="cN">−4</span><span class="m">|</span> = <b>4</b></div>
+        <div class="line" id="e3"><span class="m">|</span><span class="cN">−2,5</span><span class="m">|</span> = <b>2,5</b> &nbsp;·&nbsp; <span class="m">|</span>0<span class="m">|</span> = <b>0</b></div>
+      </div>
+      <div class="hr"></div>
+      <div id="def1">
+        <div class="cases"><span>si <span class="m">x</span> ≥ 0</span><span><span class="m">|x|</span> = <span class="m cP">x</span></span><span>si <span class="m">x</span> &lt; 0</span><span><span class="m">|x|</span> = <span class="cN">−</span><span class="m cN">x</span> &nbsp;<span class="mu">(on change le signe)</span></span></div>
+        <div class="line" id="def2">ex.&nbsp;: <span class="m">|</span>−4<span class="m">|</span> = −(−4) = 4</div>
+      </div>
+    </div>
+    <div class="sec" id="sec2" style="display:none">
+      <h3>Distance entre deux nombres</h3>
+      <div class="line big"><span class="m">|x</span> − <span class="m cA">a</span><span class="m">|</span> = distance entre <span class="m">x</span> et <span class="m cA">a</span></div>
+      <div class="hr"></div>
+      <div class="line" id="d1"><span class="m">|</span>7 − 3<span class="m">|</span> = <span class="m">|</span>4<span class="m">|</span> = <b>4</b></div>
+      <div class="line" id="d2"><span class="m">|</span>3 − 7<span class="m">|</span> = <span class="m">|</span>−4<span class="m">|</span> = <b>4</b></div>
+      <div class="line mu" id="d3">l’ordre ne change rien à la distance</div>
+    </div>
+    <div class="sec" id="sec3" style="display:none">
+      <h3 id="eqTitle">Équation</h3>
+      <div class="line big" id="q0"></div>
+      <div class="line" id="q1"></div>
+      <div class="line" id="q2"></div>
+      <div class="line" id="q3"></div>
+      <div class="hr"></div>
+      <div class="line" id="q4"></div>
+      <div class="line" id="q5"></div>
+    </div>
+    <div class="sec" id="sec4" style="display:none">
+      <h3>Méthode&nbsp;: <span class="m">|A|</span> = <span class="m">b</span></h3>
+      <div class="line">si <span class="m">b</span> &gt; 0&nbsp;: <span class="m">A</span> = <span class="m">b</span> ou <span class="m">A</span> = −<span class="m">b</span> → <b class="cOk">2 solutions</b></div>
+      <div class="line">si <span class="m">b</span> = 0&nbsp;: <span class="m">A</span> = 0 → <b class="cA">1 solution</b></div>
+      <div class="line">si <span class="m">b</span> &lt; 0&nbsp;: <b class="cN">aucune solution</b></div>
+      <div class="hr"></div>
+      <div class="line" style="white-space:normal">avec du <span class="m">x</span> des deux côtés&nbsp;: <b>deux cas</b>, et on garde seulement les solutions qui respectent le cas</div>
+      <div class="line mu">et on vérifie toujours en remplaçant&nbsp;!</div>
+    </div>
+  </div>
+  <div class="caption" id="caption" style="opacity:0"><i class="bar"></i><span id="captxt"></span></div>
+  <div class="ctrl"><a class="home" href="index.html" aria-label="Retour à l'accueil">← Accueil</a><button id="voice" aria-pressed="false">Activer la voix</button><button id="sound" aria-pressed="false">Activer le son</button><button id="pause">Pause</button><button id="replay">Rejouer</button></div>
+  <div class="seek"><input type="range" id="seek" min="0" max="148" step="0.1" value="0" aria-label="Position dans l'animation"><span id="clock">0:00 / 2:28</span></div>
+</div>
+<script>
+(function(){
+  const REC = /[?&]record/.test(location.search); if (REC) document.body.classList.add('rec');
+  const $ = id => document.getElementById(id);
+  const clamp = x => Math.max(0, Math.min(1, x));
+  const ease = x => x<.5 ? 4*x*x*x : 1-Math.pow(-2*x+2,3)/2;
+  const lerp = (a,b,k) => a + (b-a)*k;
+  const back = x => { const c=1.7, c3=c+1; return 1 + c3*Math.pow(x-1,3) + c*Math.pow(x-1,2); };
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const fr = n => String(Math.round(n*100)/100).replace('.', ',').replace('-', '−');
+
+  // ---------- chronologie ----------
+  const K = { line:4.2, ex4:8.5, exm4:13, opp:17.5, ex25:21.5, def:26, defEx:30.5, graph:35, fold:[39, 43], vCap:43.5, toLine2:49,
+              dist:51.5, d1:54, d2:58.5, eq:64, walk:[68, 72.6], alg:73.5, sol:76, check:80, g2:84.5, b0:[90, 92], b0cap:92, bneg:[96, 98], bnegCap:98,
+              eq2:103.5, fn2:106.5, V2:107.2, L2:[109.5, 111.5], int2:112.5, c1:[116.5, 119], rej:121, zoomOut:[121.5, 124], zoomIn:[127, 129], c2:[129.5, 132], chk2:134.5, method:139 };
+  const END = 148;
+  const caps = [
+    [0.3, ''],
+    [K.line, 'Voici Bip. Il part de 0 sur la droite des nombres.'],
+    [K.line + 2.2, 'La valeur absolue d’un nombre, c’est sa <b>distance à 0</b>\u00a0: le nombre de pas que Bip fait depuis 0.'],
+    [K.ex4, 'Pour aller en 4, Bip fait 4 pas\u00a0: |4| = 4.'],
+    [K.exm4, 'Pour aller en −4, Bip fait aussi 4 pas, dans l’autre sens\u00a0: |−4| = 4.'],
+    [K.opp, 'Deux nombres opposés ont la même valeur absolue. Une distance n’est jamais négative.'],
+    [K.ex25, 'En −2,5, Bip fait 2,5 pas\u00a0: |−2,5| = 2,5. Et s’il reste en 0, il ne fait aucun pas\u00a0: |0| = 0.'],
+    [K.def, 'D’où la définition\u00a0: si <span class="m">x</span> ≥ 0, |<span class="m">x</span>| = <span class="m">x</span>\u00a0; si <span class="m">x</span> &lt; 0, |<span class="m">x</span>| = −<span class="m">x</span>.'],
+    [K.defEx, 'Par exemple\u00a0: |−4| = −(−4) = 4. Le «\u00a0moins\u00a0» devant change le signe.'],
+    [K.graph, 'Traçons <span class="m">y</span> = |<span class="m">x</span>|. Pour <span class="m">x</span> ≥ 0, c’est la droite <span class="m">y</span> = <span class="m">x</span>…'],
+    [K.fold[0], '… et pour <span class="m">x</span> &lt; 0, la partie négative se replie vers le haut.'],
+    [K.vCap, 'Le graphe de la valeur absolue est un «\u00a0V\u00a0», jamais en dessous de l’axe.'],
+    [K.toLine2, 'Et |<span class="m">x</span> − <span class="m">a</span>|\u00a0?'],
+    [K.dist, '|<span class="m">x</span> − <span class="m">a</span>|, c’est la distance entre <span class="m">x</span> et <span class="m">a</span>.'],
+    [K.d1, 'Bip va de 3 à 7\u00a0: 4 pas. |7 − 3| = 4.'],
+    [K.d2, 'Et de 7 à 3\u00a0: toujours 4 pas. |3 − 7| = |−4| = 4\u00a0: la même distance, dans l’autre sens.'],
+    [K.eq, 'Résolvons |<span class="m">x</span> − 2| = 3. Une étoile est en 2\u00a0: Bip doit se placer à exactement 3 pas d’elle. Où peut-il aller\u00a0?'],
+    [K.walk[0], '3 pas vers la droite… ou 3 pas vers la gauche\u00a0: deux positions possibles\u00a0!'],
+    [K.alg, 'Par le calcul\u00a0: <span class="m">x</span> − 2 = 3 ou <span class="m">x</span> − 2 = −3.'],
+    [K.sol, 'Donc <span class="m">x</span> = 5 ou <span class="m">x</span> = −1\u00a0: deux solutions.'],
+    [K.check, 'Vérification\u00a0: |5 − 2| = 3 ✓ et |−1 − 2| = |−3| = 3 ✓.'],
+    [K.g2, 'Sur le graphe\u00a0: le «\u00a0V\u00a0» de <span class="m">y</span> = |<span class="m">x</span> − 2| coupe la droite <span class="m">y</span> = 3 en deux points.'],
+    [K.b0[0], 'Et si on cherche |<span class="m">x</span> − 2| = 0\u00a0?'],
+    [K.b0cap, 'Bip doit être à 0 pas de l’étoile\u00a0: il reste dessus. Sur le graphe, la droite touche juste la pointe du V\u00a0: une seule solution, <span class="m">x</span> = 2.'],
+    [K.bneg[0], 'Et |<span class="m">x</span> − 2| = −1\u00a0?'],
+    [K.bnegCap, 'Faire −1 pas\u00a0? Bip ne sait pas où aller\u00a0! Aucune intersection\u00a0: aucune solution. Une distance ne peut pas être négative.'],
+    [K.eq2, 'Un deuxième exemple\u00a0: |<span class="m">x</span> − 3| = 4<span class="m">x</span> + 2. Cette fois, il y a aussi du <span class="m">x</span> à droite\u00a0!'],
+    [K.fn2, 'On regarde chaque membre comme une fonction\u00a0: le V de <span class="m">y</span> = |<span class="m">x</span> − 3| et la droite <span class="m">y</span> = 4<span class="m">x</span> + 2.'],
+    [K.int2, 'Une seule intersection, vers <span class="m">x</span> ≈ 0,2. Calculons la valeur exacte, en distinguant deux cas.'],
+    [K.c1[0], 'Si <span class="m">x</span> ≥ 3\u00a0: <span class="m">x</span> − 3 = 4<span class="m">x</span> + 2, donc −5 = 3<span class="m">x</span> et <span class="m">x</span> = −5/3.'],
+    [K.rej, 'Mais −5/3 n’est pas ≥ 3\u00a0: on la rejette. Ce point est sur le prolongement de la branche droite, pas sur le V.'],
+    [K.c2[0], 'Si <span class="m">x</span> &lt; 3\u00a0: −(<span class="m">x</span> − 3) = 4<span class="m">x</span> + 2, donc −<span class="m">x</span> + 3 = 4<span class="m">x</span> + 2…'],
+    [K.c2[1], '… donc 1 = 5<span class="m">x</span> et <span class="m">x</span> = 0,2, qui est bien &lt; 3 ✓.'],
+    [K.chk2, 'Vérification\u00a0: |0,2 − 3| = 2,8 et 4 · 0,2 + 2 = 2,8 ✓. Une seule solution\u00a0: <span class="m">x</span> = 0,2.'],
+    [K.method, 'À retenir\u00a0: |<span class="m">A</span>| = <span class="m">b</span>\u00a0: deux, une ou aucune solution selon le signe de <span class="m">b</span>. Avec du <span class="m">x</span> des deux côtés\u00a0: deux cas, et on garde seulement les solutions qui les respectent.']
+  ];
+  const VOICE = [
+    [0.3, "La valeur absolue."],
+    [K.line, "Voici Bip. Il part de zéro, sur la droite des nombres."],
+    [K.line + 2.2, "La valeur absolue d'un nombre, c'est sa distance à zéro : le nombre de pas que Bip fait depuis zéro."],
+    [K.ex4, "Pour aller en quatre, Bip fait quatre pas : la valeur absolue de quatre vaut quatre."],
+    [K.exm4, "Pour aller en moins quatre, Bip fait aussi quatre pas, dans l'autre sens : la valeur absolue de moins quatre vaut quatre."],
+    [K.opp, "Deux nombres opposés ont la même valeur absolue. Une distance n'est jamais négative."],
+    [K.ex25, "En moins deux virgule cinq, Bip fait deux pas et demi : la valeur absolue de moins deux virgule cinq vaut deux virgule cinq. Et s'il reste en zéro, il ne fait aucun pas : la valeur absolue de zéro vaut zéro."],
+    [K.def, "D'où la définition : si x est positif ou nul, valeur absolue de x égale x. Si x est négatif, valeur absolue de x égale moins x."],
+    [K.defEx, "Par exemple : valeur absolue de moins quatre égale moins, moins quatre, soit quatre. Le moins devant change le signe."],
+    [K.graph, "Traçons y égale valeur absolue de x. Pour x positif, c'est la droite y égale x…"],
+    [K.fold[0], "… et pour x négatif, la partie négative se replie vers le haut."],
+    [K.vCap, "Le graphe de la valeur absolue est un V, jamais en dessous de l'axe."],
+    [K.toLine2, "Et la valeur absolue de x moins a ?"],
+    [K.dist, "Valeur absolue de x moins a, c'est la distance entre x et a."],
+    [K.d1, "Bip va de trois à sept : quatre pas. Valeur absolue de sept moins trois, égale quatre."],
+    [K.d2, "Et de sept à trois : toujours quatre pas. Valeur absolue de trois moins sept, c'est valeur absolue de moins quatre, égale quatre : la même distance, dans l'autre sens."],
+    [K.eq, "Résolvons valeur absolue de x moins deux égale trois. Une étoile est en deux : Bip doit se placer à exactement trois pas d'elle. Où peut-il aller ?"],
+    [K.walk[0], "Trois pas vers la droite… ou trois pas vers la gauche : deux positions possibles !"],
+    [K.alg, "Par le calcul : x moins deux égale trois, ou x moins deux égale moins trois."],
+    [K.sol, "Donc x égale cinq, ou x égale moins un : deux solutions."],
+    [K.check, "Vérification : valeur absolue de cinq moins deux égale trois. Et valeur absolue de moins un moins deux, c'est valeur absolue de moins trois, égale trois."],
+    [K.g2, "Sur le graphe : le V de y égale valeur absolue de x moins deux, coupe la droite y égale trois en deux points."],
+    [K.b0[0], "Et si on cherche valeur absolue de x moins deux égale zéro ?"],
+    [K.b0cap, "Bip doit être à zéro pas de l'étoile : il reste dessus. Sur le graphe, la droite touche juste la pointe du V : une seule solution, x égale deux."],
+    [K.bneg[0], "Et valeur absolue de x moins deux égale moins un ?"],
+    [K.bnegCap, "Faire moins un pas ? Bip ne sait pas où aller ! Aucune intersection : aucune solution. Une distance ne peut pas être négative."],
+    [K.eq2, "Un deuxième exemple : valeur absolue de x moins trois égale quatre x plus deux. Cette fois, il y a aussi du x à droite !"],
+    [K.fn2, "On regarde chaque membre comme une fonction : le V de y égale valeur absolue de x moins trois, et la droite y égale quatre x plus deux."],
+    [K.int2, "Une seule intersection, vers x égale zéro virgule deux environ. Calculons la valeur exacte, en distinguant deux cas."],
+    [K.c1[0], "Si x est supérieur ou égal à trois : x moins trois égale quatre x plus deux. Donc moins cinq égale trois x, et x égale moins cinq tiers."],
+    [K.rej, "Mais moins cinq tiers n'est pas supérieur ou égal à trois : on la rejette. Ce point est sur le prolongement de la branche droite, pas sur le V."],
+    [K.c2[0], "Si x est inférieur à trois : moins x moins trois égale quatre x plus deux. Donc moins x plus trois égale quatre x plus deux…"],
+    [K.c2[1], "… donc un égale cinq x, et x égale zéro virgule deux, qui est bien inférieur à trois."],
+    [K.chk2, "Vérification : valeur absolue de zéro virgule deux moins trois égale deux virgule huit. Et quatre fois zéro virgule deux, plus deux, égale deux virgule huit. Une seule solution : x égale zéro virgule deux."],
+    [K.method, "À retenir : valeur absolue de A égale b donne deux, une ou aucune solution selon le signe de b. Et avec du x des deux côtés, on distingue deux cas, et on garde seulement les solutions qui les respectent. Et on vérifie toujours !"]
+  ];
+
+  // ---------- canevas ----------
+  const stage = $('stage'), cv = $('c'), ctx = cv.getContext('2d');
+  let W = 1, H = 1, DPR = 1;
+  function resize(){ DPR = REC ? 1 : Math.min(devicePixelRatio || 1, 2); W = stage.clientWidth; H = stage.clientHeight; cv.width = W*DPR; cv.height = H*DPR; ctx.setTransform(DPR, 0, 0, DPR, 0, 0); }
+  new ResizeObserver(resize).observe(stage); resize();
+  const portrait = () => W/H < 1;
+  function area(){ return portrait() ? {x0:W*.05, x1:W*.95, y0:H*.36, y1:H*.72} : {x0:W*.05, x1:W*.6, y0:H*.08, y1:H*.7}; }
+  function glowOn(c, b){ ctx.shadowColor = c; ctx.shadowBlur = b; } function glowOff(){ ctx.shadowBlur = 0; }
+  function text(t, x, y, size, color, align, weight){ ctx.font = (weight || 700) + ' ' + size + 'px Manrope, system-ui, sans-serif'; ctx.fillStyle = color; ctx.textAlign = align || 'center'; ctx.textBaseline = 'middle'; ctx.fillText(t, x, y); }
+  function dot(x, y, r, color){ glowOn(color, r*2.5); ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2); ctx.fill(); glowOff(); }
+  function arrowH(x0, x1, y, color, w, label, lsize, above){ if (Math.abs(x1 - x0) < 2) return; const dir = Math.sign(x1 - x0), h = Math.min(12, Math.abs(x1-x0)*.4);
+    ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = w; glowOn(color, 10); ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x1 - dir*h, y); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x1, y); ctx.lineTo(x1 - dir*h, y - h*.6); ctx.lineTo(x1 - dir*h, y + h*.6); ctx.closePath(); ctx.fill(); glowOff();
+    if (label) text(label, (x0 + x1)/2, y + (above ? -1 : 1)*lsize*.95, lsize, color); }
+  // droite des nombres
+  function lineMap(min, max, yFrac){ const a = area(), s = (a.x1 - a.x0)/(max - min + 1); return { X: v => a.x0 + s*.5 + (v - min)*s, Y: a.y0 + (a.y1 - a.y0)*yFrac, s, min, max }; }
+  function drawLine(L, alpha){ ctx.globalAlpha = alpha; ctx.strokeStyle = css('--wall'); ctx.lineWidth = 3; glowOn(css('--wall'), 10); ctx.beginPath(); ctx.moveTo(L.X(L.min - .45), L.Y); ctx.lineTo(L.X(L.max + .45), L.Y); ctx.stroke(); glowOff();
+    for (let v=L.min; v<=L.max; v++){ ctx.strokeStyle = 'rgba(160,180,255,.7)'; ctx.lineWidth = v === 0 ? 3 : 1.5; ctx.beginPath(); ctx.moveTo(L.X(v), L.Y - (v === 0 ? 10 : 6)); ctx.lineTo(L.X(v), L.Y + (v === 0 ? 10 : 6)); ctx.stroke();
+      text(fr(v), L.X(v), L.Y + L.s*.5, L.s*.36, v === 0 ? '#fff' : css('--muted'), 'center', v === 0 ? 800 : 600); } ctx.globalAlpha = 1; }
+  // repère du plan
+  function planeMap(xr, yr){ const a = area(), s = Math.min((a.x1 - a.x0)/(xr[1] - xr[0] + .6), (a.y1 - a.y0)/(yr[1] - yr[0] + .6)); const ox = (a.x0 + a.x1)/2 - s*(xr[0] + xr[1])/2, oy = (a.y0 + a.y1)/2 + s*(yr[0] + yr[1])/2;
+    return { X: x => ox + x*s, Y: y => oy - y*s, s, xr, yr }; }
+  function drawPlane(P, alpha){ ctx.globalAlpha = alpha; ctx.strokeStyle = 'rgba(80,110,255,.18)'; ctx.lineWidth = 1;
+    for (let x=P.xr[0]; x<=P.xr[1]; x++){ ctx.beginPath(); ctx.moveTo(P.X(x), P.Y(P.yr[0])); ctx.lineTo(P.X(x), P.Y(P.yr[1])); ctx.stroke(); } for (let y=P.yr[0]; y<=P.yr[1]; y++){ ctx.beginPath(); ctx.moveTo(P.X(P.xr[0]), P.Y(y)); ctx.lineTo(P.X(P.xr[1]), P.Y(y)); ctx.stroke(); }
+    ctx.strokeStyle = 'rgba(200,210,255,.85)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(P.X(P.xr[0]), P.Y(0)); ctx.lineTo(P.X(P.xr[1]), P.Y(0)); ctx.moveTo(P.X(0), P.Y(P.yr[0])); ctx.lineTo(P.X(0), P.Y(P.yr[1])); ctx.stroke();
+    for (let x=P.xr[0]; x<=P.xr[1]; x++) if (x) text(fr(x), P.X(x), P.Y(0) + P.s*.32, P.s*.28, css('--muted')); for (let y=P.yr[0]; y<=P.yr[1]; y++) if (y) text(fr(y), P.X(0) - P.s*.32, P.Y(y), P.s*.28, css('--muted'));
+    text('x', P.X(P.xr[1]) + P.s*.3, P.Y(0) - P.s*.3, P.s*.34, '#fff'); text('y', P.X(0) + P.s*.3, P.Y(P.yr[1]) + P.s*.1, P.s*.34, '#fff'); ctx.globalAlpha = 1; }
+  function curve(P, f, x0, x1, color, w){ if (!(x1 - x0 > 1e-6)) return; ctx.strokeStyle = color; ctx.lineWidth = w; glowOn(color, 12); ctx.beginPath(); let first = true;
+    for (let x=x0; x<=x1 + 1e-6; x += (x1 - x0)/240){ const y = f(x); if (y < P.yr[0] - .5 || y > P.yr[1] + .5){ first = true; continue; } if (first){ ctx.moveTo(P.X(x), P.Y(y)); first = false; } else ctx.lineTo(P.X(x), P.Y(y)); } ctx.stroke(); glowOff(); }
+
+  // repère avec cadrage variable (zoom)
+  function view(xr, yr){ const a = area(), s = Math.min((a.x1 - a.x0)/(xr[1] - xr[0] + .6), (a.y1 - a.y0)/(yr[1] - yr[0] + .6)); const ox = (a.x0 + a.x1)/2 - s*(xr[0] + xr[1])/2, oy = (a.y0 + a.y1)/2 + s*(yr[0] + yr[1])/2;
+    return { X: x => ox + x*s, Y: y => oy - y*s, s, xr, yr }; }
+  function drawView(P, alpha){ ctx.globalAlpha = alpha; const [x0, x1] = P.xr, [y0, y1] = P.yr; ctx.strokeStyle = 'rgba(80,110,255,.18)'; ctx.lineWidth = 1;
+    for (let x=Math.ceil(x0); x<=x1; x++){ ctx.beginPath(); ctx.moveTo(P.X(x), P.Y(y0)); ctx.lineTo(P.X(x), P.Y(y1)); ctx.stroke(); } for (let y=Math.ceil(y0); y<=y1; y++){ ctx.beginPath(); ctx.moveTo(P.X(x0), P.Y(y)); ctx.lineTo(P.X(x1), P.Y(y)); ctx.stroke(); }
+    ctx.strokeStyle = 'rgba(200,210,255,.85)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(P.X(x0), P.Y(0)); ctx.lineTo(P.X(x1), P.Y(0)); ctx.moveTo(P.X(0), P.Y(y0)); ctx.lineTo(P.X(0), P.Y(y1)); ctx.stroke();
+    const st = P.s < 30 ? 2 : 1; for (let x=Math.ceil(x0); x<=x1; x++) if (x && x % st === 0) text(fr(x), P.X(x), P.Y(0) + 14, Math.max(10, P.s*.28), css('--muted'));
+    for (let y=Math.ceil(y0); y<=y1; y++) if (y && y % st === 0) text(fr(y), P.X(0) - 14, P.Y(y), Math.max(10, P.s*.28), css('--muted'));
+    text('x', P.X(x1) + 12, P.Y(0) - 12, 16, '#fff'); text('y', P.X(0) + 12, P.Y(y1) + 4, 16, '#fff'); ctx.globalAlpha = 1; }
+  function clipPlot(P, f, x0, x1, color, w, dash){ if (!(x1 - x0 > 1e-6)) return; ctx.save(); ctx.beginPath(); ctx.rect(P.X(P.xr[0]), P.Y(P.yr[1]), P.X(P.xr[1]) - P.X(P.xr[0]), P.Y(P.yr[0]) - P.Y(P.yr[1])); ctx.clip();
+    ctx.strokeStyle = color; ctx.lineWidth = w; if (dash) ctx.setLineDash(dash); else glowOn(color, 12); ctx.beginPath();
+    for (let i=0;i<=240;i++){ const x = x0 + (x1 - x0)*i/240, y = f(x); i ? ctx.lineTo(P.X(x), P.Y(y)) : ctx.moveTo(P.X(x), P.Y(y)); } ctx.stroke(); ctx.setLineDash([]); glowOff(); ctx.restore(); }
+
+  function drawBip(x, y, r, T, look){
+    ctx.save(); ctx.translate(x, y + Math.sin(T*6)*r*.06);
+    glowOn(css('--bip'), r*1.2); ctx.fillStyle = '#0d2a3a'; ctx.strokeStyle = css('--bip'); ctx.lineWidth = r*.14;
+    const w = r*1.7, h = r*1.45; roundRect(-w/2, -h/2, w, h, r*.4); ctx.fill(); ctx.stroke(); glowOff();
+    ctx.fillStyle = css('--bip'); [-1, 1].forEach(s => { ctx.beginPath(); ctx.arc(s*r*.38 + (look||0)*r*.08, -r*.05, r*.17, 0, Math.PI*2); ctx.fill(); });
+    ctx.strokeStyle = css('--bip'); ctx.lineWidth = r*.1; ctx.beginPath(); ctx.moveTo(0, -h/2); ctx.lineTo(0, -h/2 - r*.35); ctx.stroke();
+    glowOn('#fff', r*.6); ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(0, -h/2 - r*.42, r*.11, 0, Math.PI*2); ctx.fill(); glowOff();
+    ctx.restore(); }
+  function roundRect(x, y, w, h, r){ ctx.beginPath(); ctx.moveTo(x+r, y); ctx.arcTo(x+w, y, x+w, y+h, r); ctx.arcTo(x+w, y+h, x, y+h, r); ctx.arcTo(x, y+h, x, y, r); ctx.arcTo(x, y, x+w, y, r); ctx.closePath(); }
+  function drawStar(x, y, r, T){ ctx.save(); ctx.translate(x, y); ctx.rotate(T*.8); glowOn(css('--star'), r*1.5); ctx.fillStyle = css('--star'); ctx.beginPath();
+    for (let i=0;i<10;i++){ const a = -Math.PI/2 + i*Math.PI/5, rr = i%2 ? r*.45 : r; ctx.lineTo(Math.cos(a)*rr, Math.sin(a)*rr); } ctx.closePath(); ctx.fill(); glowOff(); ctx.restore(); }
+  // ---------- rendu ----------
+  const titleEl = $('title'), card = $('card'), captxt = $('captxt'), capEl = $('caption');
+  let capIdx = -2;
+  function renderAt(T){
+    ctx.clearRect(0, 0, W, H);
+    titleEl.style.opacity = clamp((T-.2)/.6)*(1 - clamp((T-3.4)/.6));
+    const pos = css('--pos'), neg = css('--neg'), ok = css('--ok'), A = css('--a');
+    // ===== partie 1 : distance à 0 =====
+    const s1 = clamp((T-K.line)/1)*(1 - clamp((T-K.graph)/1.2));
+    if (s1 > 0){ const L = lineMap(-6, 6, .45); drawLine(L, s1); ctx.globalAlpha = s1;
+      const KF = [[0,0],[K.ex4,0],[K.ex4+2.6,4],[K.exm4,4],[K.exm4+.6,0],[K.exm4+3.2,-4],[K.ex25,-4],[K.ex25+.5,0],[K.ex25+2.3,-2.5],[K.ex25+3.4,-2.5],[K.ex25+3.9,0],[1e9,0]];
+      let bx = 0, moving = false; for (let i=0;i<KF.length-1;i++){ if (T >= KF[i][0] && T < KF[i+1][0]){ const u = (T-KF[i][0])/(KF[i+1][0]-KF[i][0]); bx = lerp(KF[i][1], KF[i+1][1], u); moving = KF[i][1] !== KF[i+1][1]; break; } }
+      const k4 = clamp((T-K.ex4)/2.6), km4 = clamp((T-K.exm4-.6)/2.6), hl = T >= K.opp ? .6 + .4*Math.sin(T*5) : 1;
+      // compteur de pas sous les graduations franchies
+      const stepsTo = (target, k, color) => { const n = Math.floor(Math.abs(target)*k + 1e-6); for (let i=1;i<=n;i++){ const v = Math.sign(target)*i; dot(L.X(v), L.Y - L.s*1.45, 4, color); text(String(i), L.X(v), L.Y - L.s*1.8, L.s*.34, color, 'center', 800); } };
+      if (k4 > 0 && T < K.exm4 + .6) stepsTo(4, k4, pos); if (km4 > 0 && T < K.ex25) stepsTo(-4, km4, neg);
+      if (k4 > 0){ dot(L.X(4), L.Y, 7, pos); if (T >= K.exm4) arrowH(L.X(0), L.X(4), L.Y + L.s*1.25, pos, 4*hl, '|4| = 4', L.s*.42, false); }
+      if (km4 > 0){ dot(L.X(-4), L.Y, 7, neg); if (T >= K.opp - .8) arrowH(L.X(0), L.X(-4), L.Y + L.s*1.25, neg, 4*hl, '|−4| = 4', L.s*.42, false); }
+      if (T >= K.ex25 + 2.3){ const k = back(clamp((T-K.ex25-2.3)/.6)); dot(L.X(-2.5), L.Y, 6*k, neg); arrowH(L.X(0), L.X(-2.5), L.Y - L.s*2.2, neg, 3, '|−2,5| = 2,5', L.s*.36, true); }
+      if (T >= K.ex25 + 3.9){ const k = back(clamp((T-K.ex25-3.9)/.6)); dot(L.X(0), L.Y, 7*k, '#fff'); text('|0| = 0', L.X(0), L.Y + L.s*2.2, L.s*.4*k + .1, '#fff', 'center', 800); }
+      // Bip (et son « souvenir » en 4 quand on compare les opposés)
+      if (T >= K.opp && T < K.ex25){ ctx.globalAlpha = s1*.4; drawBip(L.X(4), L.Y - L.s*.7, L.s*.42, T + 1, -1); ctx.globalAlpha = s1; }
+      const kb = back(clamp((T-K.line-.3)/.6)); if (kb > 0) drawBip(L.X(bx), L.Y - L.s*.7 - (moving ? Math.abs(Math.sin(T*12))*L.s*.14 : 0), L.s*.42*kb, T, moving ? Math.sign(KF.find(f => f[0] > T)[1] - bx) : 0);
+      if (T >= K.defEx){ const k = clamp((T-K.defEx)/.6); text('−(−4) = 4', L.X(-4), L.Y - L.s*2.3, L.s*.46*k + .1, neg, 'center', 800); }
+      ctx.globalAlpha = 1; }
+    // ===== graphe de |x| =====
+    const g1 = clamp((T-K.graph)/1)*(1 - clamp((T-K.toLine2)/1.2));
+    if (g1 > 0){ const P = planeMap([-5, 5], [-5, 5]); drawPlane(P, g1); ctx.globalAlpha = g1;
+      const kd = ease(clamp((T-K.graph-.6)/1.6)), kf = ease(clamp((T-K.fold[0])/(K.fold[1]-K.fold[0])));
+      if (kd > 0){ curve(P, x => x, 0, 5*kd, pos, 4);
+        if (kf < 1){ ctx.globalAlpha = g1*(1 - kf*.6); ctx.setLineDash([7, 6]); curve(P, x => x, -5*kd, 0, 'rgba(255,92,200,.6)', 2.5); ctx.setLineDash([]); ctx.globalAlpha = g1; }
+        if (kd >= 1) curve(P, x => lerp(x, -x, kf), -5, 0, neg, 4); }
+      if (T >= K.vCap){ text('y = |x|', P.X(3.2), P.Y(4.4), P.s*.42, '#fff', 'center', 800); [[-3, 3], [3, 3]].forEach(([x, y]) => dot(P.X(x), P.Y(y), 6, x < 0 ? neg : pos)); text('(−3 ; 3)', P.X(-3) - P.s*.9, P.Y(3), P.s*.3, neg); text('(3 ; 3)', P.X(3) + P.s*.8, P.Y(3), P.s*.3, pos); }
+      ctx.globalAlpha = 1; }
+    // ===== partie 2 : |x − a| distance entre x et a ; partie 3 : |x − 2| = 3 sur la droite =====
+    const s2 = clamp((T-K.toLine2-.8)/1)*(1 - clamp((T-K.g2)/1.2));
+    if (s2 > 0){ const L = lineMap(-3, 8, .45); drawLine(L, s2); ctx.globalAlpha = s2;
+      if (T < K.eq){ const kp = back(clamp((T-K.d1+1.5)/.6)); if (kp > 0){ dot(L.X(3), L.Y, 7*kp, A); dot(L.X(7), L.Y, 7*kp, pos); }
+        const k1 = clamp((T-K.d1)/2.6), k2 = clamp((T-K.d2)/2.6);
+        if (k1 >= 1) arrowH(L.X(3), L.X(7), L.Y + L.s*1.3, pos, 4, '|7 − 3| = 4', L.s*.42, false);
+        if (k2 >= 1) arrowH(L.X(7), L.X(3), L.Y + L.s*2.3, neg, 4, '|3 − 7| = 4', L.s*.42, false);
+        const steps = (from, to, k, color) => { const n = Math.floor(Math.abs(to - from)*k + 1e-6), d = Math.sign(to - from); for (let i=1;i<=n;i++){ dot(L.X(from + d*i), L.Y - L.s*1.45, 4, color); text(String(i), L.X(from + d*i), L.Y - L.s*1.8, L.s*.34, color, 'center', 800); } };
+        if (k1 > 0 && k2 <= 0) steps(3, 7, k1, pos); if (k2 > 0) steps(7, 3, k2, neg);
+        const bx = k2 > 0 ? lerp(7, 3, k2) : lerp(3, 7, k1), mv = (k1 > 0 && k1 < 1) || (k2 > 0 && k2 < 1), kb = back(clamp((T-K.d1+1.2)/.6));
+        if (kb > 0) drawBip(L.X(bx), L.Y - L.s*.7 - (mv ? Math.abs(Math.sin(T*12))*L.s*.14 : 0), L.s*.42*kb, T, k2 > 0 ? -1 : 1); }
+      else { // |x − 2| = 3
+        dot(L.X(2), L.Y, 8, A); drawStar(L.X(2), L.Y - L.s*1.7, L.s*.34*back(clamp((T-K.eq)/.6)), T);
+        // Bip va d'abord à droite (3 pas), puis un deuxième Bip va à gauche (3 pas)
+        const kr = clamp((T-K.walk[0])/2.2), kl2 = clamp((T-K.walk[0]-2.4)/2.2), kq = back(clamp((T-K.eq-.6)/.6));
+        const stepsW = (d, k, color) => { const n = Math.floor(3*k + 1e-6); for (let i=1;i<=n;i++){ dot(L.X(2 + d*i), L.Y - L.s*1.45, 4, color); text(String(i), L.X(2 + d*i), L.Y - L.s*1.8, L.s*.34, color, 'center', 800); } };
+        if (kr > 0) stepsW(1, kr, pos); if (kl2 > 0) stepsW(-1, kl2, neg);
+        if (kr >= 1) arrowH(L.X(2), L.X(5), L.Y + L.s*2.1, pos, 3, '3', L.s*.38, false); if (kl2 >= 1) arrowH(L.X(2), L.X(-1), L.Y + L.s*2.1, neg, 3, '3', L.s*.38, false);
+        if (kq > 0){ const b1 = lerp(2, 5, kr), m1 = kr > 0 && kr < 1; drawBip(L.X(b1), L.Y - L.s*.7 - (m1 ? Math.abs(Math.sin(T*12))*L.s*.14 : 0), L.s*.42*kq, T, kr > 0 ? 1 : 0); }
+        if (T >= K.walk[0] + 2.3){ const kb2 = back(clamp((T-K.walk[0]-2.3)/.4)), b2 = lerp(2, -1, kl2), m2 = kl2 > 0 && kl2 < 1; drawBip(L.X(b2), L.Y - L.s*.7 - (m2 ? Math.abs(Math.sin(T*12))*L.s*.14 : 0), L.s*.42*kb2, T + 2, -1); }
+        if (T >= K.sol){ const k = back(clamp((T-K.sol)/.6)); [[5, pos], [-1, neg]].forEach(([v, c]) => { dot(L.X(v), L.Y, 9*k, ok); text('x = ' + fr(v), L.X(v), L.Y + L.s*1.1, L.s*.44*k + .1, ok, 'center', 800); }); } }
+      ctx.globalAlpha = 1; }
+    // ===== graphes : |x − 2| = b puis |2x − 1| = 5 =====
+    const g2 = clamp((T-K.g2)/1)*(1 - clamp((T-K.eq2)/1.2));
+    if (g2 > 0){ const P = planeMap([-3, 7], [-2, 5]); drawPlane(P, g2); ctx.globalAlpha = g2;
+      const kv = ease(clamp((T-K.g2-.5)/1.5)); curve(P, x => Math.abs(x - 2), -3, lerp(-3, 7, kv), A, 4);
+      let b = 3; b = lerp(b, 0, ease(clamp((T-K.b0[0])/(K.b0[1]-K.b0[0])))); b = lerp(b, -1, ease(clamp((T-K.bneg[0])/(K.bneg[1]-K.bneg[0]))));
+      const kl = clamp((T-K.g2-1.5)/1); if (kl > 0){ ctx.strokeStyle = 'rgba(255,255,255,' + .85*kl + ')'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(P.X(-3), P.Y(b)); ctx.lineTo(P.X(7), P.Y(b)); ctx.stroke(); text('y = ' + fr(Math.round(b*10)/10), P.X(7) - P.s*.2, P.Y(b) - P.s*.35, P.s*.32, '#fff', 'right'); }
+      if (kl >= 1 && b >= -1e-6){ const xs = b > 1e-6 ? [2 - b, 2 + b] : [2]; xs.forEach(x => { dot(P.X(x), P.Y(b), 8, ok); ctx.setLineDash([5, 5]); ctx.strokeStyle = 'rgba(109,255,148,.7)'; ctx.beginPath(); ctx.moveTo(P.X(x), P.Y(b)); ctx.lineTo(P.X(x), P.Y(0)); ctx.stroke(); ctx.setLineDash([]); text('x = ' + fr(Math.round(x*10)/10), P.X(x), P.Y(0) + P.s*.62, P.s*.32, ok, 'center', 800); }); }
+      if (T >= K.bnegCap){ text('aucune intersection', P.X(2), P.Y(-1) + P.s*.5, P.s*.36, neg, 'center', 800); }
+      // encart : Bip et l'étoile sur une petite droite graduée, alignée avec le graphe
+      const kin = clamp((T-K.b0[0])/.8)*(1 - clamp((T-K.eq2+1)/1));
+      if (kin > 0){ ctx.globalAlpha = g2*kin; const yl = P.Y(4.25), x0 = P.X(-1.5), x1 = P.X(5.5);
+        ctx.fillStyle = 'rgba(10,14,40,.85)'; ctx.strokeStyle = 'rgba(255,255,255,.15)'; ctx.lineWidth = 1; roundRect(x0, P.Y(5.4), x1 - x0, P.Y(3.75) - P.Y(5.4), 12); ctx.fill(); ctx.stroke();
+        ctx.strokeStyle = css('--wall'); ctx.lineWidth = 2.5; glowOn(css('--wall'), 8); ctx.beginPath(); ctx.moveTo(P.X(-1.2), yl); ctx.lineTo(P.X(5.2), yl); ctx.stroke(); glowOff();
+        for (let v=-1; v<=5; v++){ ctx.strokeStyle = 'rgba(160,180,255,.7)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(P.X(v), yl - 5); ctx.lineTo(P.X(v), yl + 5); ctx.stroke(); text(fr(v), P.X(v), yl + 14, Math.max(10, P.s*.26), css('--muted')); }
+        drawStar(P.X(2), P.Y(5.05), P.s*.2, T);
+        const neg1 = T >= K.bneg[0], look = neg1 ? (Math.sin(T*3) > 0 ? 1 : -1) : 0, r = P.s*.24;
+        drawBip(P.X(2), yl - r*1.05 - (neg1 ? Math.abs(Math.sin(T*6))*r*.15 : 0), r, T, look);
+        if (neg1){ const kq = clamp((T-K.bneg[0]-.4)/.5); text('?', P.X(2) + r*1.3, yl - r*2.4, P.s*.42*kq + .1, neg, 'center', 800); text('−1 pas ? impossible', P.X(4), yl - r*1.6, Math.max(13, P.s*.3)*kq + .1, neg, 'center', 800); }
+        else { text('0 pas : il reste sur l’étoile', P.X(4), yl - r*1.6, Math.max(13, P.s*.3), ok, 'center', 800); }
+        ctx.globalAlpha = g2; }
+      if (T < K.b0[0] || T >= K.eq2) text('y = |x − 2|', P.X(5.6), P.Y(4.6), P.s*.36*kv + .1, A, 'center', 800); else text('y = |x − 2|', P.X(6.2), P.Y(3.4), P.s*.32, A, 'center', 800);
+      ctx.globalAlpha = 1; }
+    const g3 = clamp((T-K.eq2)/1);
+    if (g3 > 0){ const XS = .2, GX = -5/3;
+      const zo = ease(clamp((T-K.zoomOut[0])/(K.zoomOut[1]-K.zoomOut[0])))*(1 - ease(clamp((T-K.zoomIn[0])/(K.zoomIn[1]-K.zoomIn[0]))));
+      const P = view([lerp(-2, -4, zo), 7], [lerp(-2, -6, zo), 6]); drawView(P, g3); ctx.globalAlpha = g3;
+      if (T >= K.c1[0] && T < K.chk2){ const k1 = clamp((T-K.c1[0])/.6)*(1 - clamp((T-K.c2[0])/.8)), k2 = clamp((T-K.c2[0])/.6);
+        if (k1 > 0){ ctx.fillStyle = 'rgba(255,92,200,' + .08*k1 + ')'; ctx.fillRect(P.X(3), P.Y(P.yr[1]), P.X(P.xr[1]) - P.X(3), P.Y(P.yr[0]) - P.Y(P.yr[1])); text('x ≥ 3', P.X(5), P.Y(P.yr[1]) + 18, 16, neg, 'center', 800); }
+        if (k2 > 0){ ctx.fillStyle = 'rgba(109,255,148,' + .07*k2 + ')'; ctx.fillRect(P.X(P.xr[0]), P.Y(P.yr[1]), P.X(3) - P.X(P.xr[0]), P.Y(P.yr[0]) - P.Y(P.yr[1])); text('x < 3', P.X(-1), P.Y(P.yr[1]) + 18, 16, ok, 'center', 800); } }
+      const kv = ease(clamp((T-K.V2)/1.6)); clipPlot(P, x => Math.abs(x - 3), P.xr[0], lerp(P.xr[0], P.xr[1], kv), A, 4);
+      if (kv >= 1) text('y = |x − 3|', P.X(6), P.Y(Math.min(P.yr[1] - .4, 3.6)) - 14, 15, A, 'center', 800);
+      if (T >= K.c1[1]){ const kg = clamp((T-K.c1[1])/1)*(1 - clamp((T-K.zoomIn[0])/1)); if (kg > 0){ ctx.globalAlpha = g3*kg; clipPlot(P, x => x - 3, P.xr[0], 3, 'rgba(255,92,200,.9)', 2.5, [7, 6]); ctx.globalAlpha = g3; } }
+      const kl = ease(clamp((T-K.L2[0])/(K.L2[1]-K.L2[0]))); if (kl > 0){ clipPlot(P, x => 4*x + 2, P.xr[0], lerp(P.xr[0], P.xr[1], kl), pos, 3.5); if (kl >= 1) text('y = 4x + 2', P.X(.95) + 52, P.Y(Math.min(P.yr[1] - .5, 5.4)), 16, pos, 'center', 800); }
+      if (T >= K.int2){ const kk = back(clamp((T-K.int2)/.6)), sure = T >= K.c2[1]; dot(P.X(XS), P.Y(4*XS + 2), 9*kk, ok);
+        ctx.setLineDash([5, 5]); ctx.strokeStyle = 'rgba(109,255,148,.75)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(P.X(XS), P.Y(4*XS + 2)); ctx.lineTo(P.X(XS), P.Y(0)); ctx.stroke(); ctx.setLineDash([]);
+        text(sure ? 'x = 0,2' : 'x ≈ 0,2', P.X(XS) + 46, P.Y(4*XS + 2) + 4, 16, ok, 'center', 800); }
+      if (T >= K.rej - .3){ const kg = clamp((T-K.rej+.3)/.6)*(1 - clamp((T-K.zoomIn[0])/1)); if (kg > 0){ ctx.globalAlpha = g3*kg; const gx = P.X(GX), gy = P.Y(4*GX + 2), r = 9;
+          ctx.strokeStyle = neg; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(gx, gy, r + 4, 0, Math.PI*2); ctx.stroke(); ctx.beginPath(); ctx.moveTo(gx - r, gy - r); ctx.lineTo(gx + r, gy + r); ctx.moveTo(gx + r, gy - r); ctx.lineTo(gx - r, gy + r); ctx.stroke();
+          text('x = −5/3 : rejeté', gx + 86, gy, 15, neg, 'center', 800); ctx.globalAlpha = g3; } }
+      ctx.globalAlpha = 1; }
+    // ---------- panneau ----------
+    const cOp = clamp((T-K.ex4)/.6); card.style.opacity = cOp; card.style.transform = 'translateY(' + (1-cOp)*10 + 'px)';
+    const part = T < K.toLine2 + 1 ? 1 : T < K.eq ? 2 : T < K.method ? 3 : 4;
+    [1,2,3,4].forEach(n => $('sec' + n).style.display = part === n ? '' : 'none');
+    if (part === 1){ $('e1').style.opacity = clamp((T-K.ex4-1)/.5); $('e2').style.opacity = clamp((T-K.exm4-1)/.5); $('e3').style.opacity = clamp((T-K.ex25)/.5); $('def1').style.opacity = clamp((T-K.def)/.5); $('def2').style.opacity = clamp((T-K.defEx)/.5); }
+    if (part === 2){ $('d1').style.opacity = clamp((T-K.d1-1)/.5); $('d2').style.opacity = clamp((T-K.d2-1)/.5); $('d3').style.opacity = clamp((T-K.d2-1.5)/.5); }
+    if (part === 3){ const second = T >= K.eq2;
+      const L = second ? ['|<span class="m">x</span> − 3| = 4<span class="m">x</span> + 2', '<b>si <span class="m">x</span> ≥ 3</b>\u00a0: <span class="m">x</span> − 3 = 4<span class="m">x</span> + 2 ⇔ <span class="m">x</span> = −5/3', '<b class="cN">−5/3 n’est pas ≥ 3 → rejeté</b>', '<b>si <span class="m">x</span> &lt; 3</b>\u00a0: −<span class="m">x</span> + 3 = 4<span class="m">x</span> + 2 ⇔ <b class="cOk"><span class="m">x</span> = 0,2</b> ✓', '|0,2 − 3| = <b>2,8</b>', '4 · 0,2 + 2 = <b>2,8</b> ✓']
+                       : ['|<span class="m">x</span> − 2| = 3', '⇔ <span class="m">x</span> − 2 = 3 ou <span class="m">x</span> − 2 = −3', '⇔ <b class="cOk"><span class="m">x</span> = 5</b> ou <b class="cOk"><span class="m">x</span> = −1</b>', '', '|5 − 2| = 3 ✓', '|−1 − 2| = |−3| = 3 ✓'];
+      const tt = second ? [K.eq2, K.c1[0], K.rej, K.c2[0], K.chk2, K.chk2 + .8] : [K.eq, K.alg, K.sol, 999, K.check, K.check + .8];
+      $('eqTitle').textContent = second ? 'Deuxième équation\u00a0: deux cas' : 'Équation';
+      L.forEach((h, i) => { const el = $('q' + i); if (el.innerHTML !== h) el.innerHTML = h || '&nbsp;'; el.style.opacity = clamp((T-tt[i])/.5); });
+      if (!second && T >= K.b0[0]){ $('q4').innerHTML = T >= K.bneg[0] ? '|<span class="m">x</span> − 2| = −1 → <b class="cN">aucune solution</b>' : '|<span class="m">x</span> − 2| = 0 → <b class="cA">x = 2</b> (une seule)'; $('q5').innerHTML = T >= K.bneg[0] ? 'une distance n’est jamais négative' : '&nbsp;'; $('q4').style.opacity = $('q5').style.opacity = 1; } }
+    let ci = -1; caps.forEach((c,i) => { if (T >= c[0]) ci = i; });
+    if (ci !== capIdx){ capIdx = ci; captxt.innerHTML = ci >= 0 ? caps[ci][1] : ''; }
+    capEl.style.opacity = (ci >= 0 && caps[ci][1]) ? clamp((T - caps[ci][0])/.35) : 0;
+  }
+  if (REC){ window.renderAt = T => { resize(); renderAt(T); }; window.END = END; return; }
+
+  // ---------- son (style « puce » rétro) ----------
+  const AU = { ctx:null, on:false, master:null, noise:null };
+  function auInit(){ const C = new (window.AudioContext || window.webkitAudioContext)(); const comp = C.createDynamicsCompressor(); comp.connect(C.destination);
+    const m = C.createGain(); m.gain.value = 0; m.connect(comp); AU.ctx = C; AU.master = m; }
+  function tone(f, vol, dur, type, delay){ const C = AU.ctx, t = C.currentTime + (delay||0), o = C.createOscillator(), g = C.createGain(); o.type = type || 'square'; o.frequency.value = f;
+    g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(Math.max(vol, .0002), t+.005); g.gain.exponentialRampToValueAtTime(.0001, t+dur); o.connect(g); g.connect(AU.master); o.start(t); o.stop(t+dur+.05); return o; }
+  const midi = mm => 440*Math.pow(2,(mm-69)/12);
+  const blip = (n, v) => tone(midi(n), v || .06, .09, 'square');
+  const jingle = (ns, v) => ns.forEach((n, i) => tone(midi(n), v || .06, .14, 'square', i*.09));
+  const FX = [[.3, () => jingle([72, 76, 79, 84])], [K.line, () => jingle([60, 67])], [K.ex4, () => jingle([72, 76], .05)], [K.exm4, () => jingle([72, 69], .05)], [K.opp, () => jingle([76, 79, 84], .05)],
+    [K.def, () => blip(79)], [K.graph, () => jingle([60, 64, 67], .05)], [K.fold[0], () => { const o = tone(300, .05, 3.6, 'triangle'); o.frequency.exponentialRampToValueAtTime(900, AU.ctx.currentTime + 3.5); }],
+    [K.dist, () => blip(76)], [K.eq, () => jingle([67, 71, 74])], [K.sol, () => jingle([72, 79, 84])], [K.check, () => jingle([84, 88], .05)], [K.g2, () => jingle([60, 64, 67], .05)],
+    [K.b0cap, () => jingle([79, 84], .05)], [K.bnegCap, () => jingle([60, 55, 52], .06)], [K.eq2, () => jingle([67, 71, 74])], [K.int2, () => jingle([72, 79], .06)], [K.rej, () => jingle([60, 55, 52], .06)], [K.c2[1], () => jingle([72, 79, 84])], [K.chk2, () => jingle([84, 88], .05)],
+    [K.method, () => jingle([60, 64, 67, 72, 76])]];
+  for (let i=1;i<=3;i++){ FX.push([K.walk[0] + i*.73, () => blip(67 + i*2)]); FX.push([K.walk[0] + 2.4 + i*.73, () => blip(64 - i*2)]); }
+  for (let i=1;i<=4;i++){ FX.push([K.d1 + i*.65, () => blip(64 + i*2)]); FX.push([K.d2 + i*.65, () => blip(64 - i*2)]); }
+  FX.push([K.eq + .3, () => jingle([84, 88, 91], .05)]);
+  for (let i=1;i<=4;i++){ FX.push([K.ex4 + i*.65, () => blip(64 + i*2)]); FX.push([K.exm4 + .6 + i*.65, () => blip(64 - i*2)]); }
+  function audioTick(a, b){ if (!AU.on || b <= a) return; FX.forEach(([tm, fn]) => { if (tm > a && tm <= b) fn(); });
+    if (b > 4 && b < END - 2){ for (let i=Math.floor(a/.5)+1;i<=Math.floor(b/.5);i++){ const seq = [48, 55, 52, 55, 45, 52, 50, 55]; tone(midi(seq[i%8]), .02, .2, 'triangle'); } } }
+  function masterTo(v){ if (!AU.ctx) return; const t = AU.ctx.currentTime; AU.master.gain.cancelScheduledValues(t); AU.master.gain.setTargetAtTime(v, t, .15); }
+
+  // ---------- voix off ----------
+  const VO = { on:false, busy:false, until:0, voice:null, supported:'speechSynthesis' in window };
+  function pickVoice(){ if (!VO.supported) return; const vs = speechSynthesis.getVoices().filter(v => /^fr/i.test(v.lang)); if (!vs.length) return;
+    const score = v => (/natural|online|neural/i.test(v.name) ? 8 : 0) + (/google/i.test(v.name) ? 4 : 0) + (/fr-CH/i.test(v.lang) ? 2 : 0) + (/fr-FR/i.test(v.lang) ? 1 : 0) + (v.localService ? 0 : 1);
+    VO.voice = vs.sort((a,b) => score(b) - score(a))[0]; }
+  if (VO.supported){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+  function say(text){ if (!VO.supported) return; speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = VO.voice ? VO.voice.lang : 'fr-FR'; if (VO.voice) u.voice = VO.voice; u.rate = .97;
+    u.onstart = () => { VO.busy = true; if (AU.on) masterTo(.45); }; u.onend = u.onerror = () => { VO.busy = false; if (AU.on && playing) masterTo(.9); };
+    VO.busy = true; VO.until = performance.now() + (text.length*.085/.97 + 2)*1000; speechSynthesis.speak(u); }
+  function hush(){ if (VO.supported) speechSynthesis.cancel(); VO.busy = false; }
+  function voiceTick(a, b){ if (!VO.on || b <= a) return; for (const [tm, txt] of VOICE){ if (tm > a && tm <= b) say(txt); } }
+  function holdForVoice(prev, next){ if (!VO.on || !VO.busy || performance.now() > VO.until) return next; for (const [tm] of VOICE){ if (tm > prev && tm <= next) return Math.max(prev, tm - .001); } return next; }
+
+  // ---------- commandes ----------
+  let T = 0, playing = true, last = performance.now();
+  const pauseBtn = $('pause'), replayBtn = $('replay'), soundBtn = $('sound'), voiceBtn = $('voice'), seekEl = $('seek'), clockEl = $('clock');
+  pauseBtn.addEventListener('click', () => { if (T >= END){ T = 0; playing = true; hush(); } else playing = !playing; pauseBtn.textContent = playing ? 'Pause' : 'Lecture';
+    if (VO.supported){ if (playing) speechSynthesis.resume(); else speechSynthesis.pause(); } if (AU.on) masterTo(playing ? .9 : 0); });
+  replayBtn.addEventListener('click', () => { hush(); T = -0.001; playing = true; pauseBtn.textContent = 'Pause'; if (AU.on) masterTo(.9); });
+  soundBtn.addEventListener('click', () => { if (!AU.ctx) auInit(); AU.ctx.resume(); AU.on = !AU.on; soundBtn.textContent = AU.on ? 'Couper le son' : 'Activer le son'; soundBtn.setAttribute('aria-pressed', AU.on); masterTo(AU.on && playing ? .9 : 0); });
+  voiceBtn.addEventListener('click', () => { if (!VO.supported){ voiceBtn.textContent = 'Voix indisponible'; return; }
+    VO.on = !VO.on; voiceBtn.textContent = VO.on ? 'Couper la voix' : 'Activer la voix'; voiceBtn.setAttribute('aria-pressed', VO.on);
+    if (!VO.on){ hush(); if (AU.on && playing) masterTo(.9); return; } pickVoice();
+    if (T < .3){ say(VOICE[0][1]); T = .301; } else { let cur = null; for (const v of VOICE){ if (v[0] <= T) cur = v; } if (cur && T - cur[0] < 3) say(cur[1]); } });
+  seekEl.max = END;
+  let skipAudio = false, dragging = false;
+  const mmss = x => { x = Math.max(0, Math.round(x)); return Math.floor(x/60) + ':' + String(x%60).padStart(2,'0'); };
+  function jump(sec){ T = Math.max(0, Math.min(END, sec)); skipAudio = true; hush(); if (T >= END){ playing = false; pauseBtn.textContent = 'Lecture'; } }
+  const seekBox = seekEl.parentElement;
+  seekEl.addEventListener('pointerdown', () => { dragging = true; seekBox.classList.add('drag'); });
+  window.addEventListener('pointerup', () => { if (dragging) seekEl.blur(); dragging = false; seekBox.classList.remove('drag'); });
+  seekEl.addEventListener('input', () => jump(parseFloat(seekEl.value)));
+  document.addEventListener('keydown', e => { if (e.target.tagName === 'BUTTON' && (e.key === ' ' || e.key === 'Enter')) return; if (e.target === seekEl && e.key.startsWith('Arrow')) return;
+    if (e.key === ' '){ e.preventDefault(); pauseBtn.click(); } else if (e.key === 'ArrowLeft') jump(T - 5); else if (e.key === 'ArrowRight') jump(T + 5); });
+  function loop(now){
+    const dt = Math.min(.1, (now-last)/1000); last = now; const prevT = T;
+    if (playing){ T = holdForVoice(prevT, Math.min(END, T + dt)); if (T >= END){ playing = false; pauseBtn.textContent = 'Lecture'; } }
+    if (skipAudio) skipAudio = false; else { audioTick(prevT, T); voiceTick(prevT, T); }
+    if (!dragging) seekEl.value = T.toFixed(1); clockEl.textContent = mmss(T) + ' / ' + mmss(END);
+    renderAt(Math.max(0, T)); requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
+</script>
+<script>if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js');</script>
+</body>
+</html>

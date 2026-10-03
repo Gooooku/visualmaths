@@ -16,7 +16,8 @@
 
 ## Ajouter une vidéo
 1. Dépose le fichier de la vidéo (`.html`) et sa vignette (image 16/9, par exemple `thumb-xxx.jpg`).
-2. Dans `index.html`, dans la liste `CHAPITRES`, copie un bloc `{ titre: …, texte: …, lien: …, image: …, duree: …, tag: … }`
-   dans le bon chapitre et adapte-le. Pour un nouveau chapitre, copie tout un bloc de chapitre.
-3. Dans `sw.js`, ajoute les nouveaux fichiers à la liste `FILES` et change le numéro de `CACHE` (v1 → v2)
+2. Dans `index.html`, la liste `ANNEES` est organisée ainsi : années → chapitres → vidéos.
+   Copie un bloc `{ titre: …, texte: …, lien: …, image: …, duree: …, tag: … }` dans la liste `videos`
+   du bon chapitre et adapte-le. Pour un nouveau chapitre ou une nouvelle année, copie tout un bloc.
+3. Dans `sw.js`, ajoute les nouveaux fichiers à la liste `FILES` et change le numéro de `CACHE` (par exemple v4 → v5)
    pour que les appareils reçoivent la mise à jour.

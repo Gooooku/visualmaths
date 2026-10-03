@@ -43,9 +43,14 @@ header{ display:grid; grid-template-columns:1fr minmax(0, 560px); align-items:ce
 .kicker i{ width:28px; height:4px; border-radius:99px; background:linear-gradient(90deg, var(--x), var(--y), var(--z)); }
 h1{ margin:14px 0 0; font-size:clamp(44px, 7vw, 84px); line-height:1; letter-spacing:-.035em; font-weight:800; }
 h1 span{ background:linear-gradient(90deg, var(--acc), var(--theo)); -webkit-background-clip:text; background-clip:text; color:transparent; }
-.chapter{ margin-top:40px; }
+.year{ margin-top:56px; }
+.year-head{ display:flex; align-items:center; gap:14px; margin-bottom:6px; }
+.year-head h2{ margin:0; font-size:clamp(26px, 3.6vw, 36px); letter-spacing:-.02em; font-weight:800; }
+.year-head .pill{ width:44px; height:6px; border-radius:99px; background:linear-gradient(90deg, var(--acc), var(--theo)); }
+.year-head .line{ flex:1; height:1px; background:var(--stroke); }
+.chapter{ margin-top:26px; }
 .chap-head{ display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:18px; }
-.chap-head h2{ margin:0; font-size:28px; letter-spacing:-.02em; }
+.chap-head h3{ margin:0; font-size:26px; letter-spacing:-.02em; }
 .chap-head p{ margin:4px 0 0; color:var(--muted); font-size:15px; }
 .chap-num{ font-size:13px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--acc); }
 .series{ display:inline-flex; align-items:center; gap:8px; padding:10px 16px; border-radius:99px; border:1px solid var(--stroke); background:var(--card);
@@ -92,44 +97,66 @@ footer{ margin-top:56px; color:var(--muted); font-size:13px; text-align:center; 
 </div>
 <script>
 /* ============================================================
-   LISTE DES VIDÉOS — pour ajouter une vidéo, copie un bloc { … }
-   dans la liste « videos » du bon chapitre, et mets le fichier .html
-   et sa vignette (image 16/9) dans le dépôt.
+   LISTE DES VIDÉOS — années > chapitres > vidéos.
+   Pour ajouter une vidéo, copie un bloc { … } dans la liste « videos »
+   du bon chapitre, et mets le fichier .html et sa vignette (16/9) dans le dépôt.
    tag : "theorie" ou "application"
    ============================================================ */
-const CHAPITRES = [
+const ANNEES = [
   {
-    titre: "Géométrie vectorielle",
-    description: "Points, vecteurs, droites et plans dans l’espace.",
-    series: [ { texte: "▶ Droite + applications à la suite", lien: "droite-complete.html" }, { texte: "▶ Plans + applications à la suite", lien: "plans-complete.html" } ],
-    videos: [
-      { titre: "Points et vecteurs dans l’espace", texte: "Placer un point dans un repère 3D, dessiner un vecteur, calculer les composantes de AB.", lien: "points-vecteurs.html", image: "thumb-points.jpg", duree: "2 min 23", tag: "theorie" },
-      { titre: "La droite dans l’espace", texte: "La représentation paramétrique construite point par point, puis les équations à partir de deux points.", lien: "droite-theorie.html", image: "thumb-droite.jpg", duree: "2 min 21", tag: "theorie" },
-      { titre: "Application : deux drones", texte: "À l’aide de leurs équations paramétriques, les deux drones vont-ils se percuter ?", lien: "droite-drones.html", image: "thumb-drones.jpg", duree: "1 min 05", tag: "application" },
-      { titre: "Application : le rayon d’énergie", texte: "On remplace les coordonnées de la cible dans les équations : le rayon va-t-il la toucher ?", lien: "droite-rayon.html", image: "thumb-rayon.jpg", duree: "1 min 06", tag: "application" },
-      { titre: "Intersections avec les plans de coordonnées", texte: "Les plans xOy, xOz et yOz, puis les points où une droite les traverse.", lien: "plans-intersections.html", image: "thumb-plans.jpg", duree: "1 min 41", tag: "theorie" },
-      { titre: "Application : l’ombre de l’obélisque", texte: "Où tombe l’ombre du sommet ? Le rayon de soleil coupe le sol… et révèle un trésor.", lien: "plans-obelisque.html", image: "thumb-obelisque.jpg", duree: "1 min 16", tag: "application" },
-      { titre: "Application : du robot 3D à l’écran", texte: "Comment un ordinateur transforme un objet 3D en image : chaque pixel est l’intersection d’un rayon avec l’écran.", lien: "plans-robot.html", image: "thumb-robot.jpg", duree: "1 min 36", tag: "application" }
+    titre: "3ᵉ année",
+    chapitres: [
+      {
+        titre: "Équations",
+        description: "Valeur absolue : une distance, une définition et des équations.",
+        videos: [
+          { titre: "La valeur absolue", texte: "Avec Bip le robot : la distance à 0, la définition, le graphe en V et deux équations résolues pas à pas.", lien: "valeur-absolue.html", image: "thumb-valeur-absolue.jpg", duree: "2 min 28", tag: "theorie" }
+        ]
+      }
+    ]
+  },
+  {
+    titre: "4ᵉ année",
+    chapitres: [
+      {
+        titre: "Géométrie vectorielle",
+        description: "Points, vecteurs, droites et plans dans l’espace.",
+        series: [ { texte: "▶ Droite + applications à la suite", lien: "droite-complete.html" }, { texte: "▶ Plans + applications à la suite", lien: "plans-complete.html" } ],
+        videos: [
+          { titre: "Points et vecteurs dans l’espace", texte: "Placer un point dans un repère 3D, dessiner un vecteur, calculer les composantes de AB.", lien: "points-vecteurs.html", image: "thumb-points.jpg", duree: "2 min 23", tag: "theorie" },
+          { titre: "La droite dans l’espace", texte: "La représentation paramétrique construite point par point, puis les équations à partir de deux points.", lien: "droite-theorie.html", image: "thumb-droite.jpg", duree: "2 min 21", tag: "theorie" },
+          { titre: "Application : deux drones", texte: "À l’aide de leurs équations paramétriques, les deux drones vont-ils se percuter ?", lien: "droite-drones.html", image: "thumb-drones.jpg", duree: "1 min 05", tag: "application" },
+          { titre: "Application : le rayon d’énergie", texte: "On remplace les coordonnées de la cible dans les équations : le rayon va-t-il la toucher ?", lien: "droite-rayon.html", image: "thumb-rayon.jpg", duree: "1 min 06", tag: "application" },
+          { titre: "Intersections avec les plans de coordonnées", texte: "Les plans xOy, xOz et yOz, puis les points où une droite les traverse.", lien: "plans-intersections.html", image: "thumb-plans.jpg", duree: "1 min 41", tag: "theorie" },
+          { titre: "Application : l’ombre de l’obélisque", texte: "Où tombe l’ombre du sommet ? Le rayon de soleil coupe le sol… et révèle un trésor.", lien: "plans-obelisque.html", image: "thumb-obelisque.jpg", duree: "1 min 16", tag: "application" },
+          { titre: "Application : du robot 3D à l’écran", texte: "Comment un ordinateur transforme un objet 3D en image : chaque pixel est l’intersection d’un rayon avec l’écran.", lien: "plans-robot.html", image: "thumb-robot.jpg", duree: "1 min 36", tag: "application" }
+        ]
+      }
     ]
   }
 ];
 const TAGS = { theorie: "Théorie", application: "Application" };
 const root = document.getElementById('chapters');
 const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-CHAPITRES.forEach((ch, ci) => {
-  const sec = document.createElement('section'); sec.className = 'chapter'; sec.setAttribute('aria-labelledby', 'ch' + ci);
-  sec.innerHTML = '<div class="chap-head"><div><div class="chap-num">Chapitre ' + (ci + 1) + '</div><h2 id="ch' + ci + '">' + esc(ch.titre) + '</h2><p>' + esc(ch.description) + '</p></div>'
-    + '<div style="display:flex; flex-wrap:wrap; gap:8px">' + (ch.series || []).map(x => '<a class="series" href="' + x.lien + '">' + esc(x.texte) + '</a>').join('') + '</div></div>';
-  const grid = document.createElement('div'); grid.className = 'grid';
-  ch.videos.forEach((v, i) => {
-    const a = document.createElement('a'); a.className = 'card'; a.href = v.lien;
-    a.innerHTML = '<div class="thumb"><img src="' + v.image + '" alt="" loading="lazy"><div class="play"><span>▶</span></div><div class="num">' + (i + 1) + '</div></div>'
-      + '<div class="body"><div class="meta"><span class="tag ' + v.tag + '">' + (TAGS[v.tag] || v.tag) + '</span><span class="dur">' + esc(v.duree) + '</span></div>'
-      + '<h3>' + esc(v.titre) + '</h3><p>' + esc(v.texte) + '</p></div>';
-    grid.appendChild(a);
+ANNEES.forEach((an, ai) => {
+  const ys = document.createElement('section'); ys.className = 'year'; ys.setAttribute('aria-labelledby', 'an' + ai);
+  ys.innerHTML = '<div class="year-head"><span class="pill"></span><h2 id="an' + ai + '">' + esc(an.titre) + '</h2><span class="line"></span></div>';
+  an.chapitres.forEach((ch, ci) => {
+    const sec = document.createElement('div'); sec.className = 'chapter';
+    sec.innerHTML = '<div class="chap-head"><div><div class="chap-num">Chapitre ' + (ci + 1) + '</div><h3>' + esc(ch.titre) + '</h3><p>' + esc(ch.description) + '</p></div>'
+      + '<div style="display:flex; flex-wrap:wrap; gap:8px">' + (ch.series || []).map(x => '<a class="series" href="' + x.lien + '">' + esc(x.texte) + '</a>').join('') + '</div></div>';
+    const grid = document.createElement('div'); grid.className = 'grid';
+    ch.videos.forEach((v, i) => {
+      const a = document.createElement('a'); a.className = 'card'; a.href = v.lien;
+      a.innerHTML = '<div class="thumb"><img src="' + v.image + '" alt="" loading="lazy"><div class="play"><span>▶</span></div><div class="num">' + (i + 1) + '</div></div>'
+        + '<div class="body"><div class="meta"><span class="tag ' + v.tag + '">' + (TAGS[v.tag] || v.tag) + '</span><span class="dur">' + esc(v.duree) + '</span></div>'
+        + '<h3>' + esc(v.titre) + '</h3><p>' + esc(v.texte) + '</p></div>';
+      grid.appendChild(a);
+    });
+    const soon = document.createElement('div'); soon.className = 'soon'; soon.textContent = 'D’autres vidéos arrivent bientôt…'; grid.appendChild(soon);
+    sec.appendChild(grid); ys.appendChild(sec);
   });
-  const soon = document.createElement('div'); soon.className = 'soon'; soon.textContent = 'D’autres vidéos arrivent bientôt…'; grid.appendChild(soon);
-  sec.appendChild(grid); root.appendChild(sec);
+  root.appendChild(ys);
 });
 if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js');
 </script>
