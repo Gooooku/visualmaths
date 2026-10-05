@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icone.svg">
+<link rel="apple-touch-icon" href="icone.svg">
+<meta name="theme-color" content="#0b1024">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Application — monter de niveau : la courbe d’XP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link id="gf" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&family=Press+Start+2P&family=STIX+Two+Text:ital,wght@1,500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg1:#070b1c; --bg2:#151b46; --ink:#eef1ff; --muted:#8e97c4; --glass:rgba(255,255,255,.06); --stroke:rgba(255,255,255,.14);
+  --bip:#3ee6ff; --zap:#ff4f6d; --zip:#c77dff; --lin:#3ee6ff; --exp:#ff5cc8; --log:#ffd23f; --star:#ffd23f; --x:#ff7a85; --y:#5ee3a1; --wall:#2f5bff; --ok:#6dff94;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light){ :root:not([data-theme="dark"]){ --glass:rgba(255,255,255,.08); } }
+:root[data-theme="light"]{ --glass:rgba(255,255,255,.08); }
+:root{ box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); }
+*,*::before,*::after{ box-sizing:inherit; }
+html{ height:100%; scroll-padding-top:env(safe-area-inset-top,0px); }
+body{ height:100%; margin:0; background:var(--bg1); color:var(--ink); overflow:hidden; font-family:"Manrope", system-ui, -apple-system, "Segoe UI", sans-serif; }
+.m{ font-family:"STIX Two Text","Cambria Math","Times New Roman",serif; font-style:italic; font-weight:500; }
+.cB{ color:var(--bip); } .cZ{ color:var(--zap); } .cI{ color:var(--zip); } .cS{ color:var(--star); } .cx{ color:var(--x); } .cy{ color:var(--y); } .cOk{ color:var(--ok); } .mu{ color:var(--muted); }
+.stage{ position:relative; width:100%; height:100%; overflow:hidden; background:radial-gradient(120% 90% at 70% 15%, var(--bg2) 0%, var(--bg1) 62%); --u:min(1vw, 1.78vh); }
+canvas{ position:absolute; inset:0; width:100%; height:100%; display:block; }
+.title{ position:absolute; inset:0; display:grid; place-content:center; text-align:center; pointer-events:none; }
+.title h1{ margin:0; font-weight:800; font-size:calc(var(--u)*5.4); letter-spacing:-.02em; line-height:1.05; }
+.title p{ margin:calc(var(--u)*1.4) 0 0; font-size:calc(var(--u)*2.2); color:var(--muted); font-weight:600; }
+.caption{ position:absolute; left:calc(var(--u)*4); bottom:calc(var(--u)*4.5 + 20px); max-width:min(46%, 30em); pointer-events:none; font-size:calc(var(--u)*2.1); font-weight:700; line-height:1.25; }
+.caption > span{ display:block; }
+.caption .bar{ display:block; width:calc(var(--u)*6); height:calc(var(--u)*.5); border-radius:99px; margin-bottom:calc(var(--u)*1.2); background:linear-gradient(90deg, var(--bip), var(--zip), var(--zap)); }
+.card{ position:absolute; right:calc(var(--u)*3.5); bottom:calc(var(--u)*3.5 + 20px); width:21em; padding:calc(var(--u)*1.8) calc(var(--u)*2.2); font-size:calc(var(--u)*1.7);
+  background:var(--glass); border:1px solid var(--stroke); border-radius:calc(var(--u)*1.8); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); }
+.card h3{ margin:0 0 .5em; font-size:.8em; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:800; }
+.sec{ display:grid; gap:.35em; }
+.line{ white-space:nowrap; font-variant-numeric:tabular-nums; }
+.big{ font-size:1.25em; }
+.hr{ height:1px; background:var(--stroke); margin:.6em 0; }
+.num{ display:inline-block; min-width:1.6em; text-align:right; }
+table.cmp{ border-collapse:collapse; width:100%; font-variant-numeric:tabular-nums; }
+table.cmp td, table.cmp th{ padding:.25em .3em; text-align:left; white-space:nowrap; }
+table.cmp th{ font-size:.82em; color:var(--muted); font-weight:700; }
+.ctrl{ position:absolute; right:calc(var(--u)*3.5); top:calc(var(--u)*3); display:flex; gap:8px; }
+.ctrl button, .ctrl a.home{ font:inherit; font-weight:700; font-size:14px; padding:9px 15px; border-radius:99px; border:1px solid var(--stroke); background:var(--glass); color:var(--ink); cursor:pointer; backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); }
+.ctrl button:focus-visible{ outline:3px solid var(--bip); outline-offset:2px; }
+.seek{ position:absolute; left:0; right:0; bottom:0; padding:28px calc(var(--u)*3.5) calc(var(--u)*1.2) calc(var(--u)*4); display:flex; align-items:center; gap:14px; transition:opacity .25s; }
+.seek input{ flex:1; accent-color:var(--bip); height:22px; cursor:pointer; }
+.seek span{ font-size:14px; font-weight:600; color:var(--muted); font-variant-numeric:tabular-nums; min-width:6.5em; text-align:right; }
+@media (hover: hover){ .seek{ opacity:0; } .seek:hover, .seek:has(input:focus-visible), .seek.drag{ opacity:1; } }
+.rec .ctrl, .rec .seek{ display:none; } .rec *{ transition:none !important; }
+@media (max-aspect-ratio: 1/1){
+  .stage{ --u:min(1.9vw, 1.2vh); }
+  .card{ left:calc(var(--u)*2.5); right:calc(var(--u)*2.5); top:calc(var(--u)*2.5); bottom:auto; width:auto; font-size:calc(var(--u)*1.7); }
+  .ctrl{ left:calc(var(--u)*2.5); right:calc(var(--u)*2.5); top:auto; bottom:calc(var(--u)*2 + 34px); flex-wrap:wrap; gap:6px; }
+  .ctrl button, .ctrl a.home{ padding:7px 11px; font-size:13px; }
+  .caption{ left:calc(var(--u)*2.5); right:calc(var(--u)*2.5); max-width:none; bottom:calc(var(--u)*2 + 90px); font-size:calc(var(--u)*2.6); }
+  .seek{ padding:10px calc(var(--u)*3) calc(var(--u)*2); }
+}
+.cLin{ color:var(--lin); } .cExp{ color:var(--exp); } .cLog{ color:var(--log); }
+table.lv{ border-collapse:collapse; width:100%; font-variant-numeric:tabular-nums; font-size:.95em; } table.lv td{ padding:.12em .3em; white-space:nowrap; } table.lv td:last-child{ text-align:right; font-weight:800; }
+table.lv tr.on td{ background:rgba(255,210,63,.13); }
+.ctrl a.home{ text-decoration:none; display:inline-flex; align-items:center; }
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <canvas id="c" aria-label="Animation : dans un jeu de rôle, les points d'expérience nécessaires pour passer au niveau suivant suivent une loi logarithmique ; comparaison avec une croissance linéaire et exponentielle"></canvas>
+  <div class="title" id="title"><div><h1>Monter de niveau</h1><p>Application · logarithmes</p></div></div>
+  <div class="card" id="card" style="opacity:0">
+    <div class="sec" id="secA">
+      <h3>Points à gagner pour passer au niveau suivant</h3>
+      <div class="line big"><span class="m">XP</span><sub>suivant</sub> = 1000 · log(<span class="m">niveau</span> + 1)</div>
+      <div class="hr"></div>
+      <table class="lv" id="lvT"></table>
+      <div class="line mu" id="lvNote" style="margin-top:.3em; white-space:normal">&nbsp;</div>
+    </div>
+    <div class="sec" id="secB" style="display:none">
+      <h3>Au niveau 30, à 50 points par minute</h3>
+      <div class="line"><b class="cLin">linéaire</b>&nbsp;: 300 + 100·29 = <b>3200</b> pts</div>
+      <div class="line" style="padding-left:1em">→ <b>≈ 1 h</b></div>
+      <div class="line"><b class="cExp">exponentiel</b>&nbsp;: 300·2<sup>29</sup> ≈ <b>161 milliards</b></div>
+      <div class="line" style="padding-left:1em">→ <b class="cExp">≈ 6000 ans&nbsp;!</b></div>
+      <div class="line"><b class="cLog">logarithme</b>&nbsp;: 1000·log 31 ≈ <b>1491</b> pts</div>
+      <div class="line" style="padding-left:1em">→ <b class="cLog">≈ 30 min</b></div>
+      <div class="line mu" style="margin-top:.35em; white-space:normal">le logarithme augmente la difficulté sans la rendre impossible</div>
+    </div>
+    <div class="sec" id="secC" style="display:none">
+      <h3>Dès quel niveau faut-il plus de 1500 points&nbsp;?</h3>
+      <div class="line" id="c0">1000 · log(<span class="m">n</span> + 1) = 1500</div>
+      <div class="line" id="c1">⇔ log(<span class="m">n</span> + 1) = 1,5</div>
+      <div class="line" id="c2">⇔ <span class="m">n</span> + 1 = 10<sup>1,5</sup> ≈ 31,6 &nbsp;<span class="mu">(on «&nbsp;défait&nbsp;» le log)</span></div>
+      <div class="line" id="c3">⇔ <span class="m">n</span> ≈ 30,6</div>
+      <div class="hr"></div>
+      <div class="line" id="c4">niveau 30&nbsp;: 1000·log 31 ≈ 1491 &lt; 1500</div>
+      <div class="line" id="c5">niveau 31&nbsp;: 1000·log 32 ≈ <b class="cOk">1505 &gt; 1500</b> ✓</div>
+    </div>
+  </div>
+  <div class="caption" id="caption" style="opacity:0"><i class="bar"></i><span id="captxt"></span></div>
+  <div class="ctrl"><a class="home" href="index.html" aria-label="Retour à l'accueil">← Accueil</a><button id="voice" aria-pressed="false">Activer la voix</button><button id="sound" aria-pressed="false">Activer le son</button><button id="pause">Pause</button><button id="replay">Rejouer</button></div>
+  <div class="seek"><input type="range" id="seek" min="0" max="79" step="0.1" value="0" aria-label="Position dans l'animation"><span id="clock">0:00 / 1:19</span></div>
+</div>
+<script>
+(function(){
+  const REC = /[?&]record/.test(location.search); if (REC) document.body.classList.add('rec');
+  const $ = id => document.getElementById(id);
+  const clamp = x => Math.max(0, Math.min(1, x));
+  const ease = x => x<.5 ? 4*x*x*x : 1-Math.pow(-2*x+2,3)/2;
+  const lerp = (a,b,k) => a + (b-a)*k;
+  const back = x => { const c=1.7, c3=c+1; return 1 + c3*Math.pow(x-1,3) + c*Math.pow(x-1,2); };
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const fr = n => String(n).replace('.', ',');
+  const XP = n => 1000*Math.log10(n + 1);
+
+  // ---------- chronologie ----------
+  const K = { game:4.2, fight:[6.5, 9.5], bar:[9.5, 11.5], lvup:10.8, q:13, formula:15.5, lv:[19, 24, 29], incr:34, far:38.5, toGraph:[43, 45], lin:46, exp:49, expBoom:52.5, logc:56, time:60, jouable:66, eq:[1e9, 1e9], steps:[1e9, 1e9, 1e9, 1e9], check:1e9, final:70.5 };
+  const END = 79;
+  const LV = [[1, 301], [2, 477], [3, 602]];
+  const caps = [
+    [0.3, ''],
+    [K.game, 'Dans un jeu de rôle, le héros gagne des points d’expérience (XP) en battant des monstres.'],
+    [K.lvup, 'Barre pleine\u00a0: niveau supérieur\u00a0!'],
+    [K.q, 'Mais combien de points faudra-t-il gagner pour passer au niveau suivant\u00a0?'],
+    [K.formula, 'Le jeu utilise la formule\u00a0: <span class="m">XP</span><sub>suivant</sub> = 1000 · log(<span class="m">niveau</span> + 1).'],
+    [K.lv[0], 'Au niveau 1\u00a0: 1000 · log 2 ≈ 301 points à gagner.'],
+    [K.lv[1], 'Au niveau 2\u00a0: 1000 · log 3 ≈ 477 points.'],
+    [K.lv[2], 'Au niveau 3\u00a0: 1000 · log 4 ≈ 602 points.'],
+    [K.incr, 'Chaque niveau demande un peu plus de points… mais l’écart grandit de moins en moins\u00a0: +176, puis +125.'],
+    [K.far, 'Au niveau 9, il faut 1000 points. Au niveau 99, seulement 2000\u00a0!'],
+    [K.toGraph[0], 'Pourquoi un logarithme\u00a0? Comparons trois façons de rendre les niveaux plus durs.'],
+    [K.lin, '<span class="cLin">Linéaire</span>\u00a0: 100 points de plus à chaque niveau. Ça grandit régulièrement.'],
+    [K.exp, '<span class="cExp">Exponentiel</span>\u00a0: deux fois plus de points à chaque niveau…'],
+    [K.expBoom, '… la courbe explose\u00a0! Au niveau 30, il faudrait environ 161 milliards de points.'],
+    [K.logc, '<span class="cLog">Logarithme</span>\u00a0: la courbe monte, puis s’aplatit.'],
+    [K.time, 'À 50 points par minute\u00a0: environ 30 minutes pour le niveau 30 avec le logarithme… et 6000 ans avec l’exponentielle\u00a0!'],
+    [K.jouable, 'Avec le logarithme, chaque niveau est un peu plus dur, mais le jeu reste jouable.'],
+    [K.eq[0], 'Dès quel niveau faut-il gagner plus de 1500 points\u00a0?'],
+    [K.steps[0], 'On résout 1000 · log(<span class="m">n</span> + 1) = 1500.'],
+    [K.steps[1], 'On divise par 1000\u00a0: log(<span class="m">n</span> + 1) = 1,5.'],
+    [K.steps[2], 'Pour «\u00a0défaire\u00a0» le logarithme, on prend 10 à la puissance\u00a0: <span class="m">n</span> + 1 = 10<sup>1,5</sup> ≈ 31,6.'],
+    [K.steps[3], 'Donc <span class="m">n</span> ≈ 30,6\u00a0: c’est là que la courbe croise la ligne des 1500.'],
+    [K.check, 'Au niveau 30\u00a0: 1491 points. Au niveau 31\u00a0: 1505 points. C’est donc dès le niveau 31\u00a0!'],
+    [K.final, 'À retenir\u00a0: le logarithme fait grandir la difficulté… sans jamais la rendre impossible.']
+  ];
+  const VOICE = [
+    [0.3, "Monter de niveau. Une application des logarithmes."],
+    [K.game, "Dans un jeu de rôle, le héros gagne des points d'expérience en battant des monstres."],
+    [K.lvup, "Barre pleine : niveau supérieur !"],
+    [K.q, "Mais combien de points faudra-t-il gagner pour passer au niveau suivant ?"],
+    [K.formula, "Le jeu utilise la formule : points à gagner égale mille fois logarithme de niveau plus un."],
+    [K.lv[0], "Au niveau un : mille fois logarithme de deux, environ trois cent un points à gagner."],
+    [K.lv[1], "Au niveau deux : mille fois logarithme de trois, environ quatre cent soixante-dix-sept points."],
+    [K.lv[2], "Au niveau trois : mille fois logarithme de quatre, environ six cent deux points."],
+    [K.incr, "Chaque niveau demande un peu plus de points… mais l'écart grandit de moins en moins : plus cent soixante-seize, puis plus cent vingt-cinq."],
+    [K.far, "Au niveau neuf, il faut mille points. Au niveau quatre-vingt-dix-neuf, seulement deux mille !"],
+    [K.toGraph[0], "Pourquoi un logarithme ? Comparons trois façons de rendre les niveaux plus durs."],
+    [K.lin, "Linéaire : cent points de plus à chaque niveau. Ça grandit régulièrement."],
+    [K.exp, "Exponentiel : deux fois plus de points à chaque niveau…"],
+    [K.expBoom, "… la courbe explose ! Au niveau trente, il faudrait environ cent soixante et un milliards de points."],
+    [K.logc, "Logarithme : la courbe monte, puis s'aplatit."],
+    [K.time, "À cinquante points par minute : environ trente minutes pour le niveau trente avec le logarithme… et six mille ans avec l'exponentielle !"],
+    [K.jouable, "Avec le logarithme, chaque niveau est un peu plus dur, mais le jeu reste jouable."],
+    [K.eq[0], "Dès quel niveau faut-il gagner plus de mille cinq cents points ?"],
+    [K.steps[0], "On résout : mille fois logarithme de n plus un, égale mille cinq cents."],
+    [K.steps[1], "On divise par mille : logarithme de n plus un, égale un virgule cinq."],
+    [K.steps[2], "Pour défaire le logarithme, on prend dix à la puissance : n plus un égale dix puissance un virgule cinq, environ trente et un virgule six."],
+    [K.steps[3], "Donc n vaut environ trente virgule six : c'est là que la courbe croise la ligne des mille cinq cents."],
+    [K.check, "Au niveau trente : mille quatre cent quatre-vingt-onze points. Au niveau trente et un : mille cinq cent cinq. C'est donc dès le niveau trente et un !"],
+    [K.final, "À retenir : le logarithme fait grandir la difficulté… sans jamais la rendre impossible."]
+  ];
+
+  // ---------- canevas ----------
+  const stage = $('stage'), cv = $('c'), ctx = cv.getContext('2d');
+  let W = 1, H = 1, DPR = 1;
+  function resize(){ DPR = REC ? 1 : Math.min(devicePixelRatio || 1, 2); W = stage.clientWidth; H = stage.clientHeight; cv.width = W*DPR; cv.height = H*DPR; ctx.setTransform(DPR, 0, 0, DPR, 0, 0); }
+  new ResizeObserver(resize).observe(stage); resize();
+  const portrait = () => W/H < 1;
+  function area(){ return portrait() ? {x0:W*.05, x1:W*.95, y0:H*.36, y1:H*.7} : {x0:W*.04, x1:W*.6, y0:H*.07, y1:H*.7}; }
+  function glowOn(color, b){ ctx.shadowColor = color; ctx.shadowBlur = b; } function glowOff(){ ctx.shadowBlur = 0; }
+  function drawBip(x, y, r, T, look){
+    ctx.save(); ctx.translate(x, y + Math.sin(T*6)*r*.06);
+    glowOn(css('--bip'), r*1.2); ctx.fillStyle = '#0d2a3a'; ctx.strokeStyle = css('--bip'); ctx.lineWidth = r*.14;
+    const w = r*1.7, h = r*1.45; roundRect(-w/2, -h/2, w, h, r*.4); ctx.fill(); ctx.stroke(); glowOff();
+    ctx.fillStyle = css('--bip'); [-1, 1].forEach(s => { ctx.beginPath(); ctx.arc(s*r*.38 + (look||0)*r*.08, -r*.05, r*.17, 0, Math.PI*2); ctx.fill(); });
+    ctx.strokeStyle = css('--bip'); ctx.lineWidth = r*.1; ctx.beginPath(); ctx.moveTo(0, -h/2); ctx.lineTo(0, -h/2 - r*.35); ctx.stroke();
+    glowOn('#fff', r*.6); ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(0, -h/2 - r*.42, r*.11, 0, Math.PI*2); ctx.fill(); glowOff();
+    ctx.restore(); }
+  function drawVirus(x, y, r, T, color, phase){
+    ctx.save(); ctx.translate(x, y); ctx.rotate(Math.sin(T*2 + phase)*.25);
+    glowOn(color, r*1.3); ctx.fillStyle = color; ctx.beginPath();
+    const n = 9; for (let i=0;i<n*2;i++){ const a = i/(n*2)*Math.PI*2, rr = i%2 ? r*.72 : r*(1 + .08*Math.sin(T*8 + i)); ctx.lineTo(Math.cos(a)*rr, Math.sin(a)*rr); }
+    ctx.closePath(); ctx.fill(); glowOff();
+    ctx.fillStyle = '#fff'; [-1, 1].forEach(s => { ctx.beginPath(); ctx.ellipse(s*r*.25, -r*.08, r*.17, r*.21, 0, 0, Math.PI*2); ctx.fill(); });
+    ctx.fillStyle = '#1a0a1c'; [-1, 1].forEach(s => { ctx.beginPath(); ctx.arc(s*r*.25, -r*.04, r*.09, 0, Math.PI*2); ctx.fill(); });
+    ctx.strokeStyle = '#1a0a1c'; ctx.lineWidth = r*.08; ctx.beginPath(); ctx.moveTo(-r*.25, r*.3); ctx.lineTo(-r*.08, r*.22); ctx.lineTo(r*.08, r*.3); ctx.lineTo(r*.25, r*.22); ctx.stroke();
+    ctx.restore(); }
+  function drawStar(x, y, r, T){ ctx.save(); ctx.translate(x, y); ctx.rotate(T*.8); glowOn(css('--star'), r*1.5); ctx.fillStyle = css('--star'); ctx.beginPath();
+    for (let i=0;i<10;i++){ const a = -Math.PI/2 + i*Math.PI/5, rr = i%2 ? r*.45 : r; ctx.lineTo(Math.cos(a)*rr, Math.sin(a)*rr); } ctx.closePath(); ctx.fill(); glowOff(); ctx.restore(); }
+  function roundRect(x, y, w, h, r){ ctx.beginPath(); ctx.moveTo(x+r, y); ctx.arcTo(x+w, y, x+w, y+h, r); ctx.arcTo(x+w, y+h, x, y+h, r); ctx.arcTo(x, y+h, x, y, r); ctx.arcTo(x, y, x+w, y, r); ctx.closePath(); }
+  function text(t, x, y, size, color, align, weight){ ctx.font = (weight || 700) + ' ' + size + 'px Manrope, system-ui, sans-serif'; ctx.fillStyle = color; ctx.textAlign = align || 'center'; ctx.textBaseline = 'middle'; ctx.fillText(t, x, y); }
+
+  function dot(x, y, r, color){ glowOn(color, r*2.5); ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2); ctx.fill(); glowOff(); }
+
+  // ---------- la scène de jeu ----------
+  // niveau courant et remplissage de la barre selon le temps
+  // chaque coup d'épée rapporte des XP : la barre monte à chaque coup
+  const HIT0 = K.game + 1.8, HITDT = 4.2, GAINS = [151, 150, 160, 160, 157, 301, 301, 180, 180, 180];
+  const HITS = GAINS.map((g, n) => [HIT0 + n*HITDT, g]);
+  function gameState(T){ let lvl = 1, xp = 0, flash = -1, last = null;
+    for (const [t, g] of HITS){ if (T < t) break; const k = clamp((T - t)/.5); xp += g*k; last = [t, g];
+      const need = Math.round(XP(lvl)); if (xp >= need - 1e-6 && k >= 1){ xp -= need; lvl++; flash = t + .5; } else if (xp > need) xp = need; }
+    return { lvl, xp, fill: xp/Math.round(XP(lvl)), flash, last }; }
+  // ---------- sprites en pixel art (dessins originaux) ----------
+  const PAL = { k:'#1a1020', h:'#f0c64a', s:'#f2c79a', a:'#3f6fd1', A:'#8ab4ff', c:'#c8313a', w:'#eef3fb', g:'#f2b43a', b:'#6a432a',
+                l:'#3fa9f5', L:'#b5e6ff', p:'#8a4fd8', P:'#c9a0ff', r:'#e2433f', W:'#fff7e8', e:'#ffe14d' };
+  const SPR = {
+    hero:["......kkkk........",".....khhhhk.......","....khhhhhhk......","....khsskssk......","....kssssssk......",".....kssssk.......","...kkaaaAAkk......","..kcaaaAAAAak...ww",".kccaaaAAAaak..wwk",".kccaaggaaaak.wwk.",".kccaaaaaaakkwwk..",".kccaaaaaaskwwk...","..kcaaaaaakgwk....","...kaaaaaakgk.....","...kaak.kaak......","...kaak.kaak......","...kbbk.kbbk......","..kbbbk.kbbbk.....","..kkkk...kkkk....."],
+    slime:["....kkkkkk....","..kkllllllkk..",".kllLLllllllk.","kllLLllllllllk","kllllkllllkllk","kllllkllllkllk","kllllllllllllk","kllllllkklllk.",".kllllllllllk.","..kkkkkkkkkk.."],
+    bat:["kk............kk","kPkk...kk...kkPk","kppkk.kppk.kkppk","kpppkkppppkkpppk",".kpppkpeepkpppk.","..kppppppppppk..","...kk.kppk.kk...","......kkkk......"],
+    shroom:["...kkkkkk...",".kkrrWrrrkk.","krrWWrrrWrrk","krrrrrrrrrrk","krWrrrrWrrrk",".kkkkkkkkkk.","..kssssssk..","..kskssksk..","..kssssssk..","..ksskkssk..","...kssssk...","...kkkkkk..."] };
+  function sprite(name, x, y, px, flip, flash){ const rows = SPR[name], h = rows.length, w = rows[0].length;
+    for (let r=0;r<h;r++) for (let c=0;c<w;c++){ const ch = rows[r][flip ? w - 1 - c : c]; if (ch === '.') continue; ctx.fillStyle = flash ? '#ffffff' : PAL[ch]; ctx.fillRect(Math.round(x + c*px), Math.round(y + r*px), Math.ceil(px), Math.ceil(px)); } }
+  const MONS = [['slime', 'Un slime bleu'], ['bat', 'Une chauve-souris'], ['shroom', 'Un champignon']];
+  function pixText(t, x, y, size, color, align){ ctx.font = size + 'px "Press Start 2P", "Courier New", monospace'; ctx.textAlign = align || 'left'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#0b0b1a'; ctx.fillText(t, x + size*.12, y + size*.12); ctx.fillStyle = color; ctx.fillText(t, x, y); }
+  function rpgBox(x, y, w, h){ const g = ctx.createLinearGradient(0, y, 0, y + h); g.addColorStop(0, '#2a3f9e'); g.addColorStop(1, '#101a55'); ctx.fillStyle = g; roundRect(x, y, w, h, 8); ctx.fill();
+    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 3; roundRect(x + 2, y + 2, w - 4, h - 4, 6); ctx.stroke(); ctx.strokeStyle = 'rgba(0,0,0,.5)'; ctx.lineWidth = 1; roundRect(x + 5, y + 5, w - 10, h - 10, 4); ctx.stroke(); }
+  function drawGame(T, al){
+    const a = area(), w = a.x1 - a.x0, hgt = a.y1 - a.y0; ctx.globalAlpha = al; ctx.save(); ctx.beginPath(); roundRect(a.x0, a.y0, w, hgt, 12); ctx.clip();
+    // ciel, nuages, montagnes, château
+    const sky = ctx.createLinearGradient(0, a.y0, 0, a.y0 + hgt*.6); sky.addColorStop(0, '#3a2c7a'); sky.addColorStop(.6, '#c2557a'); sky.addColorStop(1, '#f4a35a'); ctx.fillStyle = sky; ctx.fillRect(a.x0, a.y0, w, hgt);
+    const P = Math.max(2, Math.round(w/220));
+    for (let i=0;i<4;i++){ const cx = a.x0 + ((i*0.31 + T*.012) % 1.2 - .1)*w, cy = a.y0 + hgt*(.12 + .07*(i%2)); ctx.fillStyle = 'rgba(255,230,240,.55)'; ctx.fillRect(cx, cy, P*14, P*3); ctx.fillRect(cx + P*3, cy - P*2, P*8, P*2); }
+    const hz = a.y0 + hgt*.56;
+    ctx.fillStyle = '#5b3a7a'; ctx.beginPath(); ctx.moveTo(a.x0, hz); [[.08,.3],[.2,.42],[.32,.25],[.48,.4],[.62,.22],[.78,.38],[.92,.28],[1,.4]].forEach(([fx, fy]) => ctx.lineTo(a.x0 + fx*w, a.y0 + hgt*fy)); ctx.lineTo(a.x1, hz); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#3e2a5e'; ctx.beginPath(); ctx.moveTo(a.x0, hz); [[.12,.44],[.28,.36],[.4,.47],[.58,.37],[.74,.46],[.88,.39],[1,.47]].forEach(([fx, fy]) => ctx.lineTo(a.x0 + fx*w, a.y0 + hgt*fy)); ctx.lineTo(a.x1, hz); ctx.closePath(); ctx.fill();
+    const cxs = a.x0 + w*.8, cyb = hz; ctx.fillStyle = '#2a1c40'; ctx.fillRect(cxs - P*14, cyb - P*16, P*28, P*16); [-14, -4, 6].forEach(o => { ctx.fillRect(cxs + o*P, cyb - P*24, P*8, P*8); for (let m=0;m<4;m+=2) ctx.fillRect(cxs + (o + m*2)*P, cyb - P*26, P*2, P*2); }); ctx.fillStyle = '#ffd36e'; ctx.fillRect(cxs - P, cyb - P*20, P*2, P*3);
+    // prairie en tuiles
+    const gs = P*8; for (let y = hz; y < a.y1; y += gs) for (let x = a.x0 - ((y/gs)%2)*gs/2; x < a.x1; x += gs){ ctx.fillStyle = ((Math.floor((x - a.x0)/gs) + Math.floor((y - hz)/gs)) % 2) ? '#4f9a3c' : '#5aa843'; ctx.fillRect(x, y, gs + 1, gs + 1); }
+    ctx.fillStyle = 'rgba(30,60,20,.35)'; for (let i=0;i<40;i++){ const x = a.x0 + ((i*97) % 1000)/1000*w, y = hz + ((i*61) % 1000)/1000*(a.y1 - hz); ctx.fillRect(x, y, P, P*2); }
+    // combat
+    const st = gameState(T), cyc = (T - K.game) % 4.2, nM = Math.floor((T - K.game)/4.2), mon = MONS[((nM % 3) + 3) % 3];
+    const sp = Math.min(P*3, hgt*.026), hx = a.x0 + w*.16, gy = a.y0 + hgt*.765 - sp*19;
+    const lunge = cyc > 1.4 && cyc < 2.2 ? Math.sin((cyc - 1.4)/.8*Math.PI)*w*.18 : 0;
+    ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.beginPath(); ctx.ellipse(hx + lunge + sp*9, gy + sp*19, sp*8, sp*2, 0, 0, 7); ctx.fill();
+    const lvlGlow = st.flash > 0 && T - st.flash < 1.6; if (lvlGlow){ glowOn('#ffe14d', 30); }
+    sprite('hero', hx + lunge, gy, sp, false, lvlGlow && Math.sin(T*30) > 0); glowOff();
+    const mxp = a.x0 + w*.62, alive = cyc < 2.1, hit = cyc > 1.75 && cyc < 2.1;
+    if (alive && T >= K.game){ const ms = SPR[mon[0]], mw = ms[0].length, mh = ms.length, mpx = sp*1.25, bob = Math.sin(T*4)*sp*.6;
+      ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.beginPath(); ctx.ellipse(mxp + mw*mpx/2, gy + sp*19, mw*mpx*.45, sp*2, 0, 0, 7); ctx.fill();
+      sprite(mon[0], mxp + (hit ? Math.sin(T*80)*sp : 0), gy + sp*19 - mh*mpx + (mon[0] === 'bat' ? bob - sp*6 : 0), mpx, true, hit && Math.sin(T*50) > 0); }
+    if (cyc > 1.7 && cyc < 2.1){ const e = (cyc - 1.7)/.4; ctx.strokeStyle = 'rgba(255,255,255,' + (1 - e) + ')'; ctx.lineWidth = sp*.9; ctx.beginPath(); ctx.arc(mxp + sp*7, gy + sp*10, sp*7, -1.2 + e, .6 + e); ctx.stroke(); }
+    if (cyc > 1.8 && cyc < 2.8){ const e = (cyc - 1.8); pixText('-' + (37 + (nM*13) % 40), mxp + sp*7, gy - e*sp*6, Math.round(sp*2.2), '#ffffff', 'center'); }
+    if (cyc > 2.1 && cyc < 2.6){ const e = (cyc - 2.1)/.5; ctx.globalAlpha = al*(1 - e); for (let i=0;i<12;i++){ const an = i/12*Math.PI*2; ctx.fillStyle = i%2 ? '#ffe14d' : '#ffffff'; ctx.fillRect(mxp + sp*7 + Math.cos(an)*e*sp*12, gy + sp*12 + Math.sin(an)*e*sp*12, sp, sp); } ctx.globalAlpha = al; }
+    // fenêtre de texte (haut)
+    const tb = { x:a.x0 + w*.03, y:a.y0 + hgt*.04, w:w*.94, h:hgt*.13 }; rpgBox(tb.x, tb.y, tb.w, tb.h);
+    const msg = st.flash > 0 && T - st.flash < 1.8 ? 'Le héros passe au niveau ' + st.lvl + ' !' : (cyc < 1.4 ? mon[1] + ' attaque !' : cyc < 1.8 ? 'Le héros frappe !' : (st.last ? 'Victoire ! +' + st.last[1] + ' XP' : 'Victoire !'));
+    pixText(msg, tb.x + tb.w*.04, tb.y + tb.h/2, Math.round(Math.min(tb.h*.3, w*.024)), '#ffffff', 'left');
+    // menu de commandes et état du héros (bas)
+    const by = a.y0 + hgt*.79, bh = hgt*.19, fs = Math.round(Math.min(bh*.17, w*.02));
+    rpgBox(a.x0 + w*.03, by, w*.28, bh); ['Attaque', 'Magie', 'Objets', 'Fuite'].forEach((c, i) => { pixText(c, a.x0 + w*.08, by + bh*(.2 + i*.2), fs, i === 0 ? '#ffe14d' : '#ffffff', 'left'); }); if (Math.sin(T*6) > 0) pixText('▶', a.x0 + w*.05, by + bh*.2, fs, '#ffe14d', 'left');
+    const sx = a.x0 + w*.33, sw = w*.64; rpgBox(sx, by, sw, bh);
+    pixText('HÉROS', sx + sw*.05, by + bh*.25, fs, '#ffffff', 'left'); pixText('NIV. ' + st.lvl, sx + sw*.42, by + bh*.25, fs, '#ffe14d', 'left'); pixText('PV 120/120', sx + sw*.68, by + bh*.25, fs, '#8affb0', 'left');
+    const need = Math.round(XP(st.lvl)); pixText('XP', sx + sw*.05, by + bh*.62, fs, '#ffffff', 'left');
+    const xbx = sx + sw*.16, xbw = sw*.5, xby = by + bh*.62 - fs*.55, xbh = fs*1.1; ctx.fillStyle = '#0b0b1a'; ctx.fillRect(xbx, xby, xbw, xbh);
+    if (st.fill > 0){ ctx.fillStyle = '#ffd23f'; ctx.fillRect(xbx + 2, xby + 2, (xbw - 4)*st.fill, xbh - 4); ctx.fillStyle = '#fff3b0'; ctx.fillRect(xbx + 2, xby + 2, (xbw - 4)*st.fill, (xbh - 4)*.35); }
+    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.strokeRect(xbx, xby, xbw, xbh);
+    pixText(Math.round(st.xp) + '/' + need, sx + sw*.7, by + bh*.62, fs, '#ffd23f', 'left');
+    if (st.last && T - st.last[0] < 1.2){ const e = (T - st.last[0])/1.2; ctx.globalAlpha = al*(1 - e); pixText('+' + st.last[1] + ' XP', sx + sw*.82, by - fs*(.9 + e*2), Math.round(fs*1.15), '#ffe14d', 'center'); ctx.globalAlpha = al; }
+    // LEVEL UP
+    if (st.flash > 0 && T - st.flash < 1.6){ const e = (T - st.flash)/1.6; ctx.globalAlpha = al*(1 - e*e); glowOn('#ffe14d', 20); pixText('LEVEL UP !', a.x0 + w*.5, a.y0 + hgt*.36 - e*hgt*.05, Math.round(w*.05), '#ffe14d', 'center'); glowOff();
+      for (let i=0;i<14;i++){ const an = i/14*Math.PI*2 + e; ctx.fillStyle = '#fff7b0'; ctx.fillRect(hx + sp*9 + Math.cos(an)*e*sp*16, gy + sp*9 + Math.sin(an)*e*sp*16, sp*.8, sp*.8); } ctx.globalAlpha = al; }
+    ctx.restore(); ctx.globalAlpha = 1; }
+
+  // ---------- le graphique ----------
+  function graphMap(nMax, yMax){ const a = area(), pl = 64, pb = 34, x0 = a.x0 + pl, x1 = a.x1 - 14, y0 = a.y1 - pb, y1 = a.y0 + 14;
+    return { X: n => x0 + (n/nMax)*(x1 - x0), Y: v => y0 - (v/yMax)*(y0 - y1), x0, x1, y0, y1, nMax, yMax }; }
+  function drawAxes(P, al, ystep, nstep){ ctx.globalAlpha = al; ctx.strokeStyle = 'rgba(80,110,255,.18)'; ctx.lineWidth = 1;
+    for (let v=0; v<=P.yMax + 1e-6; v+=ystep){ ctx.beginPath(); ctx.moveTo(P.x0, P.Y(v)); ctx.lineTo(P.x1, P.Y(v)); ctx.stroke(); text(String(v), P.x0 - 8, P.Y(v), 12, css('--muted'), 'right', 600); }
+    for (let n=0; n<=P.nMax; n+=nstep){ ctx.beginPath(); ctx.moveTo(P.X(n), P.y0); ctx.lineTo(P.X(n), P.y1); ctx.stroke(); text(String(n), P.X(n), P.y0 + 14, 12, css('--muted'), 'center', 600); }
+    ctx.strokeStyle = 'rgba(200,210,255,.85)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(P.x0, P.y1); ctx.lineTo(P.x0, P.y0); ctx.lineTo(P.x1, P.y0); ctx.stroke();
+    text('niveau', P.x1, P.y0 + 28, 13, '#fff', 'right', 800); text('points à gagner', P.x0 + 6, P.y1 - 2, 13, '#fff', 'left', 800); ctx.globalAlpha = 1; }
+  function plot(P, f, n0, n1, color, k){ if (k <= 0) return; ctx.save(); ctx.beginPath(); ctx.rect(P.x0, P.y1 - 4, P.x1 - P.x0 + 4, P.y0 - P.y1 + 4); ctx.clip();
+    ctx.strokeStyle = color; ctx.lineWidth = 3.5; glowOn(color, 10); ctx.beginPath(); const nEnd = n0 + (n1 - n0)*k; let first = true;
+    for (let i=0;i<=300;i++){ const n = n0 + (nEnd - n0)*i/300, v = f(n); const y = Math.max(P.y1 - 40, P.Y(v)); if (first){ ctx.moveTo(P.X(n), y); first = false; } else ctx.lineTo(P.X(n), y); } ctx.stroke(); glowOff(); ctx.restore(); }
+  const fLin = n => 300 + 100*(n - 1), fExp = n => 300*Math.pow(2, n - 1), fLog = n => XP(n);
+
+  // ---------- rendu ----------
+  const titleEl = $('title'), card = $('card'), captxt = $('captxt'), capEl = $('caption');
+  let capIdx = -2;
+  function renderAt(T){
+    ctx.clearRect(0, 0, W, H);
+    titleEl.style.opacity = clamp((T-.2)/.6)*(1 - clamp((T-3.4)/.6));
+    const kg = ease(clamp((T-K.toGraph[0])/(K.toGraph[1]-K.toGraph[0]))), ke = ease(clamp((T-K.eq[0])/(K.eq[1]-K.eq[0])));
+    if (T >= K.game && kg < 1) drawGame(T, clamp((T-K.game)/.8)*(1 - kg));
+    if (kg > 0 && ke < 1){ const P = graphMap(30, 5000); const al = kg*(1 - ke); drawAxes(P, al, 1000, 5); ctx.globalAlpha = al;
+      plot(P, fLin, 1, 30, css('--lin'), ease(clamp((T-K.lin)/2.5))); plot(P, fExp, 1, 30, css('--exp'), clamp((T-K.exp)/4)); plot(P, fLog, 1, 30, css('--log'), ease(clamp((T-K.logc)/2.5)));
+      if (T >= K.lin + 2.5) text('linéaire', P.X(27), P.Y(fLin(27)) - 16, 14, css('--lin'), 'center', 800);
+      if (T >= K.expBoom){ text('exponentiel ↑ : 161 milliards au niveau 30 !', P.X(6.5), P.y1 + 8, 14, css('--exp'), 'left', 800); }
+      if (T >= K.logc + 2.5) text('logarithme', P.X(27), P.Y(fLog(27)) + 18, 14, css('--log'), 'center', 800);
+      ctx.globalAlpha = 1; }
+    if (ke > 0){ const P = graphMap(40, 2200); drawAxes(P, ke, 500, 5); ctx.globalAlpha = ke; plot(P, fLog, 1, 40, css('--log'), 1);
+      ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = 2; ctx.setLineDash([8, 6]); ctx.beginPath(); ctx.moveTo(P.x0, P.Y(1500)); ctx.lineTo(P.x1, P.Y(1500)); ctx.stroke(); ctx.setLineDash([]); text('1500', P.x1 - 4, P.Y(1500) - 12, 13, '#fff', 'right', 800);
+      if (T >= K.steps[3]){ const n = Math.pow(10, 1.5) - 1, k = back(clamp((T-K.steps[3])/.6)); dot(P.X(n), P.Y(1500), 8*k, css('--ok')); ctx.setLineDash([5, 5]); ctx.strokeStyle = 'rgba(109,255,148,.8)'; ctx.beginPath(); ctx.moveTo(P.X(n), P.Y(1500)); ctx.lineTo(P.X(n), P.y0); ctx.stroke(); ctx.setLineDash([]); text('n ≈ 30,6', P.X(n), P.y0 - 14, 14, css('--ok'), 'center', 800); }
+      if (T >= K.check){ const k = clamp((T-K.check)/.6); [[30, '1491'], [31, '1505']].forEach(([n, lab], i) => { ctx.globalAlpha = ke*k; dot(P.X(n), P.Y(XP(n)), 5, i ? css('--ok') : '#ff6b6b'); text('niv. ' + n + ' : ' + lab, P.X(n) + (i ? 12 : -12), P.Y(XP(n)) + (i ? -18 : 18), 13, i ? css('--ok') : '#ff6b6b', i ? 'left' : 'right', 800); }); }
+      ctx.globalAlpha = 1; }
+    // ---------- panneau ----------
+    const cOp = clamp((T-K.formula)/.6); card.style.opacity = cOp; card.style.transform = 'translateY(' + (1-cOp)*10 + 'px)';
+    const part = T < K.time ? 'A' : 'B';
+    $('secA').style.display = part === 'A' ? '' : 'none'; $('secB').style.display = part === 'B' ? '' : 'none'; $('secC').style.display = part === 'C' ? '' : 'none';
+    if (part === 'A'){ const rows = [[1, '1000·log 2', 301, K.lv[0]], [2, '1000·log 3', 477, K.lv[1]], [3, '1000·log 4', 602, K.lv[2]], [9, '1000·log 10', 1000, K.far], [99, '1000·log 100', 2000, K.far + 1]];
+      const html = rows.map(([n, c, v, t0]) => '<tr style="opacity:' + clamp((T-t0)/.5) + '" class="' + (T >= t0 && T < t0 + 4 ? 'on' : '') + '"><td>niveau ' + n + '</td><td>' + c + '</td><td class="cLog">' + v + '</td></tr>').join('');
+      $('lvT').innerHTML = html; $('lvNote').innerHTML = T >= K.incr ? 'écarts\u00a0: <b>+176</b>, puis <b>+125</b>\u00a0: ça augmente de moins en moins' : '&nbsp;'; }
+    if (part === 'C'){ ['c0','c1','c2','c3','c4','c5'].forEach((id, i) => $(id).style.opacity = clamp((T - [K.steps[0], K.steps[1], K.steps[2], K.steps[3], K.check, K.check + .8][i])/.5)); }
+    let ci = -1; caps.forEach((c,i) => { if (T >= c[0]) ci = i; });
+    if (ci !== capIdx){ capIdx = ci; captxt.innerHTML = ci >= 0 ? caps[ci][1] : ''; }
+    capEl.style.opacity = (ci >= 0 && caps[ci][1]) ? clamp((T - caps[ci][0])/.35) : 0;
+  }
+  if (REC){ window.renderAt = T => { resize(); renderAt(T); }; window.END = END; return; }
+
+  // ---------- son (style « puce » rétro) ----------
+  const AU = { ctx:null, on:false, master:null, noise:null };
+  function auInit(){ const C = new (window.AudioContext || window.webkitAudioContext)(); const comp = C.createDynamicsCompressor(); comp.connect(C.destination);
+    const m = C.createGain(); m.gain.value = 0; m.connect(comp); AU.ctx = C; AU.master = m; }
+  function tone(f, vol, dur, type, delay){ const C = AU.ctx, t = C.currentTime + (delay||0), o = C.createOscillator(), g = C.createGain(); o.type = type || 'square'; o.frequency.value = f;
+    g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(Math.max(vol, .0002), t+.005); g.gain.exponentialRampToValueAtTime(.0001, t+dur); o.connect(g); g.connect(AU.master); o.start(t); o.stop(t+dur+.05); return o; }
+  const midi = mm => 440*Math.pow(2,(mm-69)/12);
+  const blip = (n, v) => tone(midi(n), v || .06, .09, 'square');
+  const jingle = (ns, v) => ns.forEach((n, i) => tone(midi(n), v || .06, .14, 'square', i*.09));
+  const FX = [[.3, () => jingle([72, 76, 79, 84])], [K.formula, () => blip(79)], [K.incr, () => jingle([67, 71], .05)], [K.far, () => jingle([72, 76, 79], .05)], [K.toGraph[0], () => jingle([60, 67])],
+    [K.lin, () => blip(72)], [K.exp, () => blip(76)], [K.expBoom, () => { const o = tone(300, .06, 1.5, 'sawtooth'); o.frequency.exponentialRampToValueAtTime(2400, AU.ctx.currentTime + 1.4); }], [K.logc, () => blip(79)],
+    [K.time, () => jingle([60, 64, 67], .05)], [K.eq[0], () => jingle([67, 71, 74])], [K.steps[3], () => jingle([72, 79], .06)], [K.check, () => jingle([72, 76, 79, 84])], [K.final, () => jingle([60, 64, 67, 72])]];
+  HITS.forEach(([t]) => { FX.push([t, () => tone(110, .1, .25, 'square')]); for (let k=1;k<=3;k++) FX.push([t + k*.15, () => blip(78 + k*3, .03)]); });
+  for (let T = 0; T < K.toGraph[0]; T += .1){ }
+  { let prev = gameState(0).lvl; for (let T = 4; T < K.toGraph[1]; T += .05){ const l = gameState(T).lvl; if (l !== prev){ const tt = T; FX.push([tt, () => jingle([72, 76, 79, 84, 88], .07)]); prev = l; } } }
+
+  function audioTick(a, b){ if (!AU.on || b <= a) return; FX.forEach(([tm, fn]) => { if (tm > a && tm <= b) fn(); });
+    if (b > 4 && b < END - 2){ for (let i=Math.floor(a/.5)+1;i<=Math.floor(b/.5);i++){ const seq = [48, 55, 52, 55, 45, 52, 50, 55]; tone(midi(seq[i%8]), .02, .2, 'triangle'); } } }
+  function masterTo(v){ if (!AU.ctx) return; const t = AU.ctx.currentTime; AU.master.gain.cancelScheduledValues(t); AU.master.gain.setTargetAtTime(v, t, .15); }
+
+  // ---------- voix off ----------
+  const VO = { on:false, busy:false, until:0, voice:null, supported:'speechSynthesis' in window };
+  function pickVoice(){ if (!VO.supported) return; const vs = speechSynthesis.getVoices().filter(v => /^fr/i.test(v.lang)); if (!vs.length) return;
+    const score = v => (/natural|online|neural/i.test(v.name) ? 8 : 0) + (/google/i.test(v.name) ? 4 : 0) + (/fr-CH/i.test(v.lang) ? 2 : 0) + (/fr-FR/i.test(v.lang) ? 1 : 0) + (v.localService ? 0 : 1);
+    VO.voice = vs.sort((a,b) => score(b) - score(a))[0]; }
+  if (VO.supported){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+  function say(text){ if (!VO.supported) return; speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = VO.voice ? VO.voice.lang : 'fr-FR'; if (VO.voice) u.voice = VO.voice; u.rate = .97;
+    u.onstart = () => { VO.busy = true; if (AU.on) masterTo(.45); }; u.onend = u.onerror = () => { VO.busy = false; if (AU.on && playing) masterTo(.9); };
+    VO.busy = true; VO.until = performance.now() + (text.length*.085/.97 + 2)*1000; speechSynthesis.speak(u); }
+  function hush(){ if (VO.supported) speechSynthesis.cancel(); VO.busy = false; }
+  function voiceTick(a, b){ if (!VO.on || b <= a) return; for (const [tm, txt] of VOICE){ if (tm > a && tm <= b) say(txt); } }
+  function holdForVoice(prev, next){ if (!VO.on || !VO.busy || performance.now() > VO.until) return next; for (const [tm] of VOICE){ if (tm > prev && tm <= next) return Math.max(prev, tm - .001); } return next; }
+
+  // ---------- commandes ----------
+  let T = 0, playing = true, last = performance.now();
+  const pauseBtn = $('pause'), replayBtn = $('replay'), soundBtn = $('sound'), voiceBtn = $('voice'), seekEl = $('seek'), clockEl = $('clock');
+  pauseBtn.addEventListener('click', () => { if (T >= END){ T = 0; playing = true; hush(); } else playing = !playing; pauseBtn.textContent = playing ? 'Pause' : 'Lecture';
+    if (VO.supported){ if (playing) speechSynthesis.resume(); else speechSynthesis.pause(); } if (AU.on) masterTo(playing ? .9 : 0); });
+  replayBtn.addEventListener('click', () => { hush(); T = -0.001; playing = true; pauseBtn.textContent = 'Pause'; if (AU.on) masterTo(.9); });
+  soundBtn.addEventListener('click', () => { if (!AU.ctx) auInit(); AU.ctx.resume(); AU.on = !AU.on; soundBtn.textContent = AU.on ? 'Couper le son' : 'Activer le son'; soundBtn.setAttribute('aria-pressed', AU.on); masterTo(AU.on && playing ? .9 : 0); });
+  voiceBtn.addEventListener('click', () => { if (!VO.supported){ voiceBtn.textContent = 'Voix indisponible'; return; }
+    VO.on = !VO.on; voiceBtn.textContent = VO.on ? 'Couper la voix' : 'Activer la voix'; voiceBtn.setAttribute('aria-pressed', VO.on);
+    if (!VO.on){ hush(); if (AU.on && playing) masterTo(.9); return; } pickVoice();
+    if (T < .3){ say(VOICE[0][1]); T = .301; } else { let cur = null; for (const v of VOICE){ if (v[0] <= T) cur = v; } if (cur && T - cur[0] < 3) say(cur[1]); } });
+  seekEl.max = END;
+  let skipAudio = false, dragging = false;
+  const mmss = x => { x = Math.max(0, Math.round(x)); return Math.floor(x/60) + ':' + String(x%60).padStart(2,'0'); };
+  function jump(sec){ T = Math.max(0, Math.min(END, sec)); skipAudio = true; hush(); if (T >= END){ playing = false; pauseBtn.textContent = 'Lecture'; } }
+  const seekBox = seekEl.parentElement;
+  seekEl.addEventListener('pointerdown', () => { dragging = true; seekBox.classList.add('drag'); });
+  window.addEventListener('pointerup', () => { if (dragging) seekEl.blur(); dragging = false; seekBox.classList.remove('drag'); });
+  seekEl.addEventListener('input', () => jump(parseFloat(seekEl.value)));
+  document.addEventListener('keydown', e => { if (e.target.tagName === 'BUTTON' && (e.key === ' ' || e.key === 'Enter')) return; if (e.target === seekEl && e.key.startsWith('Arrow')) return;
+    if (e.key === ' '){ e.preventDefault(); pauseBtn.click(); } else if (e.key === 'ArrowLeft') jump(T - 5); else if (e.key === 'ArrowRight') jump(T + 5); });
+  function loop(now){
+    const dt = Math.min(.1, (now-last)/1000); last = now; const prevT = T;
+    if (playing){ T = holdForVoice(prevT, Math.min(END, T + dt)); if (T >= END){ playing = false; pauseBtn.textContent = 'Lecture'; } }
+    if (skipAudio) skipAudio = false; else { audioTick(prevT, T); voiceTick(prevT, T); }
+    if (!dragging) seekEl.value = T.toFixed(1); clockEl.textContent = mmss(T) + ' / ' + mmss(END);
+    renderAt(Math.max(0, T)); requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
+</script>
+<script>if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js');</script>
+</body>
+</html>

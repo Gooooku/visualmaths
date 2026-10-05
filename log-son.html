@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icone.svg">
+<link rel="apple-touch-icon" href="icone.svg">
+<meta name="theme-color" content="#0b1024">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Application — le son dans les jeux vidéo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link id="gf" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&family=Press+Start+2P&family=STIX+Two+Text:ital,wght@1,500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg1:#070b1c; --bg2:#151b46; --ink:#eef1ff; --muted:#8e97c4; --glass:rgba(255,255,255,.06); --stroke:rgba(255,255,255,.14);
+  --bip:#3ee6ff; --zap:#ff4f6d; --zip:#c77dff; --snd:#ffd23f; --lin:#ff5cc8; --star:#ffd23f; --x:#ff7a85; --y:#5ee3a1; --wall:#2f5bff; --ok:#6dff94;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light){ :root:not([data-theme="dark"]){ --glass:rgba(255,255,255,.08); } }
+:root[data-theme="light"]{ --glass:rgba(255,255,255,.08); }
+:root{ box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); }
+*,*::before,*::after{ box-sizing:inherit; }
+html{ height:100%; scroll-padding-top:env(safe-area-inset-top,0px); }
+body{ height:100%; margin:0; background:var(--bg1); color:var(--ink); overflow:hidden; font-family:"Manrope", system-ui, -apple-system, "Segoe UI", sans-serif; }
+.m{ font-family:"STIX Two Text","Cambria Math","Times New Roman",serif; font-style:italic; font-weight:500; }
+.cB{ color:var(--bip); } .cZ{ color:var(--zap); } .cI{ color:var(--zip); } .cS{ color:var(--star); } .cx{ color:var(--x); } .cy{ color:var(--y); } .cOk{ color:var(--ok); } .mu{ color:var(--muted); }
+.stage{ position:relative; width:100%; height:100%; overflow:hidden; background:radial-gradient(120% 90% at 70% 15%, var(--bg2) 0%, var(--bg1) 62%); --u:min(1vw, 1.78vh); }
+canvas{ position:absolute; inset:0; width:100%; height:100%; display:block; }
+.title{ position:absolute; inset:0; display:grid; place-content:center; text-align:center; pointer-events:none; }
+.title h1{ margin:0; font-weight:800; font-size:calc(var(--u)*5.4); letter-spacing:-.02em; line-height:1.05; }
+.title p{ margin:calc(var(--u)*1.4) 0 0; font-size:calc(var(--u)*2.2); color:var(--muted); font-weight:600; }
+.caption{ position:absolute; left:calc(var(--u)*4); bottom:calc(var(--u)*4.5 + 20px); max-width:min(46%, 30em); pointer-events:none; font-size:calc(var(--u)*2.1); font-weight:700; line-height:1.25; }
+.caption > span{ display:block; }
+.caption .bar{ display:block; width:calc(var(--u)*6); height:calc(var(--u)*.5); border-radius:99px; margin-bottom:calc(var(--u)*1.2); background:linear-gradient(90deg, var(--bip), var(--zip), var(--zap)); }
+.card{ position:absolute; right:calc(var(--u)*3.5); bottom:calc(var(--u)*3.5 + 20px); width:21em; padding:calc(var(--u)*1.8) calc(var(--u)*2.2); font-size:calc(var(--u)*1.7);
+  background:var(--glass); border:1px solid var(--stroke); border-radius:calc(var(--u)*1.8); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); }
+.card h3{ margin:0 0 .5em; font-size:.8em; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:800; }
+.sec{ display:grid; gap:.35em; }
+.line{ white-space:nowrap; font-variant-numeric:tabular-nums; }
+.big{ font-size:1.25em; }
+.hr{ height:1px; background:var(--stroke); margin:.6em 0; }
+.num{ display:inline-block; min-width:1.6em; text-align:right; }
+table.cmp{ border-collapse:collapse; width:100%; font-variant-numeric:tabular-nums; }
+table.cmp td, table.cmp th{ padding:.25em .3em; text-align:left; white-space:nowrap; }
+table.cmp th{ font-size:.82em; color:var(--muted); font-weight:700; }
+.ctrl{ position:absolute; right:calc(var(--u)*3.5); top:calc(var(--u)*3); display:flex; gap:8px; }
+.ctrl button, .ctrl a.home{ font:inherit; font-weight:700; font-size:14px; padding:9px 15px; border-radius:99px; border:1px solid var(--stroke); background:var(--glass); color:var(--ink); cursor:pointer; backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); }
+.ctrl button:focus-visible{ outline:3px solid var(--bip); outline-offset:2px; }
+.seek{ position:absolute; left:0; right:0; bottom:0; padding:28px calc(var(--u)*3.5) calc(var(--u)*1.2) calc(var(--u)*4); display:flex; align-items:center; gap:14px; transition:opacity .25s; }
+.seek input{ flex:1; accent-color:var(--bip); height:22px; cursor:pointer; }
+.seek span{ font-size:14px; font-weight:600; color:var(--muted); font-variant-numeric:tabular-nums; min-width:6.5em; text-align:right; }
+@media (hover: hover){ .seek{ opacity:0; } .seek:hover, .seek:has(input:focus-visible), .seek.drag{ opacity:1; } }
+.rec .ctrl, .rec .seek{ display:none; } .rec *{ transition:none !important; }
+@media (max-aspect-ratio: 1/1){
+  .stage{ --u:min(1.9vw, 1.2vh); }
+  .card{ left:calc(var(--u)*2.5); right:calc(var(--u)*2.5); top:calc(var(--u)*2.5); bottom:auto; width:auto; font-size:calc(var(--u)*1.7); }
+  .ctrl{ left:calc(var(--u)*2.5); right:calc(var(--u)*2.5); top:auto; bottom:calc(var(--u)*2 + 34px); flex-wrap:wrap; gap:6px; }
+  .ctrl button, .ctrl a.home{ padding:7px 11px; font-size:13px; }
+  .caption{ left:calc(var(--u)*2.5); right:calc(var(--u)*2.5); max-width:none; bottom:calc(var(--u)*2 + 90px); font-size:calc(var(--u)*2.6); }
+  .seek{ padding:10px calc(var(--u)*3) calc(var(--u)*2); }
+}
+.cSnd{ color:var(--snd); } .cLin{ color:var(--lin); }
+table.lv{ border-collapse:collapse; width:100%; font-variant-numeric:tabular-nums; font-size:.95em; } table.lv td{ padding:.1em .3em; white-space:nowrap; } table.lv td:last-child{ text-align:right; font-weight:800; color:var(--snd); }
+table.lv tr.on td{ background:rgba(255,210,63,.13); }
+.ctrl a.home{ text-decoration:none; display:inline-flex; align-items:center; }
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <canvas id="c" aria-label="Animation : un héros s'éloigne d'une cascade ; le niveau sonore en décibels diminue de 6 dB à chaque fois que la distance double"></canvas>
+  <div class="title" id="title"><div><h1>Le son dans les jeux vidéo</h1><p>Application · logarithmes</p></div></div>
+  <div class="card" id="card" style="opacity:0">
+    <div class="sec" id="secA">
+      <h3>Niveau sonore (en décibels)</h3>
+      <div class="line big"><span class="m">L</span> = 100 − 20 · log(<span class="m">d</span>)</div>
+      <div class="line mu" style="font-size:.9em"><span class="m">d</span> = distance en mètres</div>
+      <div class="hr"></div>
+      <table class="lv" id="lvT"></table>
+      <div class="line" id="rule" style="margin-top:.3em; white-space:normal">&nbsp;</div>
+    </div>
+    <div class="sec" id="secW" style="display:none">
+      <h3>Pourquoi −6 dB à chaque doublement&nbsp;?</h3>
+      <div class="line" id="w0">exemple&nbsp;: de 4 m à 8 m → 88 − 82 = <b class="cSnd">6 dB</b></div>
+      <div class="hr"></div>
+      <div class="line" id="w1">si la distance double (<span class="m">d</span> → 2<span class="m">d</span>)&nbsp;:</div>
+      <div class="line" id="w2"><span class="m">L</span>(2<span class="m">d</span>) = 100 − 20 · log(2<span class="m">d</span>)</div>
+      <div class="line" id="w3">= 100 − 20 · (<b>log 2 + log <span class="m">d</span></b>)</div>
+      <div class="line mu" style="font-size:.85em; padding-left:1em">↑ log d’un produit = somme des log</div>
+      <div class="line" id="w4">= (100 − 20 · log <span class="m">d</span>) − 20 · log 2</div>
+      <div class="line" id="w5">= <span class="m">L</span>(<span class="m">d</span>) − <b class="cSnd">20 · log 2</b></div>
+      <div class="hr"></div>
+      <div class="line" id="w6">20 · log 2 ≈ 20 × 0,301 ≈ <b class="cSnd">6 dB</b></div>
+    </div>
+    <div class="sec" id="secC" style="display:none">
+      <h3>À quelle distance le son tombe-t-il à 40 dB&nbsp;?</h3>
+      <div class="line" id="c0">100 − 20 · log(<span class="m">d</span>) = 40</div>
+      <div class="line" id="c1">⇔ 20 · log(<span class="m">d</span>) = 60</div>
+      <div class="line" id="c2">⇔ log(<span class="m">d</span>) = 3</div>
+      <div class="line" id="c3">⇔ <span class="m">d</span> = 10<sup>3</sup> = <b class="cOk">1000 m</b></div>
+    </div>
+  </div>
+  <div class="caption" id="caption" style="opacity:0"><i class="bar"></i><span id="captxt"></span></div>
+  <div class="ctrl"><a class="home" href="index.html" aria-label="Retour à l'accueil">← Accueil</a><button id="voice" aria-pressed="false">Activer la voix</button><button id="sound" aria-pressed="false">Activer le son</button><button id="pause">Pause</button><button id="replay">Rejouer</button></div>
+  <div class="seek"><input type="range" id="seek" min="0" max="97" step="0.1" value="0" aria-label="Position dans l'animation"><span id="clock">0:00 / 1:37</span></div>
+</div>
+<script>
+(function(){
+  const REC = /[?&]record/.test(location.search); if (REC) document.body.classList.add('rec');
+  const $ = id => document.getElementById(id);
+  const clamp = x => Math.max(0, Math.min(1, x));
+  const ease = x => x<.5 ? 4*x*x*x : 1-Math.pow(-2*x+2,3)/2;
+  const lerp = (a,b,k) => a + (b-a)*k;
+  const back = x => { const c=1.7, c3=c+1; return 1 + c3*Math.pow(x-1,3) + c*Math.pow(x-1,2); };
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const fr = n => String(n).replace('.', ',');
+  const Lof = d => 100 - 20*Math.log10(d);
+
+  // ---------- chronologie ----------
+  const K = { scene:4.2, formula:10, walk:[15, 30], why:32, w:[32, 35.5, 39, 42.5, 46], far:[50, 56], toGraph:[59, 61], curve:62, linear:67, logAxis:[72, 74.5], eq:[78, 80.5, 83, 85.5], unity:89.5, final:1e9 };
+  const END = 97;
+  // distance du héros : elle double toutes les 3 s pendant la marche, puis ×10 toutes les 3 s
+  function distAt(T){ if (T < K.walk[0]) return 1; if (T < K.walk[1]) return Math.pow(2, (T - K.walk[0])/3); if (T < K.far[0]) return 32;
+    if (T < K.far[1]) return 32*Math.pow(100/32, ease((T - K.far[0])/(K.far[1] - K.far[0]))); return 100; }
+  const caps = [
+    [0.3, ''],
+    [K.scene, 'Dans un jeu, plus le héros s’éloigne d’une source sonore, plus le son diminue. Mais comment le programmer\u00a0?'],
+    [K.formula, 'Les jeux utilisent les <b>décibels</b> (dB), une échelle logarithmique. Ici, la cascade fait 100 dB à 1 m\u00a0: <span class="m">L</span> = 100 − 20 · log(<span class="m">d</span>).'],
+    [K.walk[0] + 3, 'À 2 m\u00a0: 100 − 20 · log 2 ≈ 94 dB.'],
+    [K.walk[0] + 6, 'À 4 m\u00a0: 100 − 20 · log 4 ≈ 88 dB.'],
+    [K.walk[0] + 9, 'À 8 m\u00a0: 82 dB. À chaque fois que la distance <b>double</b>, le son baisse de <b>6 dB</b>.'],
+    [K.walk[0] + 12, '16 m\u00a0: 76 dB, puis 32 m\u00a0: 70 dB… toujours −6 dB.'],
+    [K.w[0], 'Pourquoi toujours 6 dB\u00a0? Vérifions sur un exemple\u00a0: de 4 m à 8 m, le son passe de 88 à 82 dB. On a bien perdu 6 dB.'],
+    [K.w[1], 'En général\u00a0: si la distance double, elle passe de <span class="m">d</span> à 2<span class="m">d</span>. On calcule <span class="m">L</span>(2<span class="m">d</span>) = 100 − 20 · log(2<span class="m">d</span>).'],
+    [K.w[2], 'Le logarithme d’un produit est la somme des logarithmes\u00a0: log(2<span class="m">d</span>) = log 2 + log <span class="m">d</span>.'],
+    [K.w[3], 'On regroupe\u00a0: on retrouve <span class="m">L</span>(<span class="m">d</span>), le niveau d’avant… moins 20 · log 2.'],
+    [K.w[4], 'Et 20 · log 2 ≈ 20 × 0,301 ≈ 6. Quelle que soit la distance, la doubler enlève toujours 6 dB\u00a0!'],
+    [K.far[0], 'Plus loin\u00a0: à 10 m, 80 dB\u00a0; à 100 m, 60 dB. Multiplier la distance par 10 enlève 20 dB.'],
+    [K.toGraph[0], 'Traçons le niveau sonore en fonction de la distance.'],
+    [K.curve, 'Il baisse vite au début, puis de plus en plus lentement\u00a0: c’est la forme d’un logarithme, comme ce que perçoit notre oreille.'],
+    [K.linear, 'Avec une baisse linéaire (en rose), le son disparaîtrait d’un coup à 50 m\u00a0: pas réaliste.'],
+    [K.logAxis[0], 'Si on gradue la distance en 1, 10, 100, 1000 (échelle logarithmique), la courbe devient une droite\u00a0!'],
+    [K.eq[0], 'À quelle distance le son tombe-t-il à 40 dB, presque un murmure\u00a0? On résout 100 − 20 · log(<span class="m">d</span>) = 40.'],
+    [K.eq[1], 'On isole le logarithme\u00a0: 20 · log(<span class="m">d</span>) = 60, donc log(<span class="m">d</span>) = 3.'],
+    [K.eq[3], 'Donc <span class="m">d</span> = 10<sup>3</sup> = 1000 m.'],
+    [K.unity, 'Dans les moteurs de jeu, ce réglage existe vraiment\u00a0: dans Unity, il s’appelle «\u00a0Logarithmic Rolloff\u00a0».'],
+    [K.final, 'À retenir\u00a0: doubler la distance enlève 6 dB, et multiplier la distance par 10 enlève 20 dB.']
+  ];
+  const VOICE = [
+    [0.3, "Le son dans les jeux vidéo. Une application des logarithmes."],
+    [K.scene, "Dans un jeu, plus le héros s'éloigne d'une source sonore, plus le son diminue. Mais comment le programmer ?"],
+    [K.formula, "Les jeux utilisent les décibels, une échelle logarithmique. Ici, la cascade fait cent décibels à un mètre. Le niveau sonore vaut cent moins vingt fois logarithme de d."],
+    [K.walk[0] + 3, "À deux mètres : environ quatre-vingt-quatorze décibels."],
+    [K.walk[0] + 6, "À quatre mètres : environ quatre-vingt-huit décibels."],
+    [K.walk[0] + 9, "À huit mètres : quatre-vingt-deux décibels. À chaque fois que la distance double, le son baisse de six décibels."],
+    [K.walk[0] + 12, "Seize mètres : soixante-seize décibels. Puis trente-deux mètres : soixante-dix. Toujours moins six."],
+    [K.w[0], "Pourquoi toujours six décibels ? Vérifions sur un exemple : de quatre à huit mètres, le son passe de quatre-vingt-huit à quatre-vingt-deux décibels. On a bien perdu six décibels."],
+    [K.w[1], "En général : si la distance double, elle passe de d à deux d. On calcule le niveau à deux d : cent moins vingt fois logarithme de deux d."],
+    [K.w[2], "Le logarithme d'un produit est la somme des logarithmes : logarithme de deux d égale logarithme de deux, plus logarithme de d."],
+    [K.w[3], "On regroupe : on retrouve le niveau d'avant, moins vingt fois logarithme de deux."],
+    [K.w[4], "Et vingt fois logarithme de deux, c'est environ vingt fois zéro virgule trois, soit six. Quelle que soit la distance, la doubler enlève toujours six décibels !"],
+    [K.far[0], "Plus loin : à dix mètres, quatre-vingts décibels. À cent mètres, soixante décibels. Multiplier la distance par dix enlève vingt décibels."],
+    [K.toGraph[0], "Traçons le niveau sonore en fonction de la distance."],
+    [K.curve, "Il baisse vite au début, puis de plus en plus lentement : c'est la forme d'un logarithme, comme ce que perçoit notre oreille."],
+    [K.linear, "Avec une baisse linéaire, en rose, le son disparaîtrait d'un coup à cinquante mètres : pas réaliste."],
+    [K.logAxis[0], "Si on gradue la distance en un, dix, cent, mille, sur une échelle logarithmique, la courbe devient une droite !"],
+    [K.eq[0], "À quelle distance le son tombe-t-il à quarante décibels, presque un murmure ? On résout : cent moins vingt fois logarithme de d, égale quarante."],
+    [K.eq[1], "On isole le logarithme : vingt fois logarithme de d égale soixante, donc logarithme de d égale trois."],
+    [K.eq[3], "Donc d égale dix puissance trois, mille mètres."],
+    [K.unity, "Dans les moteurs de jeu, ce réglage existe vraiment : dans Unity, il s'appelle Logarithmic Rolloff."],
+    [K.final, "À retenir : doubler la distance enlève six décibels, et multiplier la distance par dix enlève vingt décibels."]
+  ];
+
+  // ---------- canevas ----------
+  const stage = $('stage'), cv = $('c'), ctx = cv.getContext('2d');
+  let W = 1, H = 1, DPR = 1;
+  function resize(){ DPR = REC ? 1 : Math.min(devicePixelRatio || 1, 2); W = stage.clientWidth; H = stage.clientHeight; cv.width = W*DPR; cv.height = H*DPR; ctx.setTransform(DPR, 0, 0, DPR, 0, 0); }
+  new ResizeObserver(resize).observe(stage); resize();
+  const portrait = () => W/H < 1;
+  function area(){ return portrait() ? {x0:W*.05, x1:W*.95, y0:H*.36, y1:H*.7} : {x0:W*.04, x1:W*.6, y0:H*.07, y1:H*.7}; }
+  function glowOn(color, b){ ctx.shadowColor = color; ctx.shadowBlur = b; } function glowOff(){ ctx.shadowBlur = 0; }
+  function drawBip(x, y, r, T, look){
+    ctx.save(); ctx.translate(x, y + Math.sin(T*6)*r*.06);
+    glowOn(css('--bip'), r*1.2); ctx.fillStyle = '#0d2a3a'; ctx.strokeStyle = css('--bip'); ctx.lineWidth = r*.14;
+    const w = r*1.7, h = r*1.45; roundRect(-w/2, -h/2, w, h, r*.4); ctx.fill(); ctx.stroke(); glowOff();
+    ctx.fillStyle = css('--bip'); [-1, 1].forEach(s => { ctx.beginPath(); ctx.arc(s*r*.38 + (look||0)*r*.08, -r*.05, r*.17, 0, Math.PI*2); ctx.fill(); });
+    ctx.strokeStyle = css('--bip'); ctx.lineWidth = r*.1; ctx.beginPath(); ctx.moveTo(0, -h/2); ctx.lineTo(0, -h/2 - r*.35); ctx.stroke();
+    glowOn('#fff', r*.6); ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(0, -h/2 - r*.42, r*.11, 0, Math.PI*2); ctx.fill(); glowOff();
+    ctx.restore(); }
+  function drawVirus(x, y, r, T, color, phase){
+    ctx.save(); ctx.translate(x, y); ctx.rotate(Math.sin(T*2 + phase)*.25);
+    glowOn(color, r*1.3); ctx.fillStyle = color; ctx.beginPath();
+    const n = 9; for (let i=0;i<n*2;i++){ const a = i/(n*2)*Math.PI*2, rr = i%2 ? r*.72 : r*(1 + .08*Math.sin(T*8 + i)); ctx.lineTo(Math.cos(a)*rr, Math.sin(a)*rr); }
+    ctx.closePath(); ctx.fill(); glowOff();
+    ctx.fillStyle = '#fff'; [-1, 1].forEach(s => { ctx.beginPath(); ctx.ellipse(s*r*.25, -r*.08, r*.17, r*.21, 0, 0, Math.PI*2); ctx.fill(); });
+    ctx.fillStyle = '#1a0a1c'; [-1, 1].forEach(s => { ctx.beginPath(); ctx.arc(s*r*.25, -r*.04, r*.09, 0, Math.PI*2); ctx.fill(); });
+    ctx.strokeStyle = '#1a0a1c'; ctx.lineWidth = r*.08; ctx.beginPath(); ctx.moveTo(-r*.25, r*.3); ctx.lineTo(-r*.08, r*.22); ctx.lineTo(r*.08, r*.3); ctx.lineTo(r*.25, r*.22); ctx.stroke();
+    ctx.restore(); }
+  function drawStar(x, y, r, T){ ctx.save(); ctx.translate(x, y); ctx.rotate(T*.8); glowOn(css('--star'), r*1.5); ctx.fillStyle = css('--star'); ctx.beginPath();
+    for (let i=0;i<10;i++){ const a = -Math.PI/2 + i*Math.PI/5, rr = i%2 ? r*.45 : r; ctx.lineTo(Math.cos(a)*rr, Math.sin(a)*rr); } ctx.closePath(); ctx.fill(); glowOff(); ctx.restore(); }
+  function roundRect(x, y, w, h, r){ ctx.beginPath(); ctx.moveTo(x+r, y); ctx.arcTo(x+w, y, x+w, y+h, r); ctx.arcTo(x+w, y+h, x, y+h, r); ctx.arcTo(x, y+h, x, y, r); ctx.arcTo(x, y, x+w, y, r); ctx.closePath(); }
+  function text(t, x, y, size, color, align, weight){ ctx.font = (weight || 700) + ' ' + size + 'px Manrope, system-ui, sans-serif'; ctx.fillStyle = color; ctx.textAlign = align || 'center'; ctx.textBaseline = 'middle'; ctx.fillText(t, x, y); }
+
+  const PAL = { k:'#1a1020', h:'#f0c64a', s:'#f2c79a', a:'#3f6fd1', A:'#8ab4ff', c:'#c8313a', w:'#eef3fb', g:'#f2b43a', b:'#6a432a',
+                l:'#3fa9f5', L:'#b5e6ff', p:'#8a4fd8', P:'#c9a0ff', r:'#e2433f', W:'#fff7e8', e:'#ffe14d' };
+  const SPR = {
+    hero:["......kkkk........",".....khhhhk.......","....khhhhhhk......","....khsskssk......","....kssssssk......",".....kssssk.......","...kkaaaAAkk......","..kcaaaAAAAak...ww",".kccaaaAAAaak..wwk",".kccaaggaaaak.wwk.",".kccaaaaaaakkwwk..",".kccaaaaaaskwwk...","..kcaaaaaakgwk....","...kaaaaaakgk.....","...kaak.kaak......","...kaak.kaak......","...kbbk.kbbk......","..kbbbk.kbbbk.....","..kkkk...kkkk....."],
+    slime:["....kkkkkk....","..kkllllllkk..",".kllLLllllllk.","kllLLllllllllk","kllllkllllkllk","kllllkllllkllk","kllllllllllllk","kllllllkklllk.",".kllllllllllk.","..kkkkkkkkkk.."],
+    bat:["kk............kk","kPkk...kk...kkPk","kppkk.kppk.kkppk","kpppkkppppkkpppk",".kpppkpeepkpppk.","..kppppppppppk..","...kk.kppk.kk...","......kkkk......"],
+    shroom:["...kkkkkk...",".kkrrWrrrkk.","krrWWrrrWrrk","krrrrrrrrrrk","krWrrrrWrrrk",".kkkkkkkkkk.","..kssssssk..","..kskssksk..","..kssssssk..","..ksskkssk..","...kssssk...","...kkkkkk..."] };
+  function sprite(name, x, y, px, flip, flash){ const rows = SPR[name], h = rows.length, w = rows[0].length;
+    for (let r=0;r<h;r++) for (let c=0;c<w;c++){ const ch = rows[r][flip ? w - 1 - c : c]; if (ch === '.') continue; ctx.fillStyle = flash ? '#ffffff' : PAL[ch]; ctx.fillRect(Math.round(x + c*px), Math.round(y + r*px), Math.ceil(px), Math.ceil(px)); } }
+  function pixText(t, x, y, size, color, align){ ctx.font = size + 'px "Press Start 2P", "Courier New", monospace'; ctx.textAlign = align || 'left'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#0b0b1a'; ctx.fillText(t, x + size*.12, y + size*.12); ctx.fillStyle = color; ctx.fillText(t, x, y); }
+  function rpgBox(x, y, w, h){ const g = ctx.createLinearGradient(0, y, 0, y + h); g.addColorStop(0, '#2a3f9e'); g.addColorStop(1, '#101a55'); ctx.fillStyle = g; roundRect(x, y, w, h, 8); ctx.fill();
+    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 3; roundRect(x + 2, y + 2, w - 4, h - 4, 6); ctx.stroke(); ctx.strokeStyle = 'rgba(0,0,0,.5)'; ctx.lineWidth = 1; roundRect(x + 5, y + 5, w - 10, h - 10, 4); ctx.stroke(); }
+
+  // ---------- la scène : cascade et héros qui s'éloigne ----------
+  function drawScene(T, al){
+    const a = area(), w = a.x1 - a.x0, hgt = a.y1 - a.y0; ctx.globalAlpha = al; ctx.save(); ctx.beginPath(); roundRect(a.x0, a.y0, w, hgt, 12); ctx.clip();
+    const d = distAt(T), L = Lof(d), P = Math.max(2, Math.round(w/220)), u = Math.log2(d);     // u = nombre de doublements
+    const sky = ctx.createLinearGradient(0, a.y0, 0, a.y0 + hgt*.6); sky.addColorStop(0, '#4a8fe0'); sky.addColorStop(1, '#bfe4ff'); ctx.fillStyle = sky; ctx.fillRect(a.x0, a.y0, w, hgt);
+    for (let i=0;i<5;i++){ const cx = a.x0 + ((i*.27 + T*.01 - u*.03) % 1.2 + 1.2) % 1.2*w - w*.1, cy = a.y0 + hgt*(.1 + .06*(i%3)); ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.fillRect(cx, cy, P*16, P*4); ctx.fillRect(cx + P*4, cy - P*3, P*8, P*3); }
+    const hz = a.y0 + hgt*.6;
+    // collines (parallaxe : elles défilent quand le héros avance)
+    [[.2, '#7cc06a', .42, .06], [.5, '#5aa843', .5, .14]].forEach(([par, col, top, amp]) => { ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(a.x0, hz);
+      for (let x=0;x<=w;x+=8){ const wx = x + u*w*par; ctx.lineTo(a.x0 + x, a.y0 + hgt*(top + amp*.5*(1 + Math.sin(wx*.012)))); } ctx.lineTo(a.x1, hz); ctx.closePath(); ctx.fill(); });
+    // sol
+    const gs = P*8; for (let y = hz; y < a.y1; y += gs) for (let x = a.x0 - ((u*w*.9) % gs) - gs; x < a.x1; x += gs){ ctx.fillStyle = ((Math.round((x + u*w*.9)/gs) + Math.round((y - hz)/gs)) % 2) ? '#4f9a3c' : '#5aa843'; ctx.fillRect(x, y, gs + 1, gs + 1); }
+    // la cascade : elle s'éloigne (plus petite, plus à gauche, plus pâle) quand la distance augmente
+    const sc = 1/(1 + u*.32), fx = a.x0 + w*(.22 - u*.03), fy = hz, fw = w*.16*sc, fh = hgt*.62*sc;
+    ctx.fillStyle = '#7d7468'; ctx.fillRect(fx - fw*.9, fy - fh, fw*.9, fh); ctx.fillRect(fx + fw, fy - fh, fw*.9, fh); ctx.fillStyle = '#968b7c'; ctx.fillRect(fx - fw*.9, fy - fh, fw*2.8, fh*.12);
+    for (let k=0;k<6;k++){ const sx = fx + fw*k/6; ctx.fillStyle = k%2 ? '#8fd3ff' : '#d8f1ff'; ctx.fillRect(sx, fy - fh*.9, fw/6 + 1, fh*.9);
+      ctx.fillStyle = '#ffffff'; const off = ((T*2.5 + k*.37) % 1)*fh*.9; ctx.fillRect(sx + 1, fy - fh*.9 + off, fw/12, fh*.08); }
+    ctx.fillStyle = '#e8f8ff'; for (let k=0;k<10;k++){ const an = k/10*Math.PI, r = fw*.6*(1 + .2*Math.sin(T*8 + k)); ctx.fillRect(fx + fw/2 + Math.cos(an)*r - P, fy - Math.sin(an)*r*.4 - P, P*2*sc + 1, P*2*sc + 1); }
+    // ondes sonores : leur opacité suit l'amplitude du son
+    const amp = Math.pow(10, (L - 100)/20);
+    for (let k=0;k<4;k++){ const ph = ((T*.8 + k*.25) % 1); ctx.strokeStyle = 'rgba(255,210,63,' + (Math.min(1, amp*1.2)*(1 - ph)*.9 + .04) + ')'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(fx + fw/2, fy - fh*.5, fw*.6 + ph*w*.5, -.9, .9); ctx.stroke(); }
+    // le héros (il marche tant que la distance augmente)
+    const walking = (T >= K.walk[0] && T < K.walk[1]) || (T >= K.far[0] && T < K.far[1]); const sp = Math.min(P*2.6, hgt*.022);
+    const hx = a.x0 + w*.6, hy = hz + hgt*.18 - sp*19 - (walking ? Math.abs(Math.sin(T*9))*sp : 0);
+    if (d <= 1.01) { const kk = clamp((T-K.scene)/.6); } 
+    const heroX = d <= 1.01 ? lerp(fx + fw*2.2, hx, 0) : hx;
+    ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.beginPath(); ctx.ellipse(heroX + sp*9, hz + hgt*.18, sp*8, sp*2, 0, 0, 7); ctx.fill(); sprite('hero', heroX, hy, sp, false, false);
+    // repères de distance au sol
+    ctx.restore(); ctx.save(); ctx.beginPath(); roundRect(a.x0, a.y0, w, hgt, 12); ctx.clip();
+    // HUD : distance, volume, vumètre
+    const bx = a.x0 + w*.03, by = a.y0 + hgt*.04, bw = w*.44, bh = hgt*.2; rpgBox(bx, by, bw, bh); const fs = Math.round(Math.min(bh*.17, w*.02));
+    pixText('DISTANCE', bx + bw*.06, by + bh*.3, fs, '#ffffff'); pixText((d < 10 ? fr(Math.round(d*10)/10) : Math.round(d)) + ' m', bx + bw*.94, by + bh*.3, fs, '#ffe14d', 'right');
+    pixText('VOLUME', bx + bw*.06, by + bh*.55, fs, '#ffffff'); pixText(Math.round(L) + ' dB', bx + bw*.94, by + bh*.55, fs, '#ffe14d', 'right');
+    const mx = bx + bw*.06, my = by + bh*.72, mw = bw*.88, mh = bh*.14; ctx.fillStyle = '#0b0b1a'; ctx.fillRect(mx, my, mw, mh); const n = 20, on = Math.round(n*clamp(L/100));
+    for (let k=0;k<n;k++){ ctx.fillStyle = k < on ? (k < 12 ? '#5dff8a' : k < 17 ? '#ffe14d' : '#ff5a5a') : 'rgba(255,255,255,.08)'; ctx.fillRect(mx + 2 + k*(mw - 4)/n, my + 2, (mw - 4)/n - 2, mh - 4); }
+    // « −6 dB » à chaque doublement
+    if (T >= K.walk[0] + 2.6 && T < K.walk[1] + 1){ const ph = ((T - K.walk[0]) % 3)/3; if (ph < .45){ ctx.globalAlpha = al*(1 - ph/.45); pixText('×2  →  −6 dB', bx + bw + w*.04, by + bh*.55 - ph*20, fs, '#ff9a3d'); ctx.globalAlpha = al; } }
+    if (T >= K.far[0] && T < K.far[1] + 1.5){ ctx.globalAlpha = al*clamp((T-K.far[0])/.5); pixText('×10  →  −20 dB', bx + bw + w*.04, by + bh*.55, fs, '#ff9a3d'); ctx.globalAlpha = al; }
+    ctx.restore(); ctx.globalAlpha = 1; }
+
+  // ---------- graphique ----------
+  function graphMap(){ const a = area(), pl = 56, pb = 34; return { x0:a.x0 + pl, x1:a.x1 - 14, y0:a.y1 - pb, y1:a.y0 + 16, Y: v => (a.y1 - pb) - (v/100)*((a.y1 - pb) - (a.y0 + 16)) }; }
+  function drawGraph(T, al){ const G = graphMap(), kl = ease(clamp((T-K.logAxis[0])/(K.logAxis[1]-K.logAxis[0])));
+    // abscisse : mélange entre échelle linéaire (0 → 100 m) et logarithmique (1 → 1000 m)
+    const Xlin = d => G.x0 + (d/100)*(G.x1 - G.x0), Xlog = d => G.x0 + (Math.log10(Math.max(d, 1))/3)*(G.x1 - G.x0), X = d => lerp(Xlin(d), Xlog(d), kl);
+    ctx.globalAlpha = al; ctx.strokeStyle = 'rgba(80,110,255,.18)'; ctx.lineWidth = 1;
+    for (let v=0; v<=100; v+=20){ ctx.beginPath(); ctx.moveTo(G.x0, G.Y(v)); ctx.lineTo(G.x1, G.Y(v)); ctx.stroke(); text(v + ' dB', G.x0 - 8, G.Y(v), 12, css('--muted'), 'right', 600); }
+    const ticks = kl < .5 ? [0, 20, 40, 60, 80, 100] : [1, 10, 100, 1000]; ctx.globalAlpha = al*(kl < .5 ? 1 - kl*2 : (kl - .5)*2);
+    ticks.forEach(d => { ctx.beginPath(); ctx.moveTo(X(d), G.y0); ctx.lineTo(X(d), G.y1); ctx.stroke(); text(d + ' m', X(d), G.y0 + 14, 12, css('--muted'), 'center', 600); }); ctx.globalAlpha = al;
+    ctx.strokeStyle = 'rgba(200,210,255,.85)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(G.x0, G.y1); ctx.lineTo(G.x0, G.y0); ctx.lineTo(G.x1, G.y0); ctx.stroke();
+    text('distance', G.x1, G.y0 + 28, 13, '#fff', 'right', 800); text('niveau sonore', G.x0 + 6, G.y1 - 4, 13, '#fff', 'left', 800);
+    ctx.save(); ctx.beginPath(); ctx.rect(G.x0, G.y1 - 4, G.x1 - G.x0 + 4, G.y0 - G.y1 + 4); ctx.clip();
+    const kc = ease(clamp((T-K.curve)/2.5)), dMax = lerp(100, 1000, kl);
+    ctx.strokeStyle = css('--snd'); ctx.lineWidth = 3.5; glowOn(css('--snd'), 10); ctx.beginPath(); let first = true;
+    for (let i=0;i<=400;i++){ const d = lerp(1, lerp(1, dMax, kc), Math.pow(i/400, kl > .5 ? 3 : 1)); const x = X(d), y = G.Y(Math.max(0, Lof(d))); if (first){ ctx.moveTo(x, y); first = false; } else ctx.lineTo(x, y); } ctx.stroke(); glowOff();
+    if (T >= K.linear && kl < 1){ const kk = ease(clamp((T-K.linear)/2)); ctx.globalAlpha = al*(1 - kl); ctx.strokeStyle = css('--lin'); ctx.setLineDash([8, 6]); ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(Xlin(1), G.Y(100)); ctx.lineTo(Xlin(lerp(1, 50, kk)), G.Y(lerp(100, 0, (lerp(1, 50, kk) - 1)/49))); ctx.stroke(); ctx.setLineDash([]);
+      if (kk >= 1) text('baisse linéaire : 0 dB à 50 m', Xlin(52), G.Y(8), 13, css('--lin'), 'left', 800); ctx.globalAlpha = al; }
+    // équation : ligne des 40 dB
+    if (T >= K.eq[0]){ const ke = clamp((T-K.eq[0])/.8); ctx.globalAlpha = al*ke; ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.setLineDash([8, 6]); ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(G.x0, G.Y(40)); ctx.lineTo(G.x1, G.Y(40)); ctx.stroke(); ctx.setLineDash([]); text('40 dB', G.x0 + 40, G.Y(40) - 12, 13, '#fff', 'center', 800);
+      if (T >= K.eq[3]){ const k = back(clamp((T-K.eq[3])/.6)); dot(X(1000) - 3, G.Y(40), 8*k, css('--ok')); ctx.setLineDash([5, 5]); ctx.strokeStyle = 'rgba(109,255,148,.8)'; ctx.beginPath(); ctx.moveTo(X(1000) - 3, G.Y(40)); ctx.lineTo(X(1000) - 3, G.y0); ctx.stroke(); ctx.setLineDash([]); text('1000 m', X(1000) - 40, G.y0 - 16, 14, css('--ok'), 'center', 800); }
+      ctx.globalAlpha = al; }
+    ctx.restore();
+    if (kl >= 1) text('échelle logarithmique : une droite !', G.x0 + (G.x1 - G.x0)*.55, G.Y(88), 14, css('--snd'), 'center', 800);
+    ctx.globalAlpha = 1; }
+  function dot(x, y, r, color){ glowOn(color, r*2.5); ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2); ctx.fill(); glowOff(); }
+
+  // ---------- rendu ----------
+  const titleEl = $('title'), card = $('card'), captxt = $('captxt'), capEl = $('caption');
+  let capIdx = -2;
+  const ROWS = [[1, 100, 0], [2, 94, K.walk[0] + 3], [4, 88, K.walk[0] + 6], [8, 82, K.walk[0] + 9], [16, 76, K.walk[0] + 12], [32, 70, K.walk[0] + 14.5], [100, 60, K.far[1]]];
+  function renderAt(T){
+    ctx.clearRect(0, 0, W, H);
+    titleEl.style.opacity = clamp((T-.2)/.6)*(1 - clamp((T-3.4)/.6));
+    const kg = ease(clamp((T-K.toGraph[0])/(K.toGraph[1]-K.toGraph[0])));
+    if (T >= K.scene && kg < 1) drawScene(T, clamp((T-K.scene)/.8)*(1 - kg));
+    if (kg > 0) drawGraph(T, kg);
+    // panneau
+    const cOp = clamp((T-K.formula)/.6); card.style.opacity = cOp; card.style.transform = 'translateY(' + (1-cOp)*10 + 'px)';
+    const part = T < K.w[0] ? 'A' : T < K.far[0] ? 'W' : T < K.eq[0] ? 'A' : 'C'; $('secA').style.display = part === 'A' ? '' : 'none'; $('secW').style.display = part === 'W' ? '' : 'none'; $('secC').style.display = part === 'C' ? '' : 'none';
+    if (part === 'W'){ [K.w[0], K.w[1], K.w[1] + 1.5, K.w[2], K.w[3], K.w[3] + 1.5, K.w[4]].forEach((t0, i) => $('w' + i).style.opacity = clamp((T - t0)/.5)); $('w3').style.background = T >= K.w[2] && T < K.w[3] ? 'rgba(255,210,63,.12)' : 'transparent'; }
+    if (part === 'A'){ const d = distAt(T); $('lvT').innerHTML = ROWS.map(([dd, L, t0]) => '<tr style="opacity:' + (t0 === 0 ? clamp((T-K.formula)/.5) : clamp((T-t0)/.5)) + '" class="' + (Math.abs(d - dd) < .05*dd && kg < 1 ? 'on' : '') + '"><td>' + dd + ' m</td><td>100 − 20·log ' + dd + '</td><td>' + L + ' dB</td></tr>').join('');
+      $('rule').innerHTML = T >= K.why ? '<b>distance ×2 → −6 dB</b> &nbsp;car log(2<span class="m">d</span>) = log 2 + log <span class="m">d</span>' + (T >= K.far[0] ? '<br><b>distance ×10 → −20 dB</b>' : '') : (T >= K.walk[0] + 9 ? '<b>distance ×2 → −6 dB</b>' : '&nbsp;'); }
+    else { ['c0','c1','c2','c3'].forEach((id, i) => $(id).style.opacity = clamp((T - K.eq[i])/.5)); }
+    let ci = -1; caps.forEach((c,i) => { if (T >= c[0]) ci = i; });
+    if (ci !== capIdx){ capIdx = ci; captxt.innerHTML = ci >= 0 ? caps[ci][1] : ''; }
+    capEl.style.opacity = (ci >= 0 && caps[ci][1]) ? clamp((T - caps[ci][0])/.35) : 0;
+  }
+  if (REC){ window.renderAt = T => { resize(); renderAt(T); }; window.END = END; return; }
+
+  // ---------- son (style « puce » rétro) ----------
+  const AU = { ctx:null, on:false, master:null, noise:null };
+  function auInit(){ const C = new (window.AudioContext || window.webkitAudioContext)(); const comp = C.createDynamicsCompressor(); comp.connect(C.destination);
+    const m = C.createGain(); m.gain.value = 0; m.connect(comp); AU.ctx = C; AU.master = m; }
+  function tone(f, vol, dur, type, delay){ const C = AU.ctx, t = C.currentTime + (delay||0), o = C.createOscillator(), g = C.createGain(); o.type = type || 'square'; o.frequency.value = f;
+    g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(Math.max(vol, .0002), t+.005); g.gain.exponentialRampToValueAtTime(.0001, t+dur); o.connect(g); g.connect(AU.master); o.start(t); o.stop(t+dur+.05); return o; }
+  const midi = mm => 440*Math.pow(2,(mm-69)/12);
+  const blip = (n, v) => tone(midi(n), v || .06, .09, 'square');
+  const jingle = (ns, v) => ns.forEach((n, i) => tone(midi(n), v || .06, .14, 'square', i*.09));
+  // bruit de cascade dont le volume suit vraiment le niveau en décibels
+  let water = null;
+  function waterInit(){ const C = AU.ctx, nb = C.createBuffer(1, C.sampleRate*2, C.sampleRate), dd = nb.getChannelData(0); let last = 0; for (let i=0;i<dd.length;i++){ last = .97*last + .03*(Math.random()*2 - 1); dd[i] = last*6 + (Math.random()*2 - 1)*.15; }
+    const src = C.createBufferSource(); src.buffer = nb; src.loop = true; const f = C.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 1800; const g = C.createGain(); g.gain.value = 0; src.connect(f); f.connect(g); g.connect(AU.master); src.start(); water = g; }
+  const FX = [[.3, () => jingle([72, 76, 79, 84])], [K.formula, () => blip(79)], [K.w[0], () => jingle([67, 71], .05)], [K.w[4], () => jingle([72, 76, 79], .05)], [K.toGraph[0], () => jingle([60, 67])], [K.logAxis[0], () => jingle([64, 67, 71], .05)],
+    [K.eq[3], () => jingle([72, 79, 84])], [K.unity + .5, () => jingle([60, 64, 67, 72])]];
+  for (let k=1;k<=5;k++) FX.push([K.walk[0] + k*3, () => blip(60 + k, .03)]);
+  function audioTick(a, b){ if (!AU.on || b <= a) return; if (!water) waterInit(); FX.forEach(([tm, fn]) => { if (tm > a && tm <= b) fn(); });
+    const inScene = b >= K.scene && b < K.toGraph[1]; const amp = inScene ? Math.pow(10, (Lof(distAt(b)) - 100)/20) : 0; water.gain.setTargetAtTime(inScene ? .28*amp*(VO.on && VO.busy ? .55 : 1) : 0, AU.ctx.currentTime, .08); }
+  function masterTo(v){ if (!AU.ctx) return; const t = AU.ctx.currentTime; AU.master.gain.cancelScheduledValues(t); AU.master.gain.setTargetAtTime(v, t, .15); }
+
+  // ---------- voix off ----------
+  const VO = { on:false, busy:false, until:0, voice:null, supported:'speechSynthesis' in window };
+  function pickVoice(){ if (!VO.supported) return; const vs = speechSynthesis.getVoices().filter(v => /^fr/i.test(v.lang)); if (!vs.length) return;
+    const score = v => (/natural|online|neural/i.test(v.name) ? 8 : 0) + (/google/i.test(v.name) ? 4 : 0) + (/fr-CH/i.test(v.lang) ? 2 : 0) + (/fr-FR/i.test(v.lang) ? 1 : 0) + (v.localService ? 0 : 1);
+    VO.voice = vs.sort((a,b) => score(b) - score(a))[0]; }
+  if (VO.supported){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+  function say(text){ if (!VO.supported) return; speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = VO.voice ? VO.voice.lang : 'fr-FR'; if (VO.voice) u.voice = VO.voice; u.rate = .97;
+    u.onstart = () => { VO.busy = true; if (AU.on) masterTo(.45); }; u.onend = u.onerror = () => { VO.busy = false; if (AU.on && playing) masterTo(.9); };
+    VO.busy = true; VO.until = performance.now() + (text.length*.085/.97 + 2)*1000; speechSynthesis.speak(u); }
+  function hush(){ if (VO.supported) speechSynthesis.cancel(); VO.busy = false; }
+  function voiceTick(a, b){ if (!VO.on || b <= a) return; for (const [tm, txt] of VOICE){ if (tm > a && tm <= b) say(txt); } }
+  function holdForVoice(prev, next){ if (!VO.on || !VO.busy || performance.now() > VO.until) return next; for (const [tm] of VOICE){ if (tm > prev && tm <= next) return Math.max(prev, tm - .001); } return next; }
+
+  // ---------- commandes ----------
+  let T = 0, playing = true, last = performance.now();
+  const pauseBtn = $('pause'), replayBtn = $('replay'), soundBtn = $('sound'), voiceBtn = $('voice'), seekEl = $('seek'), clockEl = $('clock');
+  pauseBtn.addEventListener('click', () => { if (T >= END){ T = 0; playing = true; hush(); } else playing = !playing; pauseBtn.textContent = playing ? 'Pause' : 'Lecture';
+    if (VO.supported){ if (playing) speechSynthesis.resume(); else speechSynthesis.pause(); } if (AU.on) masterTo(playing ? .9 : 0); });
+  replayBtn.addEventListener('click', () => { hush(); T = -0.001; playing = true; pauseBtn.textContent = 'Pause'; if (AU.on) masterTo(.9); });
+  soundBtn.addEventListener('click', () => { if (!AU.ctx) auInit(); AU.ctx.resume(); AU.on = !AU.on; soundBtn.textContent = AU.on ? 'Couper le son' : 'Activer le son'; soundBtn.setAttribute('aria-pressed', AU.on); masterTo(AU.on && playing ? .9 : 0); });
+  voiceBtn.addEventListener('click', () => { if (!VO.supported){ voiceBtn.textContent = 'Voix indisponible'; return; }
+    VO.on = !VO.on; voiceBtn.textContent = VO.on ? 'Couper la voix' : 'Activer la voix'; voiceBtn.setAttribute('aria-pressed', VO.on);
+    if (!VO.on){ hush(); if (AU.on && playing) masterTo(.9); return; } pickVoice();
+    if (T < .3){ say(VOICE[0][1]); T = .301; } else { let cur = null; for (const v of VOICE){ if (v[0] <= T) cur = v; } if (cur && T - cur[0] < 3) say(cur[1]); } });
+  seekEl.max = END;
+  let skipAudio = false, dragging = false;
+  const mmss = x => { x = Math.max(0, Math.round(x)); return Math.floor(x/60) + ':' + String(x%60).padStart(2,'0'); };
+  function jump(sec){ T = Math.max(0, Math.min(END, sec)); skipAudio = true; hush(); if (T >= END){ playing = false; pauseBtn.textContent = 'Lecture'; } }
+  const seekBox = seekEl.parentElement;
+  seekEl.addEventListener('pointerdown', () => { dragging = true; seekBox.classList.add('drag'); });
+  window.addEventListener('pointerup', () => { if (dragging) seekEl.blur(); dragging = false; seekBox.classList.remove('drag'); });
+  seekEl.addEventListener('input', () => jump(parseFloat(seekEl.value)));
+  document.addEventListener('keydown', e => { if (e.target.tagName === 'BUTTON' && (e.key === ' ' || e.key === 'Enter')) return; if (e.target === seekEl && e.key.startsWith('Arrow')) return;
+    if (e.key === ' '){ e.preventDefault(); pauseBtn.click(); } else if (e.key === 'ArrowLeft') jump(T - 5); else if (e.key === 'ArrowRight') jump(T + 5); });
+  function loop(now){
+    const dt = Math.min(.1, (now-last)/1000); last = now; const prevT = T;
+    if (playing){ T = holdForVoice(prevT, Math.min(END, T + dt)); if (T >= END){ playing = false; pauseBtn.textContent = 'Lecture'; } }
+    if (skipAudio) skipAudio = false; else { audioTick(prevT, T); voiceTick(prevT, T); }
+    if (!dragging) seekEl.value = T.toFixed(1); clockEl.textContent = mmss(T) + ' / ' + mmss(END);
+    renderAt(Math.max(0, T)); requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
+</script>
+<script>if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js');</script>
+</body>
+</html>
