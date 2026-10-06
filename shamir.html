@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icone.svg">
+<link rel="apple-touch-icon" href="icone.svg">
+<meta name="theme-color" content="#0b1024">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Application — le secret de Shamir</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link id="gf" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&family=STIX+Two+Text:ital,wght@0,500;1,500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg1:#070b1c; --bg2:#151b46; --ink:#eef1ff; --muted:#8e97c4; --glass:rgba(255,255,255,.06); --stroke:rgba(255,255,255,.14);
+  --bip:#3ee6ff; --zap:#ff4f6d; --zip:#c77dff; --sec:#ffd23f; --crv:#3ee6ff; --err:#ff5a6e; --star:#ffd23f; --x:#ff7a85; --y:#5ee3a1; --wall:#2f5bff; --ok:#6dff94;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light){ :root:not([data-theme="dark"]){ --glass:rgba(255,255,255,.08); } }
+:root[data-theme="light"]{ --glass:rgba(255,255,255,.08); }
+:root{ box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); }
+*,*::before,*::after{ box-sizing:inherit; }
+html{ height:100%; scroll-padding-top:env(safe-area-inset-top,0px); }
+body{ height:100%; margin:0; background:var(--bg1); color:var(--ink); overflow:hidden; font-family:"Manrope", system-ui, -apple-system, "Segoe UI", sans-serif; }
+.m{ font-family:"STIX Two Text","Cambria Math","Times New Roman",serif; font-style:italic; font-weight:500; }
+.cB{ color:var(--bip); } .cZ{ color:var(--zap); } .cI{ color:var(--zip); } .cS{ color:var(--star); } .cx{ color:var(--x); } .cy{ color:var(--y); } .cOk{ color:var(--ok); } .mu{ color:var(--muted); }
+.stage{ position:relative; width:100%; height:100%; overflow:hidden; background:radial-gradient(120% 90% at 70% 15%, var(--bg2) 0%, var(--bg1) 62%); --u:min(1vw, 1.78vh); }
+canvas{ position:absolute; inset:0; width:100%; height:100%; display:block; }
+.title{ position:absolute; inset:0; display:grid; place-content:center; text-align:center; pointer-events:none; }
+.title h1{ margin:0; font-weight:800; font-size:calc(var(--u)*5.4); letter-spacing:-.02em; line-height:1.05; }
+.title p{ margin:calc(var(--u)*1.4) 0 0; font-size:calc(var(--u)*2.2); color:var(--muted); font-weight:600; }
+.caption{ position:absolute; left:calc(var(--u)*4); bottom:calc(var(--u)*4.5 + 20px); max-width:min(46%, 30em); pointer-events:none; font-size:calc(var(--u)*2.1); font-weight:700; line-height:1.25; }
+.caption > span{ display:block; }
+.caption .bar{ display:block; width:calc(var(--u)*6); height:calc(var(--u)*.5); border-radius:99px; margin-bottom:calc(var(--u)*1.2); background:linear-gradient(90deg, var(--bip), var(--zip), var(--zap)); }
+.card{ position:absolute; right:calc(var(--u)*3.5); bottom:calc(var(--u)*3.5 + 20px); width:21em; padding:calc(var(--u)*1.8) calc(var(--u)*2.2); font-size:calc(var(--u)*1.7);
+  background:var(--glass); border:1px solid var(--stroke); border-radius:calc(var(--u)*1.8); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); }
+.card h3{ margin:0 0 .5em; font-size:.8em; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:800; }
+.sec{ display:grid; gap:.35em; }
+.line{ white-space:nowrap; font-variant-numeric:tabular-nums; }
+.big{ font-size:1.25em; }
+.hr{ height:1px; background:var(--stroke); margin:.6em 0; }
+.num{ display:inline-block; min-width:1.6em; text-align:right; }
+table.cmp{ border-collapse:collapse; width:100%; font-variant-numeric:tabular-nums; }
+table.cmp td, table.cmp th{ padding:.25em .3em; text-align:left; white-space:nowrap; }
+table.cmp th{ font-size:.82em; color:var(--muted); font-weight:700; }
+.ctrl{ position:absolute; right:calc(var(--u)*3.5); top:calc(var(--u)*3); display:flex; gap:8px; }
+.ctrl button, .ctrl a.home{ font:inherit; font-weight:700; font-size:14px; padding:9px 15px; border-radius:99px; border:1px solid var(--stroke); background:var(--glass); color:var(--ink); cursor:pointer; backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); }
+.ctrl button:focus-visible{ outline:3px solid var(--bip); outline-offset:2px; }
+.seek{ position:absolute; left:0; right:0; bottom:0; padding:28px calc(var(--u)*3.5) calc(var(--u)*1.2) calc(var(--u)*4); display:flex; align-items:center; gap:14px; transition:opacity .25s; }
+.seek input{ flex:1; accent-color:var(--bip); height:22px; cursor:pointer; }
+.seek span{ font-size:14px; font-weight:600; color:var(--muted); font-variant-numeric:tabular-nums; min-width:6.5em; text-align:right; }
+@media (hover: hover){ .seek{ opacity:0; } .seek:hover, .seek:has(input:focus-visible), .seek.drag{ opacity:1; } }
+.rec .ctrl, .rec .seek{ display:none; } .rec *{ transition:none !important; }
+@media (max-aspect-ratio: 1/1){
+  .stage{ --u:min(1.9vw, 1.2vh); }
+  .card{ left:calc(var(--u)*2.5); right:calc(var(--u)*2.5); top:calc(var(--u)*2.5); bottom:auto; width:auto; font-size:calc(var(--u)*1.7); }
+  .ctrl{ left:calc(var(--u)*2.5); right:calc(var(--u)*2.5); top:auto; bottom:calc(var(--u)*2 + 34px); flex-wrap:wrap; gap:6px; }
+  .ctrl button, .ctrl a.home{ padding:7px 11px; font-size:13px; }
+  .caption{ left:calc(var(--u)*2.5); right:calc(var(--u)*2.5); max-width:none; bottom:calc(var(--u)*2 + 90px); font-size:calc(var(--u)*2.6); }
+  .seek{ padding:10px calc(var(--u)*3) calc(var(--u)*2); }
+}
+.cS{ color:var(--sec); } .cC{ color:var(--crv); } .cE{ color:var(--err); }
+table.gen{ border-collapse:collapse; width:100%; font-variant-numeric:tabular-nums; } table.gen td{ padding:.2em .4em; white-space:nowrap; } table.gen td:last-child{ text-align:right; font-weight:800; color:var(--sec); }
+.ctrl a.home{ text-decoration:none; display:inline-flex; align-items:center; }
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <canvas id="c" aria-label="Animation : partager un code secret entre cinq personnes en le cachant dans l'ordonnée à l'origine d'une fonction ; il faut deux points pour une droite, trois pour une parabole"></canvas>
+  <div class="title" id="title"><div><h1>Le secret de Shamir</h1><p>Application · fonctions</p></div></div>
+  <div class="card" id="card" style="opacity:0">
+    <div class="sec" id="s1">
+      <h3>Degré 1 · il faut 2 points</h3>
+      <div class="line"><span class="m">f</span>(<span class="m">x</span>) = <span class="m">ax</span> + <span class="m">b</span></div>
+      <div class="line"><span class="m">b</span> = <b class="cS">42</b> <span class="mu">(secret)</span> · <span class="m">a</span> = 7 <span class="mu">(au hasard)</span></div>
+      <div class="hr"></div>
+      <div class="line" id="d0">Bruno (2 ; 56) · David (4 ; 70)</div>
+      <div class="line" id="d1">pente = (70 − 56) / (4 − 2) = <b>7</b></div>
+      <div class="line" id="d2"><span class="m">f</span>(0) = 56 − 2 × 7 = <b class="cS">42</b></div>
+    </div>
+    <div class="sec" id="s2" style="display:none">
+      <h3 id="s2t">Degré 2 · il faut 3 points</h3>
+      <div class="line" id="s2f"></div>
+      <div class="line" id="s2h"></div>
+      <div class="hr"></div>
+      <div id="sys">
+        <div style="display:flex; align-items:center; gap:.3em">
+          <span id="brace" style="font-family:'STIX Two Text', serif; font-size:4.4em; line-height:.9; font-weight:400; color:#cfd6ff">{</span>
+          <div>
+            <div class="line" id="y0">4<span class="m">a</span> + 2<span class="m">b</span> + <span class="m">c</span> = 56 <span class="mu" style="font-size:.85em">· Bruno</span></div>
+            <div class="line" id="y1">16<span class="m">a</span> + 4<span class="m">b</span> + <span class="m">c</span> = 86 <span class="mu" style="font-size:.85em">· David</span></div>
+            <div class="line" id="y2">25<span class="m">a</span> + 5<span class="m">b</span> + <span class="m">c</span> = 107 <span class="mu" style="font-size:.85em">· Emma</span></div>
+          </div>
+        </div>
+        <div class="line" id="y3">→ <span class="m">a</span> = 2, <span class="m">b</span> = 3, <b class="cS"><span class="m">c</span> = 42</b></div>
+      </div>
+      <div id="sys3" style="display:none">
+        <div style="display:flex; align-items:center; gap:.3em">
+          <span id="brace3" style="font-family:'STIX Two Text', serif; font-size:5.6em; line-height:.9; font-weight:400; color:#cfd6ff">{</span>
+          <div>
+            <div class="line" id="z0"><span class="m">a</span> + <span class="m">b</span> + <span class="m">c</span> + <span class="m">d</span> = 1 <span class="mu" style="font-size:.85em">· Alice</span></div>
+            <div class="line" id="z1">8<span class="m">a</span> + 4<span class="m">b</span> + 2<span class="m">c</span> + <span class="m">d</span> = −10 <span class="mu" style="font-size:.85em">· Bruno</span></div>
+            <div class="line" id="z2">27<span class="m">a</span> + 9<span class="m">b</span> + 3<span class="m">c</span> + <span class="m">d</span> = −3 <span class="mu" style="font-size:.85em">· Chloé</span></div>
+            <div class="line" id="z3">125<span class="m">a</span> + 25<span class="m">b</span> + 5<span class="m">c</span> + <span class="m">d</span> = 17 <span class="mu" style="font-size:.85em">· Emma</span></div>
+          </div>
+        </div>
+        <div class="line" id="z4">→ <span class="m">a</span> = −2, <span class="m">b</span> = 21, <span class="m">c</span> = −60, <b class="cS"><span class="m">d</span> = 42</b></div>
+      </div>
+      <div class="line" id="e0"></div>
+      <div class="line" id="e1"></div>
+    </div>
+    <div class="sec" id="s3" style="display:none">
+      <h3>Généralisation</h3>
+      <table class="gen">
+        <tr id="g0"><td>degré 1 (droite)</td><td>2 points</td></tr>
+        <tr id="g1"><td>degré 2 (parabole)</td><td>3 points</td></tr>
+        <tr id="g2"><td>degré 3</td><td>4 points</td></tr>
+        <tr id="g3"><td>degré <span class="m">n</span></td><td><span class="m">n</span> + 1 points</td></tr>
+      </table>
+      <div class="hr"></div>
+      <div class="line" id="g4" style="white-space:normal">pour exiger <b><span class="m">k</span> personnes</b>&nbsp;: fonction de <b>degré <span class="m">k</span> − 1</b></div>
+    </div>
+  </div>
+  <div class="caption" id="caption" style="opacity:0"><i class="bar"></i><span id="captxt"></span></div>
+  <div class="ctrl"><a class="home" href="index.html" aria-label="Retour à l'accueil">← Accueil</a><button id="voice" aria-pressed="false">Activer la voix</button><button id="sound" aria-pressed="false">Activer le son</button><button id="pause">Pause</button><button id="replay">Rejouer</button></div>
+  <div class="seek"><input type="range" id="seek" min="0" max="184" step="0.1" value="0" aria-label="Position dans l'animation"><span id="clock">0:00 / 3:04</span></div>
+</div>
+<script>
+(function(){
+  const REC = /[?&]record/.test(location.search); if (REC) document.body.classList.add('rec');
+  const $ = id => document.getElementById(id);
+  const clamp = x => Math.max(0, Math.min(1, x));
+  const ease = x => x<.5 ? 4*x*x*x : 1-Math.pow(-2*x+2,3)/2;
+  const lerp = (a,b,k) => a + (b-a)*k;
+  const back = x => { const c=1.7, c3=c+1; return 1 + c3*Math.pow(x-1,3) + c*Math.pow(x-1,2); };
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+  // ---------- chronologie ----------
+  const K = { safe:4, people:7, bad1:[14, 16, 18.5], bad2:[24, 26.5, 29.5, 33], want:[38, 41.5], shamir:[47, 50, 54], sub1:60, d1:[64, 68, 75, 79, 83, 87, 91.5, 94, 98], only:71.5, sub2:101, d2:[105, 109, 112, 113.5, 119.5], sub3:124, d3:[128, 132, 135, 138, 143.5], gen:[148, 149.5, 151, 152.5, 154, 156.5], sub4:160, real:[168, 173], end:179 };
+  const END = 184;
+  const caps = [
+    [0.3, ''],
+    [K.safe, 'Une entreprise possède une <b>clé privée</b> qui donne accès à <b>10 millions de CHF</b> en cryptomonnaies. Pour simplifier, imaginons que cette clé soit le nombre <b class="cS">42</b> (en réalité, c’est un nombre immense).'],
+    [K.people, 'Cinq responsables doivent pouvoir l’utiliser. Mais confier la clé à une seule personne, c’est trop risqué\u00a0: elle pourrait la perdre… ou partir avec l’argent\u00a0!'],
+    [K.bad1[0], '<b>Mauvaise idée n° 1</b>\u00a0: donner la clé entière à chacun.'],
+    [K.bad1[2], 'Pratique… mais n’importe qui peut vider le portefeuille tout seul. Aucune sécurité\u00a0!'],
+    [K.bad2[0], '<b>Mauvaise idée n° 2</b>\u00a0: couper la clé en morceaux. Alice reçoit «\u00a04\u00a0_\u00a0», Bruno reçoit «\u00a0_\u00a02\u00a0».'],
+    [K.bad2[1], 'Il faut bien les deux… mais si Bruno perd sa carte, la clé et les 10 millions sont perdus pour toujours\u00a0!'],
+    [K.bad2[3], 'Et chaque morceau dévoile déjà une partie de la clé\u00a0: Alice sait qu’elle commence par 4.'],
+    [K.want[0], 'Ce qu’on voudrait vraiment\u00a0: partager la clé entre 5 personnes, mais que 2 suffisent pour la reconstituer…'],
+    [K.want[1], '… qu’une personne seule ne sache rien, et que la clé reste récupérable même si 3 cartes sont perdues.'],
+    [K.shamir[0], 'En 1979, le cryptographe Adi Shamir trouve la solution, grâce aux fonctions.'],
+    [K.shamir[1], 'Il cache le secret dans le <b>terme constant</b> de la fonction, c’est-à-dire <span class="m">f</span>(0). Sur le graphique, c’est l’<b>ordonnée à l’origine</b>.'],
+    [K.shamir[2], 'Chaque personne reçoit un point de la courbe… mais jamais le point en <span class="m">x</span> = 0.'],
+    [K.sub1, 'Premier cas\u00a0: le secret est partagé entre <b>5</b> personnes, et <b class="cOk">2</b> d’entre elles suffisent pour le retrouver.'],
+    [K.sub2, 'Deuxième cas\u00a0: on veut maintenant qu’il faille <b class="cOk">3</b> personnes parmi les <b>5</b>.'],
+    [K.sub3, 'Et s’il faut <b class="cOk">4</b> personnes parmi les <b>5</b>\u00a0?'],
+    [K.sub4, 'Par exemple, pour exiger <b class="cOk">3</b> personnes parmi <b>8</b>\u00a0: on choisit une parabole (degré 2) et on distribue 8 points. N’importe quels 3 d’entre eux suffisent.'],
+    [K.d1[0], 'Avec une droite <span class="m">f</span>(<span class="m">x</span>) = <span class="m">ax</span> + <span class="m">b</span>\u00a0: <span class="m">b</span> = 42 est le secret, et la pente <span class="m">a</span> est choisie au hasard, par exemple 7.'],
+    [K.d1[1], 'Les cinq reçoivent chacun un point\u00a0: (1 ; 49), (2 ; 56), (3 ; 63), (4 ; 70) et (5 ; 77).'],
+    [K.only, 'Attention\u00a0: la seule chose que possède chaque personne, c’est <b>son point</b>. Personne ne connaît la fonction\u00a0!'],
+    [K.d1[2], 'Bruno essaie seul avec son point (2 ; 56)\u00a0: une infinité de droites passent par ce point…'],
+    [K.d1[3], '… et l’ordonnée à l’origine peut valoir n’importe quoi. Impossible de trouver le secret\u00a0!'],
+    [K.d1[4], 'Bruno et David mettent leurs points en commun\u00a0: par deux points, il ne passe qu’une seule droite.'],
+    [K.d1[5], 'La pente\u00a0: (70 − 56) / (4 − 2) = 7. Puis <span class="m">f</span>(0) = 56 − 2 × 7 = 42.'],
+    [K.d1[6], 'La clé est reconstituée\u00a0: accès aux 10 millions\u00a0!'],
+    [K.d1[7], 'Et si trois cartes sont perdues\u00a0? Les deux restantes suffisent encore.'],
+    [K.d2[0], 'Pour exiger 3 personnes, on utilise une <b>parabole</b> <span class="m">f</span>(<span class="m">x</span>) = <span class="m">ax</span><sup>2</sup> + <span class="m">bx</span> + <span class="m">c</span>\u00a0: <span class="m">c</span> = 42 est le secret, <span class="m">a</span> et <span class="m">b</span> sont choisis au hasard.'],
+    [K.d2[1], 'Bruno et David se mettent ensemble\u00a0: ils n’ont que <b>2 points</b>. Une infinité de paraboles passent par ces 2 points\u00a0: ils ne peuvent pas trouver le secret.'],
+    [K.d2[3], 'Emma les rejoint\u00a0: à trois, ils ont <b>3 points</b>. Il ne passe plus qu’une seule parabole par ces 3 points. On la trouve en résolvant un système de 3 équations…'],
+    [K.d2[4], '… et on retrouve <span class="m">c</span> = 42\u00a0!'],
+    [K.d3[0], 'Avec une fonction de degré 3, <span class="m">ax</span><sup>3</sup> + <span class="m">bx</span><sup>2</sup> + <span class="m">cx</span> + <span class="m">d</span>, il faut 4 personnes. Le secret est <span class="m">d</span>.'],
+    [K.d3[1], 'Alice, Chloé et Emma se mettent ensemble\u00a0: avec <b>3 points</b>, plusieurs courbes de degré 3 restent possibles.'],
+    [K.d3[3], 'Bruno les rejoint\u00a0: avec <b>4 points</b>, une seule courbe. On résout un système de 4 équations…'],
+    [K.d3[4], '… et on retrouve <span class="m">d</span> = 42\u00a0!'],
+    [K.gen[0], 'En résumé\u00a0: une droite est déterminée par 2 points, une parabole par 3 points, une courbe de degré 3 par 4 points…'],
+    [K.gen[4], '… et une fonction de degré <span class="m">n</span> par <span class="m">n</span> + 1 points. Pour exiger <span class="m">k</span> personnes, on choisit le degré <span class="m">k</span> − 1.'],
+    [K.real[0], 'C’est ainsi que des entreprises protègent aujourd’hui les clés privées de leurs cryptomonnaies, ou d’autres accès informatiques importants.'],
+    [K.real[1], 'Dans la vraie méthode, les calculs se font avec des nombres entiers «\u00a0modulo un nombre premier\u00a0», mais l’idée est exactement la même.']
+  ];
+  const VOICE = [
+    [0.3, "Le secret de Shamir."],
+    [K.safe, "Une entreprise possède une clé privée qui donne accès à dix millions de francs en cryptomonnaies. Pour simplifier, imaginons que cette clé soit le nombre quarante-deux. En réalité, c'est un nombre immense."],
+    [K.people, "Cinq responsables doivent pouvoir l'utiliser. Mais confier la clé à une seule personne, c'est trop risqué : elle pourrait la perdre… ou partir avec l'argent !"],
+    [K.bad1[0], "Mauvaise idée numéro un : donner la clé entière à chacun."],
+    [K.bad1[2], "Pratique… mais n'importe qui peut vider le portefeuille tout seul. Aucune sécurité !"],
+    [K.bad2[0], "Mauvaise idée numéro deux : couper la clé en morceaux. Alice reçoit le quatre, Bruno reçoit le deux."],
+    [K.bad2[1], "Il faut bien les deux… mais si Bruno perd sa carte, la clé et les dix millions sont perdus pour toujours !"],
+    [K.bad2[3], "Et chaque morceau dévoile déjà une partie de la clé : Alice sait qu'elle commence par quatre."],
+    [K.want[0], "Ce qu'on voudrait vraiment : partager la clé entre cinq personnes, mais que deux suffisent pour la reconstituer…"],
+    [K.want[1], "… qu'une personne seule ne sache rien, et que la clé reste récupérable même si trois cartes sont perdues."],
+    [K.shamir[0], "En mille neuf cent soixante-dix-neuf, le cryptographe Adi Shamir trouve la solution, grâce aux fonctions."],
+    [K.shamir[1], "Il cache le secret dans le terme constant de la fonction, c'est-à-dire f de zéro. Sur le graphique, c'est l'ordonnée à l'origine."],
+    [K.shamir[2], "Chaque personne reçoit un point de la courbe… mais jamais le point en x égale zéro."],
+    [K.sub1, "Premier cas : le secret est partagé entre cinq personnes, et deux d'entre elles suffisent pour le retrouver."],
+    [K.sub2, "Deuxième cas : on veut maintenant qu'il faille trois personnes parmi les cinq."],
+    [K.sub3, "Et s'il faut quatre personnes parmi les cinq ?"],
+    [K.sub4, "Par exemple, pour exiger trois personnes parmi huit : on choisit une parabole, de degré deux, et on distribue huit points. N'importe quels trois d'entre eux suffisent."],
+    [K.d1[0], "Avec une droite, f de x égale a x plus b : b égale quarante-deux, c'est le secret, et la pente a est choisie au hasard, par exemple sept."],
+    [K.d1[1], "Les cinq reçoivent chacun un point de la droite."],
+    [K.only, "Attention : la seule chose que possède chaque personne, c'est son point. Personne ne connaît la fonction !"],
+    [K.d1[2], "Bruno essaie seul avec son point : une infinité de droites passent par ce point…"],
+    [K.d1[3], "… et l'ordonnée à l'origine peut valoir n'importe quoi. Impossible de trouver le secret !"],
+    [K.d1[4], "Bruno et David mettent leurs points en commun : par deux points, il ne passe qu'une seule droite."],
+    [K.d1[5], "La pente : soixante-dix moins cinquante-six, divisé par quatre moins deux, égale sept. Puis f de zéro égale cinquante-six moins deux fois sept, quarante-deux."],
+    [K.d1[6], "La clé est reconstituée : accès aux dix millions !"],
+    [K.d1[7], "Et si trois cartes sont perdues ? Les deux restantes suffisent encore."],
+    [K.d2[0], "Pour exiger trois personnes, on utilise une parabole, a x carré plus b x plus c : c égale quarante-deux est le secret, a et b sont choisis au hasard."],
+    [K.d2[1], "Bruno et David se mettent ensemble : ils n'ont que deux points. Une infinité de paraboles passent par ces deux points : ils ne peuvent pas trouver le secret."],
+    [K.d2[3], "Emma les rejoint : à trois, ils ont trois points. Il ne passe plus qu'une seule parabole par ces trois points. On la trouve en résolvant un système de trois équations…"],
+    [K.d2[4], "… et on retrouve c égale quarante-deux !"],
+    [K.d3[0], "Avec une fonction de degré trois, il faut quatre personnes. Le secret est le terme constant d."],
+    [K.d3[1], "Alice, Chloé et Emma se mettent ensemble : avec trois points, plusieurs courbes de degré trois restent possibles."],
+    [K.d3[3], "Bruno les rejoint : avec quatre points, une seule courbe. On résout un système de quatre équations…"],
+    [K.d3[4], "… et on retrouve d égale quarante-deux !"],
+    [K.gen[0], "En résumé : une droite est déterminée par deux points, une parabole par trois points, une courbe de degré trois par quatre points…"],
+    [K.gen[4], "… et une fonction de degré n par n plus un points. Pour exiger k personnes, on choisit le degré k moins un."],
+    [K.real[0], "C'est ainsi que des entreprises protègent aujourd'hui les clés privées de leurs cryptomonnaies, ou d'autres accès informatiques importants."],
+    [K.real[1], "Dans la vraie méthode, les calculs se font avec des nombres entiers, modulo un nombre premier, mais l'idée est exactement la même."]
+  ];
+
+  caps.sort((p, q) => p[0] - q[0]); VOICE.sort((p, q) => p[0] - q[0]);
+  // ---------- canevas ----------
+  const stage = $('stage'), cv = $('c'), ctx = cv.getContext('2d');
+  let W = 1, H = 1, DPR = 1;
+  function resize(){ DPR = REC ? 1 : Math.min(devicePixelRatio || 1, 2); W = stage.clientWidth; H = stage.clientHeight; cv.width = W*DPR; cv.height = H*DPR; ctx.setTransform(DPR, 0, 0, DPR, 0, 0); }
+  new ResizeObserver(resize).observe(stage); resize();
+  const portrait = () => W/H < 1;
+  function area(){ return portrait() ? {x0:W*.04, x1:W*.96, y0:H*.3, y1:H*.72} : {x0:W*.03, x1:W*.6, y0:H*.05, y1:H*.72}; }
+  function glowOn(color, b){ ctx.shadowColor = color; ctx.shadowBlur = b; } function glowOff(){ ctx.shadowBlur = 0; }
+  function roundRect(x, y, w, h, r){ ctx.beginPath(); ctx.moveTo(x+r, y); ctx.arcTo(x+w, y, x+w, y+h, r); ctx.arcTo(x+w, y+h, x, y+h, r); ctx.arcTo(x, y+h, x, y, r); ctx.arcTo(x, y, x+w, y, r); ctx.closePath(); }
+  function text(t, x, y, size, color, align, weight){ ctx.font = (weight || 700) + ' ' + size + 'px Manrope, system-ui, sans-serif'; ctx.fillStyle = color; ctx.textAlign = align || 'center'; ctx.textBaseline = 'middle'; ctx.fillText(t, x, y); }
+  function dot(x, y, r, color, glow){ if (glow) glowOn(color, r*3); ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2); ctx.fill(); glowOff(); }
+  const serif = (sz, w) => (w || 500) + ' ' + sz + 'px "STIX Two Text", "Cambria Math", "Times New Roman", serif';
+  function grid(){ ctx.strokeStyle = 'rgba(90,120,255,.07)'; ctx.lineWidth = 1; const s = Math.max(28, W/40); for (let x = (W % s)/2; x < W; x += s){ ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); } for (let y = (H % s)/2; y < H; y += s){ ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); } }
+
+  // ---------- personnages ----------
+  const PEOPLE = [['Alice', '#ff7eb6', '#f2c6a0', '#5a3a2a'], ['Bruno', '#4fc3ff', '#c98e64', '#2a1a10'], ['Chloé', '#6dff94', '#f5d2b0', '#b5651d'], ['David', '#ffa94d', '#8d5a3b', '#111'], ['Emma', '#c77dff', '#f0c09a', '#e0c070']];
+  function avatar(x, y, s, p, al, hi){ const [nm, col, skin, hair] = p; ctx.globalAlpha = al; if (hi){ glowOn(col, 18); }
+    ctx.fillStyle = col; ctx.beginPath(); ctx.ellipse(x, y + s*1.05, s*.95, s*.62, 0, Math.PI, 0); ctx.fill(); glowOff();
+    ctx.fillStyle = skin; ctx.beginPath(); ctx.arc(x, y, s*.5, 0, 7); ctx.fill(); ctx.fillStyle = hair; ctx.beginPath(); ctx.arc(x, y - s*.12, s*.52, Math.PI*1.05, Math.PI*1.95); ctx.fill();
+    ctx.fillStyle = '#1a1a2a'; [-1, 1].forEach(d => { ctx.beginPath(); ctx.arc(x + d*s*.17, y + s*.02, s*.055, 0, 7); ctx.fill(); }); ctx.strokeStyle = '#7a3a30'; ctx.lineWidth = Math.max(1, s*.05); ctx.beginPath(); ctx.arc(x, y + s*.14, s*.14, .2, Math.PI - .2); ctx.stroke();
+    text(nm, x, y + s*1.35, Math.max(11, s*.42), '#eef1ff', 'center', 800); ctx.globalAlpha = 1; }
+  function cardTxt(x, y, s, txt, col, al, burn){ if (al <= 0) return; ctx.globalAlpha = al*(1 - burn); const w = s*2.75, h = s*.85; ctx.fillStyle = 'rgba(12,18,48,.92)'; ctx.strokeStyle = col; ctx.lineWidth = 1.6; roundRect(x - w/2, y - h/2, w, h, 6); ctx.fill(); ctx.stroke();
+    ctx.font = serif(Math.max(11, s*.48)); ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(txt, x, y + 1);
+    if (burn > 0){ ctx.globalAlpha = (1 - burn)*.8; for (let i=0;i<8;i++){ const a = i*.8 + burn*3; dot(x + Math.cos(a)*w*.4*burn, y - burn*s*1.4 - i*3, s*.12*(1 - burn) + 1, i % 2 ? '#ff9a3d' : '#888', true); } } ctx.globalAlpha = 1; }
+  function safe(x, y, s, open, code, al){ ctx.globalAlpha = al; const w = s*3.8, h = s*2.1;
+    // portefeuille numérique : écran avec le montant, et un cadenas
+    ctx.fillStyle = '#1a2348'; ctx.strokeStyle = open > .5 ? '#ffd23f' : '#8fa0d8'; ctx.lineWidth = 2; if (open > 0) glowOn('#ffd23f', 24*open); roundRect(x - w/2, y - h/2, w, h, s*.22); ctx.fill(); ctx.stroke(); glowOff();
+    ctx.fillStyle = '#0c1028'; roundRect(x - w/2 + s*.15, y - h/2 + s*.15, w - s*.3, h*.44, s*.12); ctx.fill();
+    ctx.fillStyle = '#f7931a'; ctx.beginPath(); ctx.arc(x - w/2 + s*.5, y - h/2 + s*.15 + h*.22, s*.24, 0, 7); ctx.fill(); ctx.fillStyle = '#fff'; ctx.font = '800 ' + (s*.28) + 'px Manrope'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('₿', x - w/2 + s*.5, y - h/2 + s*.15 + h*.22 + 1);
+    text('10 000 000 CHF', x + s*.32, y - h/2 + s*.15 + h*.22, Math.max(11, s*.4), open > .5 ? '#ffd23f' : '#cfd6ff', 'center', 800);
+    // cadenas
+    const lx = x, ly = y + h*.2, lr = s*.32, op = ease(open); ctx.strokeStyle = open > .5 ? '#6dff94' : '#cfd6ff'; ctx.lineWidth = Math.max(2, s*.09);
+    ctx.beginPath(); ctx.arc(lx + op*lr*.9, ly - lr*.5 - op*lr*.5, lr*.62, Math.PI, 0); ctx.stroke(); ctx.fillStyle = open > .5 ? '#6dff94' : '#cfd6ff'; roundRect(lx - lr*.8, ly - lr*.45, lr*1.6, lr*1.2, lr*.2); ctx.fill();
+    ctx.fillStyle = '#1a2348'; ctx.beginPath(); ctx.arc(lx, ly + lr*.08, lr*.18, 0, 7); ctx.fill();
+    if (open > 0){ for (let i=0;i<6;i++){ const ph = (performance.now()/900 + i/6) % 1; ctx.globalAlpha = al*open*(1 - ph); text('₿', x + Math.cos(i*1.7)*w*.3, y - h*.5 - ph*s*.8, Math.max(10, s*.3), '#f7931a', 'center', 800); } ctx.globalAlpha = al; }
+    if (code) { text('clé privée\u00a0: ' + code, x, y - h*.5 - s*.35, Math.max(13, s*.36), css('--sec'), 'center', 800); } ctx.globalAlpha = 1; }
+
+  // ---------- schéma « k personnes parmi n » ----------
+  function personIcon(x, y, r, col){ ctx.strokeStyle = col; ctx.lineWidth = Math.max(1.6, r*.16); ctx.beginPath(); ctx.arc(x, y - r*.55, r*.42, 0, 7); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x - r*.75, y + r*.85); ctx.quadraticCurveTo(x - r*.75, y + .02*r, x, y + .02*r); ctx.quadraticCurveTo(x + r*.75, y + .02*r, x + r*.75, y + r*.85); ctx.closePath(); ctx.stroke(); }
+  function drawSubset(cx, cy, R, n, k, al){ ctx.globalAlpha = al; const rx = R*1.45, ry = R*.95;
+    ctx.fillStyle = 'rgba(8,12,40,.9)'; roundRect(cx - rx - 24, cy - ry - 34, (rx + 24)*2, (ry + 34)*2 + 20, 18); ctx.fill();
+    ctx.strokeStyle = '#ffd23f'; ctx.lineWidth = 3; glowOn('#ffd23f', 10); ctx.beginPath(); ctx.ellipse(cx, cy, rx, ry, 0, 0, 7); ctx.stroke(); glowOff();
+    const ix = cx + rx*.3, irx = rx*.42, iry = ry*.82; ctx.strokeStyle = '#6dff94'; ctx.lineWidth = 3; glowOn('#6dff94', 10); ctx.beginPath(); ctx.ellipse(ix, cy, irx, iry, 0, 0, 7); ctx.stroke(); glowOff();
+    text(String(n), cx - rx*.2, cy - ry - 14, Math.max(18, R*.32), '#ffd23f', 'center', 800); text(String(k), ix + irx*.45, cy - iry - 14, Math.max(18, R*.32), '#6dff94', 'center', 800);
+    const r = Math.min(R*.2, 24);
+    for (let i=0;i<k;i++){ const yy = cy + ((i + .5)/k - .5)*iry*1.4, xx = ix + (i % 2 ? .3 : -.3)*irx*(k > 1 ? 1 : 0); personIcon(xx, yy, r, '#b9ffcc'); }
+    const m = n - k; for (let i=0;i<m;i++){ const t = m === 1 ? .5 : i/(m - 1), yy = cy + (t - .5)*ry*1.3, xx = cx - rx*.55 + (i % 2 ? .22 : 0)*rx; personIcon(xx, yy, r, 'rgba(238,241,255,.8)'); }
+    text(k + ' personnes parmi ' + n, cx, cy + ry + 24, Math.max(13, R*.2), '#eef1ff', 'center', 800); ctx.globalAlpha = 1; }
+
+  // ---------- graphique ----------
+  const f1 = x => 42 + 7*x, f2 = x => 42 + 3*x + 2*x*x, f3 = x => -2*x*x*x + 21*x*x - 60*x + 42;
+  let RNG = [0, 120];
+  function G(){ const a = area(), top = a.y0 + (a.y1 - a.y0)*.27, x0 = a.x0 + 52, x1 = a.x1 - (a.x1 - a.x0)*.2, y0 = a.y1 - 28, y1 = top; return { X: x => x0 + (x + .3)/6.6*(x1 - x0), Y: y => y0 - (y - RNG[0])/(RNG[1] - RNG[0])*(y0 - y1), x0, x1, y0, y1 }; }
+  function axes(P, al){ ctx.globalAlpha = al; ctx.strokeStyle = 'rgba(80,110,255,.16)'; ctx.lineWidth = 1; for (let v=RNG[0]; v<=RNG[1]; v+=20){ ctx.beginPath(); ctx.moveTo(P.X(-.3), P.Y(v)); ctx.lineTo(P.X(6.3), P.Y(v)); ctx.stroke(); text(String(v), P.X(0) - 8, P.Y(v), 11, css('--muted'), 'right', 600); }
+    for (let x=1;x<=6;x++){ ctx.beginPath(); ctx.moveTo(P.X(x), P.Y(RNG[0])); ctx.lineTo(P.X(x), P.Y(RNG[1])); ctx.stroke(); text(String(x), P.X(x), P.Y(0) + 13, 11, css('--muted'), 'center', 600); }
+    ctx.strokeStyle = 'rgba(210,220,255,.85)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(P.X(-.3), P.Y(0)); ctx.lineTo(P.X(6.3), P.Y(0)); ctx.moveTo(P.X(0), P.Y(RNG[0])); ctx.lineTo(P.X(0), P.Y(RNG[1] + 2)); ctx.stroke();
+    text('x', P.X(6.3) + 10, P.Y(0), 13, '#fff', 'center', 800); text('y', P.X(0), P.Y(RNG[1] + 2) - 10, 13, '#fff', 'center', 800); ctx.globalAlpha = 1; }
+  function curve(P, f, col, w, al, dash){ ctx.save(); ctx.beginPath(); ctx.rect(P.X(-.3), P.Y(RNG[1] + 4), P.X(6.3) - P.X(-.3), P.Y(RNG[0] - 4) - P.Y(RNG[1] + 4)); ctx.clip(); ctx.globalAlpha = al; ctx.strokeStyle = col; ctx.lineWidth = w; if (dash) ctx.setLineDash(dash); else glowOn(col, 8);
+    ctx.beginPath(); for (let i=0;i<=240;i++){ const x = -.3 + 6.6*i/240; i ? ctx.lineTo(P.X(x), P.Y(f(x))) : ctx.moveTo(P.X(x), P.Y(f(x))); } ctx.stroke(); ctx.setLineDash([]); glowOff(); ctx.restore(); ctx.globalAlpha = 1; }
+  function secretPt(P, v, al, label){ ctx.globalAlpha = al; dot(P.X(0), P.Y(v), 8, css('--sec'), true); if (label) text(label, P.X(0) + 14, P.Y(v) - 14, 13, css('--sec'), 'left', 800); ctx.globalAlpha = 1; }
+
+  // ---------- rendu ----------
+  const titleEl = $('title'), card = $('card'), captxt = $('captxt'), capEl = $('caption');
+  let capIdx = -2;
+  function renderAt(T){
+    ctx.clearRect(0, 0, W, H); grid();
+    titleEl.style.opacity = clamp((T-.2)/.6)*(1 - clamp((T-3.4)/.6));
+    const a = area(), aw = a.x1 - a.x0, s = Math.min(aw/18, (a.y1 - a.y0)/9), rowY = a.y0 + s*.9;
+    const graphOn = clamp((T - K.shamir[0] - .6)/1), stageA = 1 - graphOn;
+    // positions des avatars : en ligne, en haut
+    const PX = i => a.x0 + aw*(.12 + i*.19);
+    const burnT = (i) => { if (T >= K.bad2[1] && T < K.want[0] - 1 && i === 1) return clamp((T - K.bad2[1] - 1)/1.4); if (T >= K.d1[7] && T < K.d2[0] - .5 && [0, 2, 4].includes(i)) return clamp((T - K.d1[7] - .5 - [0, 2, 4].indexOf(i)*.5)/1.2); return 0; };
+    // le coffre (scènes 1 à 4) puis en petit dans le graphique
+    const open1 = T >= K.bad1[2] && T < K.bad2[0] - .3 ? ease(clamp((T - K.bad1[2])/1)) : 0;
+    if (T >= K.safe && stageA > 0){ const k = back(clamp((T - K.safe)/.6)); safe(a.x0 + aw*.5, a.y0 + (a.y1 - a.y0)*.62, s*1.3*k, open1, T < K.people + 2 ? '42' : null, stageA*(1 - clamp((T - K.want[0])/.6))); }
+    if (stageA > 0){ ctx.globalAlpha = stageA;
+      if (T >= K.bad1[2] && T < K.bad2[0] - .3){ const k = clamp((T - K.bad1[2])/.5); ctx.globalAlpha = stageA*k; text('Chloé vide le portefeuille seule\u00a0!', a.x0 + aw*.5, a.y0 + (a.y1 - a.y0)*.92, Math.max(14, s*.55), css('--err'), 'center', 800); }
+      if (T >= K.bad2[1] + 2 && T < K.bad2[3]){ ctx.globalAlpha = stageA; text('10 millions perdus\u00a0!', a.x0 + aw*.5, a.y0 + (a.y1 - a.y0)*.92, Math.max(14, s*.55), css('--err'), 'center', 800); }
+      if (T >= K.bad2[3] && T < K.want[0]){ ctx.globalAlpha = stageA; text('Alice sait déjà\u00a0: 4…', PX(0), rowY + s*3.2, Math.max(12, s*.45), css('--err'), 'center', 800); }
+      if (T >= K.want[0]){ const k = clamp((T - K.want[0])/.6); ctx.globalAlpha = stageA*k; const lines = [['5 personnes', '#eef1ff'], ['2 suffisent', css('--ok')], ['1 seule ne sait rien', css('--ok')], ['3 cartes perdues\u00a0? pas grave', css('--ok')]];
+        lines.forEach(([t, c], j) => { if (T >= K.want[0] + j*1.6) text((j ? '✓ ' : '') + t, a.x0 + aw*.08, a.y0 + (a.y1 - a.y0)*(.5 + j*.1), Math.max(14, s*.55), c, 'left', 800); }); }
+      ctx.globalAlpha = 1; }
+    // ---- le graphique (à partir de l'idée de Shamir) ----
+    RNG = (T >= K.d3[0] - .3 && T < K.gen[0] - .3) ? [-20, 60] : [0, 120];
+    if (graphOn > 0){ const P = G(); axes(P, graphOn);
+      const openS = (t0, t1) => T >= t0 && T < t1 ? ease(clamp((T - t0)/1)) : 0;
+      safe(a.x1 - aw*.1, a.y0 + (a.y1 - a.y0)*.42, s*.62, Math.max(openS(K.d1[6], K.d2[0] - .3), openS(K.d2[4], K.d3[0] - .3), openS(K.d3[4], K.gen[0] - .3)), null, graphOn);
+      // l'idée : secret = f(0)
+      if (T >= K.shamir[1] && T < K.d1[1] + 2){ const k = clamp((T - K.shamir[1])/.6); secretPt(P, 42, k, 'secret = f(0) = 42'); }
+      // degré 1
+      if (T >= K.d1[0] && T < K.d2[0] - .3){
+        const shown = T < K.d1[1] + 2 ? clamp((T - K.d1[0])/1)*(1 - clamp((T - K.d1[1] - 1.2)/.8)) : (T >= K.d1[4] ? clamp((T - K.d1[4] - 1)/1) : 0);
+        if (shown > 0) curve(P, f1, css('--crv'), 3, shown);
+        const vis = i => T >= K.d1[1] + i*.3 && !(T >= K.d1[2] && T < K.d1[4] && i !== 1) && !(T >= K.d1[4] && T < K.d1[7] && i !== 1 && i !== 3) && burnT(i) < 1;
+        for (let i=0;i<5;i++) if (vis(i)) dot(P.X(i + 1), P.Y(f1(i + 1)), 6, PEOPLE[i][1], true);
+        if (T >= K.d1[2] && T < K.d1[4]){ const m = 7 + 18*Math.sin((T - K.d1[2])*1.3), g = x => 56 + m*(x - 2); curve(P, g, 'rgba(255,255,255,.75)', 2, 1, [6, 5]);
+          for (let j=1;j<=4;j++){ const mj = 7 + 18*Math.sin((T - K.d1[2])*1.3 - j*.5); curve(P, x => 56 + mj*(x - 2), 'rgba(255,255,255,' + (.25 - j*.05) + ')', 1.5, 1, [4, 6]); }
+          if (T >= K.d1[3]){ const v = 56 - 2*m; secretPt(P, Math.max(0, Math.min(120, v)), 1, 'f(0) = ' + Math.round(v) + ' ?'); } }
+        if (T >= K.d1[5] + 1.5) secretPt(P, 42, 1, 'f(0) = 42 ✓'); }
+      // degré 2
+      if (T >= K.d2[0] && T < K.d3[0] - .3){
+        const pts = [0, 1, 2, 3, 4], two = T >= K.d2[1] && T < K.d2[3], three = T >= K.d2[3];
+        if (T < K.d2[1]) curve(P, f2, css('--crv'), 3, clamp((T - K.d2[0])/1)*(1 - clamp((T - K.d2[1] + .8)/.8)));
+        pts.forEach(i => { const on = T < K.d2[1] ? T >= K.d2[0] + .6 + i*.25 : two ? (i === 1 || i === 3) : (i === 1 || i === 3 || i === 4); if (on) dot(P.X(i + 1), P.Y(f2(i + 1)), 6, PEOPLE[i][1], true); });
+        if (two){ const fam = c => x => 26 + 15*x + c*(x - 2)*(x - 4); for (let j=0;j<5;j++){ const c = 2 + 4*Math.sin((T - K.d2[1])*1.2 - j*.7); curve(P, fam(c), 'rgba(255,255,255,' + (j ? .2 : .75) + ')', j ? 1.5 : 2, 1, [6, 5]); }
+          const c0 = 2 + 4*Math.sin((T - K.d2[1])*1.2); secretPt(P, Math.max(0, Math.min(120, 26 + 8*c0)), 1, 'f(0) = ' + Math.round(26 + 8*c0) + ' ?'); }
+        if (three){ curve(P, f2, css('--crv'), 3, clamp((T - K.d2[3])/1)); if (T >= K.d2[4]) secretPt(P, 42, 1, 'f(0) = 42 ✓'); } }
+      // degré 3
+      if (T >= K.d3[0] && T < K.gen[0] - .3){
+        const three = T >= K.d3[1] && T < K.d3[3], four = T >= K.d3[3];
+        if (T < K.d3[1]) curve(P, f3, css('--crv'), 3, clamp((T - K.d3[0])/1)*(1 - clamp((T - K.d3[1] + .8)/.8)));
+        [0, 1, 2, 3, 4].forEach(i => { const on = T < K.d3[1] ? T >= K.d3[0] + .6 + i*.25 : three ? (i === 0 || i === 2 || i === 4) : (i === 0 || i === 2 || i === 4 || i === 1); if (on) dot(P.X(i + 1), P.Y(f3(i + 1)), 6, PEOPLE[i][1], true); });
+        if (three){ for (let j=0;j<5;j++){ const c = 1.6*Math.sin((T - K.d3[1])*1.2 - j*.7); curve(P, x => f3(x) + c*(x - 1)*(x - 3)*(x - 5)*.6, 'rgba(255,255,255,' + (j ? .2 : .75) + ')', j ? 1.5 : 2, 1, [6, 5]); }
+          const c0 = 1.6*Math.sin((T - K.d3[1])*1.2); secretPt(P, 42 - 15*c0*.6, 1, 'f(0) = ' + Math.round(42 - 15*c0*.6) + ' ?'); }
+        if (four){ curve(P, f3, css('--crv'), 3, clamp((T - K.d3[3])/1)); if (T >= K.d3[4]) secretPt(P, 42, 1, 'f(0) = 42 ✓'); } }
+      // généralisation et réalité : les trois courbes ensemble
+      if (T >= K.gen[0]){ const k = clamp((T - K.gen[0])/1); curve(P, f1, css('--crv'), 2.5, k*.9); curve(P, f2, '#c77dff', 2.5, k*.9); curve(P, f3, '#ffa94d', 2.5, k*.9); secretPt(P, 42, k, 'secret = 42'); }
+    }
+    if (T >= K.people){ PEOPLE.forEach((p, i) => { const k = back(clamp((T - K.people - i*.25)/.5)); if (k <= 0) return; let hi = false;
+        if (T >= K.d1[2] && T < K.d1[4] && i === 1) hi = true; if (T >= K.d1[4] && T < K.d1[7] && (i === 1 || i === 3)) hi = true;
+        if (T >= K.bad1[2] && T < K.bad2[0] && i === 2) hi = true;
+        if (T >= K.d2[1] && T < K.d2[3] && (i === 1 || i === 3)) hi = true; if (T >= K.d2[3] && T < K.sub3 && (i === 1 || i === 3 || i === 4)) hi = true;
+        if (T >= K.d3[1] && T < K.d3[3] && (i === 0 || i === 2 || i === 4)) hi = true; if (T >= K.d3[3] && T < K.gen[0] && i !== 3) hi = true;
+        avatar(PX(i), rowY, s*k, p, 1, hi);
+        // les cartes
+        let txt = null, col = p[1];
+        if (T >= K.bad1[1] && T < K.bad2[0] - .3) txt = '42';
+        if (T >= K.bad2[0] && T < K.want[0] - .5 && i < 2) txt = i === 0 ? '4 _' : '_ 2';
+        if (T >= K.d1[1] + .6 && T < K.d2[0] - .3) txt = '(' + (i + 1) + ' ; ' + f1(i + 1) + ')';
+        if (T >= K.d2[0] + .6 && T < K.d3[0] - .3) txt = '(' + (i + 1) + ' ; ' + f2(i + 1) + ')';
+        if (T >= K.d3[0] + .6 && T < K.gen[0] - .3) txt = '(' + (i + 1) + ' ; ' + f3(i + 1) + ')';
+        if (txt) cardTxt(PX(i), rowY + s*2.2, s, txt, col, clamp((T - K.bad1[1])/.4), burnT(i)); }); }
+    { const C = [a.x0 + aw*.47, a.y0 + (a.y1 - a.y0)*.6], R = Math.min(aw*.19, (a.y1 - a.y0)*.25);
+      const subW = (t0, t1) => clamp((T - t0)/.6)*(1 - clamp((T - t1 + .5)/.5));
+      let w; if ((w = subW(K.sub1, K.d1[0])) > 0) drawSubset(C[0], C[1], R, 5, 2, w);
+      if ((w = subW(K.sub2, K.d2[0])) > 0) drawSubset(C[0], C[1], R, 5, 3, w);
+      if ((w = subW(K.sub3, K.d3[0])) > 0) drawSubset(C[0], C[1], R, 5, 4, w);
+      if ((w = subW(K.sub4, K.real[0])) > 0) drawSubset(C[0], C[1], R, 8, 3, w);
+      if (T >= K.want[0] && stageA > 0) drawSubset(a.x0 + aw*.78, a.y0 + (a.y1 - a.y0)*.62, R*.7, 5, 2, clamp((T - K.want[0])/.6)*stageA); }
+    // ---------- panneau ----------
+    const part = T < K.d1[0] ? null : T < K.d2[0] ? 1 : T < K.gen[0] ? 2 : 3;
+    const cOp = part ? clamp((T - K.d1[0])/.6) : 0; card.style.opacity = cOp; card.style.transform = 'translateY(' + (1-cOp)*10 + 'px)';
+    [1, 2, 3].forEach(n => $('s' + n).style.display = part === n ? '' : 'none');
+    if (part === 1){ $('d0').style.opacity = clamp((T - K.d1[4])/.5); $('d1').style.opacity = clamp((T - K.d1[5])/.5); $('d2').style.opacity = clamp((T - K.d1[5] - 1.5)/.5); }
+    if (part === 2){ const deg3 = T >= K.d3[0]; $('s2t').textContent = deg3 ? 'Degré 3 · il faut 4 points' : 'Degré 2 · il faut 3 points';
+      $('s2f').innerHTML = deg3 ? '<span class="m">f</span>(<span class="m">x</span>) = <span class="m">ax</span><sup>3</sup> + <span class="m">bx</span><sup>2</sup> + <span class="m">cx</span> + <span class="m">d</span>' : '<span class="m">f</span>(<span class="m">x</span>) = <span class="m">ax</span><sup>2</sup> + <span class="m">bx</span> + <span class="m">c</span>';
+      $('s2h').innerHTML = deg3 ? '<span class="m">d</span> = <b class="cS">42</b> <span class="mu">(secret)</span> · <span class="m">a</span>, <span class="m">b</span>, <span class="m">c</span> <span class="mu">au hasard</span>' : '<span class="m">c</span> = <b class="cS">42</b> <span class="mu">(secret)</span> · <span class="m">a</span>, <span class="m">b</span> <span class="mu">au hasard</span>';
+      $('sys').style.display = deg3 ? 'none' : ''; $('sys3').style.display = deg3 && T >= K.d3[3] ? '' : 'none';
+      if (deg3){ ['z0','z1','z2','z3'].forEach((id, i) => $(id).style.opacity = clamp((T - K.d3[3] - .3 - i*.5)/.5)); $('brace3').style.opacity = clamp((T - K.d3[3])/.5); $('z4').style.opacity = clamp((T - K.d3[4])/.5); } ['y0','y1','y2'].forEach((id, i) => $(id).style.opacity = clamp((T - K.d2[3] - i*.6)/.5)); $('brace').style.opacity = clamp((T - K.d2[3])/.5); $('y3').style.opacity = clamp((T - K.d2[4])/.5);
+      $('e0').innerHTML = deg3 ? (T < K.d3[3] ? '3 points\u00a0: plusieurs courbes possibles' : '') : (T < K.d2[3] ? '2 points\u00a0: une infinité de paraboles' : '');
+      $('e1').innerHTML = '';
+      $('e0').style.opacity = deg3 ? clamp((T - K.d3[1])/.5) : clamp((T - K.d2[1])/.5); $('e1').style.opacity = deg3 ? clamp((T - K.d3[3])/.5) : 0; }
+    if (part === 3){ ['g0','g1','g2','g3','g4'].forEach((id, i) => $(id).style.opacity = clamp((T - K.gen[i])/.5)); }
+    let ci = -1; caps.forEach((c,i) => { if (T >= c[0]) ci = i; });
+    if (ci !== capIdx){ capIdx = ci; captxt.innerHTML = ci >= 0 ? caps[ci][1] : ''; }
+    capEl.style.opacity = (ci >= 0 && caps[ci][1]) ? clamp((T - caps[ci][0])/.35) : 0;
+  }
+  if (REC){ window.renderAt = T => { resize(); renderAt(T); }; window.END = END; return; }
+
+  // ---------- son (style « puce » rétro) ----------
+  const AU = { ctx:null, on:false, master:null, noise:null };
+  function auInit(){ const C = new (window.AudioContext || window.webkitAudioContext)(); const comp = C.createDynamicsCompressor(); comp.connect(C.destination);
+    const m = C.createGain(); m.gain.value = 0; m.connect(comp); AU.ctx = C; AU.master = m; }
+  function tone(f, vol, dur, type, delay){ const C = AU.ctx, t = C.currentTime + (delay||0), o = C.createOscillator(), g = C.createGain(); o.type = type || 'square'; o.frequency.value = f;
+    g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(Math.max(vol, .0002), t+.005); g.gain.exponentialRampToValueAtTime(.0001, t+dur); o.connect(g); g.connect(AU.master); o.start(t); o.stop(t+dur+.05); return o; }
+  const midi = mm => 440*Math.pow(2,(mm-69)/12);
+  const blip = (n, v) => tone(midi(n), v || .06, .09, 'square');
+  const jingle = (ns, v) => ns.forEach((n, i) => tone(midi(n), v || .06, .14, 'square', i*.09));
+  const FX = [[.3, () => jingle([72, 76, 79, 84])], [K.safe, () => jingle([60, 67])], [K.bad1[2], () => jingle([60, 55, 52], .06)], [K.bad2[1] + 1, () => jingle([60, 55, 52], .06)], [K.want[1], () => jingle([72, 76, 79], .05)],
+    [K.shamir[1], () => jingle([79, 84], .05)], [K.d1[4], () => jingle([67, 71, 74])], [K.d1[6], () => jingle([72, 76, 79, 84, 88], .07)], [K.d2[4], () => jingle([72, 76, 79, 84], .06)], [K.only, () => blip(79)], [K.d3[4], () => jingle([72, 76, 79, 84], .06)], [K.gen[4], () => jingle([67, 71, 74, 79])], [K.real[1], () => jingle([60, 64, 67, 72])]];
+  for (let i=0;i<5;i++){ FX.push([K.people + i*.25, () => blip(64 + i*3)]); FX.push([K.d1[1] + i*.3, () => blip(70 + i*2, .04)]); }
+  function audioTick(a, b){ if (!AU.on || b <= a) return; FX.forEach(([tm, fn]) => { if (tm > a && tm <= b) fn(); });
+    if (b > 4 && b < END - 2){ for (let i=Math.floor(a/.5)+1;i<=Math.floor(b/.5);i++){ const seq = [48, 55, 52, 55, 45, 52, 50, 55]; tone(midi(seq[i%8]), .018, .2, 'triangle'); } } }
+  function masterTo(v){ if (!AU.ctx) return; const t = AU.ctx.currentTime; AU.master.gain.cancelScheduledValues(t); AU.master.gain.setTargetAtTime(v, t, .15); }
+
+  // ---------- voix off ----------
+  const VO = { on:false, busy:false, until:0, voice:null, supported:'speechSynthesis' in window };
+  function pickVoice(){ if (!VO.supported) return; const vs = speechSynthesis.getVoices().filter(v => /^fr/i.test(v.lang)); if (!vs.length) return;
+    const score = v => (/natural|online|neural/i.test(v.name) ? 8 : 0) + (/google/i.test(v.name) ? 4 : 0) + (/fr-CH/i.test(v.lang) ? 2 : 0) + (/fr-FR/i.test(v.lang) ? 1 : 0) + (v.localService ? 0 : 1);
+    VO.voice = vs.sort((a,b) => score(b) - score(a))[0]; }
+  if (VO.supported){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+  function say(text){ if (!VO.supported) return; speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = VO.voice ? VO.voice.lang : 'fr-FR'; if (VO.voice) u.voice = VO.voice; u.rate = .97;
+    u.onstart = () => { VO.busy = true; if (AU.on) masterTo(.45); }; u.onend = u.onerror = () => { VO.busy = false; if (AU.on && playing) masterTo(.9); };
+    VO.busy = true; VO.until = performance.now() + (text.length*.085/.97 + 2)*1000; speechSynthesis.speak(u); }
+  function hush(){ if (VO.supported) speechSynthesis.cancel(); VO.busy = false; }
+  function voiceTick(a, b){ if (!VO.on || b <= a) return; for (const [tm, txt] of VOICE){ if (tm > a && tm <= b) say(txt); } }
+  function holdForVoice(prev, next){ if (!VO.on || !VO.busy || performance.now() > VO.until) return next; for (const [tm] of VOICE){ if (tm > prev && tm <= next) return Math.max(prev, tm - .001); } return next; }
+
+  // ---------- commandes ----------
+  let T = 0, playing = true, last = performance.now();
+  const pauseBtn = $('pause'), replayBtn = $('replay'), soundBtn = $('sound'), voiceBtn = $('voice'), seekEl = $('seek'), clockEl = $('clock');
+  pauseBtn.addEventListener('click', () => { if (T >= END){ T = 0; playing = true; hush(); } else playing = !playing; pauseBtn.textContent = playing ? 'Pause' : 'Lecture';
+    if (VO.supported){ if (playing) speechSynthesis.resume(); else speechSynthesis.pause(); } if (AU.on) masterTo(playing ? .9 : 0); });
+  replayBtn.addEventListener('click', () => { hush(); T = -0.001; playing = true; pauseBtn.textContent = 'Pause'; if (AU.on) masterTo(.9); });
+  soundBtn.addEventListener('click', () => { if (!AU.ctx) auInit(); AU.ctx.resume(); AU.on = !AU.on; soundBtn.textContent = AU.on ? 'Couper le son' : 'Activer le son'; soundBtn.setAttribute('aria-pressed', AU.on); masterTo(AU.on && playing ? .9 : 0); });
+  voiceBtn.addEventListener('click', () => { if (!VO.supported){ voiceBtn.textContent = 'Voix indisponible'; return; }
+    VO.on = !VO.on; voiceBtn.textContent = VO.on ? 'Couper la voix' : 'Activer la voix'; voiceBtn.setAttribute('aria-pressed', VO.on);
+    if (!VO.on){ hush(); if (AU.on && playing) masterTo(.9); return; } pickVoice();
+    if (T < .3){ say(VOICE[0][1]); T = .301; } else { let cur = null; for (const v of VOICE){ if (v[0] <= T) cur = v; } if (cur && T - cur[0] < 3) say(cur[1]); } });
+  seekEl.max = END;
+  let skipAudio = false, dragging = false;
+  const mmss = x => { x = Math.max(0, Math.round(x)); return Math.floor(x/60) + ':' + String(x%60).padStart(2,'0'); };
+  function jump(sec){ T = Math.max(0, Math.min(END, sec)); skipAudio = true; hush(); if (T >= END){ playing = false; pauseBtn.textContent = 'Lecture'; } }
+  const seekBox = seekEl.parentElement;
+  seekEl.addEventListener('pointerdown', () => { dragging = true; seekBox.classList.add('drag'); });
+  window.addEventListener('pointerup', () => { if (dragging) seekEl.blur(); dragging = false; seekBox.classList.remove('drag'); });
+  seekEl.addEventListener('input', () => jump(parseFloat(seekEl.value)));
+  document.addEventListener('keydown', e => { if (e.target.tagName === 'BUTTON' && (e.key === ' ' || e.key === 'Enter')) return; if (e.target === seekEl && e.key.startsWith('Arrow')) return;
+    if (e.key === ' '){ e.preventDefault(); pauseBtn.click(); } else if (e.key === 'ArrowLeft') jump(T - 5); else if (e.key === 'ArrowRight') jump(T + 5); });
+  function loop(now){
+    const dt = Math.min(.1, (now-last)/1000); last = now; const prevT = T;
+    if (playing){ T = holdForVoice(prevT, Math.min(END, T + dt)); if (T >= END){ playing = false; pauseBtn.textContent = 'Lecture'; } }
+    if (skipAudio) skipAudio = false; else { audioTick(prevT, T); voiceTick(prevT, T); }
+    if (!dragging) seekEl.value = T.toFixed(1); clockEl.textContent = mmss(T) + ' / ' + mmss(END);
+    renderAt(Math.max(0, T)); requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
+</script>
+<script>if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js');</script>
+</body>
+</html>

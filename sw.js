@@ -1,8 +1,8 @@
 // Mise en cache : le site fonctionne aussi hors connexion après une première visite
-const CACHE = 'visualmaths-v6';
-const FILES = ['./', 'index.html', 'valeur-absolue.html', 'exponentielle.html', 'logarithmes-intro.html', 'log-niveaux.html', 'log-son.html', 'manhattan-applications.html', 'respawn.html', 'points-vecteurs.html', 'droite-theorie.html', 'droite-drones.html', 'droite-rayon.html', 'droite-complete.html', 'plans-intersections.html', 'plans-obelisque.html', 'plans-robot.html', 'plans-complete.html',
+const CACHE = 'visualmaths-v7';
+const FILES = ['./', 'index.html', 'shamir.html', 'valeur-absolue.html', 'exponentielle.html', 'logarithmes-intro.html', 'log-niveaux.html', 'log-son.html', 'manhattan-applications.html', 'respawn.html', 'points-vecteurs.html', 'droite-theorie.html', 'droite-drones.html', 'droite-rayon.html', 'droite-complete.html', 'plans-intersections.html', 'plans-obelisque.html', 'plans-robot.html', 'plans-complete.html',
   'three.min.js', 'OrbitControls.js', 'RoomEnvironment.js', 'manifest.webmanifest', 'icone.svg',
-  'hero.jpg', 'thumb-valeur-absolue.jpg', 'thumb-exponentielle.jpg', 'thumb-log-intro.jpg', 'thumb-log-niveaux.jpg', 'thumb-log-son.jpg', 'thumb-manhattan.jpg', 'thumb-respawn.jpg', 'thumb-plans.jpg', 'thumb-obelisque.jpg', 'thumb-robot.jpg', 'thumb-points.jpg', 'thumb-droite.jpg', 'thumb-drones.jpg', 'thumb-rayon.jpg'];
+  'hero.jpg', 'thumb-shamir.jpg', 'thumb-valeur-absolue.jpg', 'thumb-exponentielle.jpg', 'thumb-log-intro.jpg', 'thumb-log-niveaux.jpg', 'thumb-log-son.jpg', 'thumb-manhattan.jpg', 'thumb-respawn.jpg', 'thumb-plans.jpg', 'thumb-obelisque.jpg', 'thumb-robot.jpg', 'thumb-points.jpg', 'thumb-droite.jpg', 'thumb-drones.jpg', 'thumb-rayon.jpg'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener('fetch', e => {
