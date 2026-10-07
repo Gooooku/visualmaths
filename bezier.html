@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icone.svg">
+<link rel="apple-touch-icon" href="icone.svg">
+<meta name="theme-color" content="#0b1024">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Application — les courbes de Bézier</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link id="gf" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&family=STIX+Two+Text:ital,wght@0,500;1,500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg1:#070b1c; --bg2:#151b46; --ink:#eef1ff; --muted:#8e97c4; --glass:rgba(255,255,255,.06); --stroke:rgba(255,255,255,.14);
+  --bip:#3ee6ff; --zap:#ff4f6d; --zip:#c77dff; --c0:#4fc3ff; --c1:#ffa94d; --c2:#c77dff; --cv:#ff5a6e; --gold:#ffd23f; --star:#ffd23f; --x:#ff7a85; --y:#5ee3a1; --wall:#2f5bff; --ok:#6dff94;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light){ :root:not([data-theme="dark"]){ --glass:rgba(255,255,255,.08); } }
+:root[data-theme="light"]{ --glass:rgba(255,255,255,.08); }
+:root{ box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); }
+*,*::before,*::after{ box-sizing:inherit; }
+html{ height:100%; scroll-padding-top:env(safe-area-inset-top,0px); }
+body{ height:100%; margin:0; background:var(--bg1); color:var(--ink); overflow:hidden; font-family:"Manrope", system-ui, -apple-system, "Segoe UI", sans-serif; }
+.m{ font-family:"STIX Two Text","Cambria Math","Times New Roman",serif; font-style:italic; font-weight:500; }
+.cB{ color:var(--bip); } .cZ{ color:var(--zap); } .cI{ color:var(--zip); } .cS{ color:var(--star); } .cx{ color:var(--x); } .cy{ color:var(--y); } .cOk{ color:var(--ok); } .mu{ color:var(--muted); }
+.stage{ position:relative; width:100%; height:100%; overflow:hidden; background:radial-gradient(120% 90% at 70% 15%, var(--bg2) 0%, var(--bg1) 62%); --u:min(1vw, 1.78vh); }
+canvas{ position:absolute; inset:0; width:100%; height:100%; display:block; }
+.title{ position:absolute; inset:0; display:grid; place-content:center; text-align:center; pointer-events:none; }
+.title h1{ margin:0; font-weight:800; font-size:calc(var(--u)*5.4); letter-spacing:-.02em; line-height:1.05; }
+.title p{ margin:calc(var(--u)*1.4) 0 0; font-size:calc(var(--u)*2.2); color:var(--muted); font-weight:600; }
+.caption{ position:absolute; left:calc(var(--u)*4); bottom:calc(var(--u)*4.5 + 20px); max-width:min(46%, 30em); pointer-events:none; font-size:calc(var(--u)*2.1); font-weight:700; line-height:1.25; }
+.caption > span{ display:block; }
+.caption .bar{ display:block; width:calc(var(--u)*6); height:calc(var(--u)*.5); border-radius:99px; margin-bottom:calc(var(--u)*1.2); background:linear-gradient(90deg, var(--bip), var(--zip), var(--zap)); }
+.card{ position:absolute; right:calc(var(--u)*3.5); bottom:calc(var(--u)*3.5 + 20px); width:21em; padding:calc(var(--u)*1.8) calc(var(--u)*2.2); font-size:calc(var(--u)*1.7);
+  background:var(--glass); border:1px solid var(--stroke); border-radius:calc(var(--u)*1.8); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); }
+.card h3{ margin:0 0 .5em; font-size:.8em; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:800; }
+.sec{ display:grid; gap:.35em; }
+.line{ white-space:nowrap; font-variant-numeric:tabular-nums; }
+.big{ font-size:1.25em; }
+.hr{ height:1px; background:var(--stroke); margin:.6em 0; }
+.num{ display:inline-block; min-width:1.6em; text-align:right; }
+table.cmp{ border-collapse:collapse; width:100%; font-variant-numeric:tabular-nums; }
+table.cmp td, table.cmp th{ padding:.25em .3em; text-align:left; white-space:nowrap; }
+table.cmp th{ font-size:.82em; color:var(--muted); font-weight:700; }
+.ctrl{ position:absolute; right:calc(var(--u)*3.5); top:calc(var(--u)*3); display:flex; gap:8px; }
+.ctrl button, .ctrl a.home{ font:inherit; font-weight:700; font-size:14px; padding:9px 15px; border-radius:99px; border:1px solid var(--stroke); background:var(--glass); color:var(--ink); cursor:pointer; backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); }
+.ctrl button:focus-visible{ outline:3px solid var(--bip); outline-offset:2px; }
+.seek{ position:absolute; left:0; right:0; bottom:0; padding:28px calc(var(--u)*3.5) calc(var(--u)*1.2) calc(var(--u)*4); display:flex; align-items:center; gap:14px; transition:opacity .25s; }
+.seek input{ flex:1; accent-color:var(--bip); height:22px; cursor:pointer; }
+.seek span{ font-size:14px; font-weight:600; color:var(--muted); font-variant-numeric:tabular-nums; min-width:6.5em; text-align:right; }
+@media (hover: hover){ .seek{ opacity:0; } .seek:hover, .seek:has(input:focus-visible), .seek.drag{ opacity:1; } }
+.rec .ctrl, .rec .seek{ display:none; } .rec *{ transition:none !important; }
+@media (max-aspect-ratio: 1/1){
+  .stage{ --u:min(1.9vw, 1.2vh); }
+  .card{ left:calc(var(--u)*2.5); right:calc(var(--u)*2.5); top:calc(var(--u)*2.5); bottom:auto; width:auto; font-size:calc(var(--u)*1.7); }
+  .ctrl{ left:calc(var(--u)*2.5); right:calc(var(--u)*2.5); top:auto; bottom:calc(var(--u)*2 + 34px); flex-wrap:wrap; gap:6px; }
+  .ctrl button, .ctrl a.home{ padding:7px 11px; font-size:13px; }
+  .caption{ left:calc(var(--u)*2.5); right:calc(var(--u)*2.5); max-width:none; bottom:calc(var(--u)*2 + 90px); font-size:calc(var(--u)*2.6); }
+  .seek{ padding:10px calc(var(--u)*3) calc(var(--u)*2); }
+}
+.cA{ color:var(--c0); } .cB{ color:var(--c1); } .cC{ color:var(--c2); } .cR{ color:var(--cv); } .cG{ color:var(--gold); }
+.card .line.big{ font-size:1.15em; }
+.ctrl a.home{ text-decoration:none; display:inline-flex; align-items:center; }
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <canvas id="c" aria-label="Animation : un circuit de jeu vidéo dont chaque virage est une courbe de Bézier cubique ; zoom sur un virage, construction point par point, puis tour complet en voiture"></canvas>
+  <div class="title" id="title"><div><h1>Les courbes de Bézier</h1><p>Application · fonctions polynomiales de degré 3</p></div></div>
+  <div class="card" id="card" style="opacity:0">
+    <div class="sec" id="sA">
+      <h3>Les 4 points de contrôle</h3>
+      <div class="line"><b class="cA">P₀</b>(0 ; 0) <span class="mu">fin de la 1<sup>re</sup> route</span></div>
+      <div class="line"><b class="cB">P₁</b><span id="p1v">(3 ; 0)</span> <span class="mu">poignée</span></div>
+      <div class="line"><b class="cB">P₂</b><span id="p2v">(5 ; 2)</span> <span class="mu">poignée</span></div>
+      <div class="line"><b class="cA">P₃</b>(5 ; 5) <span class="mu">début de la 2<sup>e</sup> route</span></div>
+      <div class="hr"></div>
+      <div class="line big" id="tval"><span class="m">t</span> = 0,00</div>
+      <div class="line mu" id="tnote" style="white-space:normal">&nbsp;</div>
+    </div>
+    <div class="sec" id="sB" style="display:none">
+      <h3>La formule de la courbe</h3>
+      <div class="line" id="f0" style="font-size:.86em; white-space:normal; line-height:1.5"><span class="m">B</span>(<span class="m">t</span>) = (1 − <span class="m">t</span>)<sup>3</sup><span class="cA">P₀</span> + 3(1 − <span class="m">t</span>)<sup>2</sup><span class="m">t</span> <span class="cB">P₁</span> + 3(1 − <span class="m">t</span>)<span class="m">t</span><sup>2</sup><span class="cB">P₂</span> + <span class="m">t</span><sup>3</sup><span class="cA">P₃</span></div>
+      <div class="line mu" id="f1">avec 0 ≤ <span class="m">t</span> ≤ 1</div>
+      <div class="hr"></div>
+      <div class="line big" id="f2"><span class="m">x</span>(<span class="m">t</span>) = −<span class="m">t</span><sup>3</sup> − 3<span class="m">t</span><sup>2</sup> + 9<span class="m">t</span></div>
+      <div class="line big" id="f3"><span class="m">y</span>(<span class="m">t</span>) = −<span class="m">t</span><sup>3</sup> + 6<span class="m">t</span><sup>2</sup></div>
+      <div class="line" id="f4" style="margin-top:.3em">→ deux <b>polynômes de degré 3</b>&nbsp;!</div>
+      <div class="hr"></div>
+      <div class="line" id="f5"><span class="m">x</span>(0,5) = <b class="cR">3,625</b></div>
+      <div class="line" id="f6"><span class="m">y</span>(0,5) = <b class="cR">1,375</b></div>
+      <div class="line" id="f7">→ <span class="m">B</span>(0,5) ≈ <b class="cR">(3,6 ; 1,4)</b></div>
+    </div>
+  </div>
+  <div class="caption" id="caption" style="opacity:0"><i class="bar"></i><span id="captxt"></span></div>
+  <div class="ctrl"><a class="home" href="index.html" aria-label="Retour à l'accueil">← Accueil</a><button id="voice" aria-pressed="false">Activer la voix</button><button id="sound" aria-pressed="false">Activer le son</button><button id="pause">Pause</button><button id="replay">Rejouer</button></div>
+  <div class="seek"><input type="range" id="seek" min="0" max="146" step="0.1" value="0" aria-label="Position dans l'animation"><span id="clock">0:00 / 2:26</span></div>
+</div>
+<script>
+(function(){
+  const REC = /[?&]record/.test(location.search); if (REC) document.body.classList.add('rec');
+  const $ = id => document.getElementById(id);
+  const clamp = x => Math.max(0, Math.min(1, x));
+  const ease = x => x<.5 ? 4*x*x*x : 1-Math.pow(-2*x+2,3)/2;
+  const lerp = (a,b,k) => a + (b-a)*k;
+  const back = x => { const c=1.7, c3=c+1; return 1 + c3*Math.pow(x-1,3) + c*Math.pow(x-1,2); };
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const fr = (v, d) => v.toFixed(d).replace('.', ',').replace('-', '−');
+
+  // ---------- les points de contrôle ----------
+  const P = [[0, 0], [3, 0], [5, 2], [5, 5]];
+  const L = (a, b, t) => [lerp(a[0], b[0], t), lerp(a[1], b[1], t)];
+  const bez = (Q, t) => { const u = 1 - t; return [u*u*u*Q[0][0] + 3*u*u*t*Q[1][0] + 3*u*t*t*Q[2][0] + t*t*t*Q[3][0], u*u*u*Q[0][1] + 3*u*u*t*Q[1][1] + 3*u*t*t*Q[2][1] + t*t*t*Q[3][1]]; };
+  const OBST = [3, .5];
+
+  // ---------- chronologie ----------
+  const K = { scene:4, zoomTxt:8.5, zoom:[9.5, 12.5], gap:13.5, ends:13.5, ctrl:[17, 19.5, 22], road:24.5, bend:[27, 34.5], lerp:[36.5, 39], lv1:[43, 44.5], lv2:[46, 47.5], lv3:[49, 50.5], sweep:[52.5, 59.5], formula:[61.5, 65], coords:[68, 71, 74], b05:[77.5, 1e9, 80.5], bmove:[83.5, 91.5], dezoom:[93.5, 96.5], segs:[97.5, 105.5], game:[1e9, 1e9], race:[107.5, 117], letters:[121.5, 128], hist:133, final:138 };
+  const END = 146;
+  function tAt(T){ if (T < K.lerp[1]) return 0; if (T < K.lv1[0] - 1.5) return ease(clamp((T - K.lerp[1])/1.5))*.5; if (T < K.lv1[0]) return .5 - ease(clamp((T - K.lv1[0] + 1.5)/1.2))*.2;
+    if (T < K.sweep[0]) return .3; if (T < K.sweep[0] + 1) return .3*(1 - ease(clamp((T - K.sweep[0])/1)));
+    if (T < K.sweep[1]) return clamp((T - K.sweep[0] - 1)/(K.sweep[1] - K.sweep[0] - 1)); return 1; }
+  const caps = [
+    [0.3, ''],
+    [K.scene, 'Voici le circuit d’un jeu de course, dans l’éditeur du jeu. Toutes ces courbes sont bien lisses, sans aucun angle.'],
+    [K.zoomTxt, 'Zoomons sur un des virages. Comment le concepteur l’a-t-il tracé\u00a0?'],
+    [K.gap, 'Effaçons-le\u00a0: il faut relier ces deux bouts de route par un virage lisse.'],
+    [K.ctrl[0], 'Il utilise une <b>courbe de Bézier</b>. Il place 4 points\u00a0: <span class="cA">P₀</span> au bout de la première route, <span class="cA">P₃</span> au début de la seconde…'],
+    [K.ctrl[1], '… et deux <b>poignées</b>, <span class="cB">P₁</span> et <span class="cB">P₂</span>, dans le prolongement des routes. Elles «\u00a0tirent\u00a0» la courbe pour lui donner sa forme.'],
+    [K.road, 'La route suit la courbe, sans aucun angle\u00a0: le raccord est parfaitement lisse.'],
+    [K.bend[0], 'Le concepteur attrape une poignée et la déplace\u00a0: le virage devient plus serré ou plus large, en direct. Les coordonnées de la poignée changent en même temps.'],
+    [K.lerp[0], 'Mais comment l’ordinateur calcule-t-il cette courbe\u00a0? Avec une idée simple\u00a0: avancer d’une fraction <span class="m">t</span> sur un segment.'],
+    [K.lerp[1], '<span class="m">t</span> = 0 au début du segment, <span class="m">t</span> = 0,5 au milieu, <span class="m">t</span> = 1 à la fin.'],
+    [K.lv1[0], 'Avec <span class="m">t</span> = 0,3\u00a0: un point à 30 % sur chacun des trois segments.'],
+    [K.lv2[0], 'On relie ces points, et on recommence\u00a0: deux points…'],
+    [K.lv3[0], '… puis un seul\u00a0: c’est le point de la courbe pour <span class="m">t</span> = 0,3.'],
+    [K.sweep[0], 'En faisant varier <span class="m">t</span> de 0 à 1, ce dernier point dessine tout le virage\u00a0!'],
+    [K.formula[0], 'Ce procédé donne une formule\u00a0: <span class="m">B</span>(<span class="m">t</span>) est un mélange des 4 points, avec des coefficients en <span class="m">t</span>.'],
+    [K.formula[1], 'Les puissances de <span class="m">t</span> vont jusqu’à <span class="m">t</span><sup>3</sup>\u00a0: c’est une Bézier <b>cubique</b>.'],
+    [K.coords[0], 'Avec nos 4 points, l’abscisse vaut <span class="m">x</span>(<span class="m">t</span>) = −<span class="m">t</span><sup>3</sup> − 3<span class="m">t</span><sup>2</sup> + 9<span class="m">t</span>…'],
+    [K.coords[1], '… et l’ordonnée <span class="m">y</span>(<span class="m">t</span>) = −<span class="m">t</span><sup>3</sup> + 6<span class="m">t</span><sup>2</sup>.'],
+    [K.coords[2], 'Le virage est donc décrit par deux <b>fonctions polynomiales de degré 3</b>\u00a0!'],
+    [K.b05[0], 'Par exemple, pour <span class="m">t</span> = 0,5\u00a0: <span class="m">x</span>(0,5) = 3,625 et <span class="m">y</span>(0,5) = 1,375.'],
+    [K.b05[2], 'Le point <span class="m">B</span>(0,5) ≈ (3,6 ; 1,4) est bien sur la route\u00a0!'],
+    [K.bmove[0], 'Pour construire la route, l’ordinateur calcule ainsi <span class="m">B</span>(0), <span class="m">B</span>(0,001), <span class="m">B</span>(0,002)… jusqu’à <span class="m">B</span>(1)\u00a0: point après point, il obtient tout le virage.'],
+    [K.dezoom[0], 'Revenons au circuit entier.'],
+    [K.race[0], 'Le circuit est prêt\u00a0: place à la course\u00a0!'],
+    [K.segs[0], 'Chaque virage est une courbe de Bézier, avec ses propres points et poignées. Les poignées sont alignées d’un virage à l’autre\u00a0: c’est ce qui rend le circuit parfaitement lisse.'],
+    [K.letters[0], 'Mais les courbes de Bézier ne servent pas qu’aux circuits. Chaque lettre que tu lis sur un écran est, elle aussi, dessinée avec des courbes de Bézier.'],
+    [K.letters[1], 'Dans les logiciels de dessin, l’outil «\u00a0plume\u00a0» fonctionne exactement ainsi\u00a0: des points et des poignées.'],
+    [K.hist, 'Elles portent le nom de Pierre Bézier, ingénieur chez Renault, qui les a utilisées dans les années 1960 pour dessiner des carrosseries de voitures.'],
+    [K.final, 'Les concepteurs de jeux et les graphistes s’en servent pour tracer des formes et des trajectoires lisses\u00a0: une route, le travelling d’une caméra, ou une lettre.']
+  ];
+  const VOICE = [
+    [0.3, "Les courbes de Bézier."],
+    [K.scene, "Voici le circuit d'un jeu de course, dans l'éditeur du jeu. Toutes ces courbes sont bien lisses, sans aucun angle."],
+    [K.zoomTxt, "Zoomons sur un des virages. Comment le concepteur l'a-t-il tracé ?"],
+    [K.gap, "Effaçons-le : il faut relier ces deux bouts de route par un virage lisse."],
+    [K.ctrl[0], "Il utilise une courbe de Bézier. Il place quatre points : P zéro au bout de la première route, P trois au début de la seconde…"],
+    [K.ctrl[1], "… et deux poignées, P un et P deux, dans le prolongement des routes. Elles tirent la courbe pour lui donner sa forme."],
+    [K.road, "La route suit la courbe, sans aucun angle : le raccord est parfaitement lisse."],
+    [K.bend[0], "Le concepteur attrape une poignée et la déplace : le virage devient plus serré ou plus large, en direct. Les coordonnées de la poignée changent en même temps."],
+    [K.lerp[0], "Mais comment l'ordinateur calcule-t-il cette courbe ? Avec une idée simple : avancer d'une fraction t sur un segment."],
+    [K.lerp[1], "t égale zéro au début du segment, zéro virgule cinq au milieu, un à la fin."],
+    [K.lv1[0], "Avec t égale zéro virgule trois : un point à trente pour cent sur chacun des trois segments."],
+    [K.lv2[0], "On relie ces points, et on recommence : deux points…"],
+    [K.lv3[0], "… puis un seul : c'est le point de la courbe pour t égale zéro virgule trois."],
+    [K.sweep[0], "En faisant varier t de zéro à un, ce dernier point dessine tout le virage !"],
+    [K.formula[0], "Ce procédé donne une formule : B de t est un mélange des quatre points, avec des coefficients en t."],
+    [K.formula[1], "Les puissances de t vont jusqu'à t au cube : c'est une Bézier cubique."],
+    [K.coords[0], "Avec nos quatre points, l'abscisse vaut moins t cube, moins trois t carré, plus neuf t…"],
+    [K.coords[1], "… et l'ordonnée, moins t cube, plus six t carré."],
+    [K.coords[2], "Le virage est donc décrit par deux fonctions polynomiales de degré trois !"],
+    [K.b05[0], "Par exemple, pour t égale zéro virgule cinq : x vaut trois virgule six deux cinq, et y vaut un virgule trois sept cinq."],
+    [K.b05[2], "Le point B de zéro virgule cinq, environ trois virgule six, un virgule quatre, est bien sur la route !"],
+    [K.bmove[0], "Pour construire la route, l'ordinateur calcule ainsi B de zéro, B de zéro virgule zéro zéro un, B de zéro virgule zéro zéro deux… jusqu'à B de un : point après point, il obtient tout le virage."],
+    [K.dezoom[0], "Revenons au circuit entier."],
+    [K.race[0], "Le circuit est prêt : place à la course !"],
+    [K.segs[0], "Chaque virage est une courbe de Bézier, avec ses propres points et poignées. Les poignées sont alignées d'un virage à l'autre : c'est ce qui rend le circuit parfaitement lisse."],
+    [K.letters[0], "Mais les courbes de Bézier ne servent pas qu'aux circuits. Chaque lettre que tu lis sur un écran est, elle aussi, dessinée avec des courbes de Bézier."],
+    [K.letters[1], "Dans les logiciels de dessin, l'outil plume fonctionne exactement ainsi : des points et des poignées."],
+    [K.hist, "Elles portent le nom de Pierre Bézier, ingénieur chez Renault, qui les a utilisées dans les années mille neuf cent soixante pour dessiner des carrosseries de voitures."],
+    [K.final, "Les concepteurs de jeux et les graphistes s'en servent pour tracer des formes et des trajectoires lisses : une route, le travelling d'une caméra, ou une lettre."]
+  ];
+
+  caps.sort((p, q) => p[0] - q[0]); VOICE.sort((p, q) => p[0] - q[0]);
+  // ---------- canevas ----------
+  const stage = $('stage'), cv = $('c'), ctx = cv.getContext('2d');
+  let W = 1, H = 1, DPR = 1;
+  function resize(){ DPR = REC ? 1 : Math.min(devicePixelRatio || 1, 2); W = stage.clientWidth; H = stage.clientHeight; cv.width = W*DPR; cv.height = H*DPR; ctx.setTransform(DPR, 0, 0, DPR, 0, 0); }
+  new ResizeObserver(resize).observe(stage); resize();
+  const portrait = () => W/H < 1;
+  function area(){ return portrait() ? {x0:W*.04, x1:W*.96, y0:H*.32, y1:H*.72} : {x0:W*.03, x1:W*.6, y0:H*.06, y1:H*.72}; }
+  function glowOn(color, b){ ctx.shadowColor = color; ctx.shadowBlur = b; } function glowOff(){ ctx.shadowBlur = 0; }
+  function roundRect(x, y, w, h, r){ ctx.beginPath(); ctx.moveTo(x+r, y); ctx.arcTo(x+w, y, x+w, y+h, r); ctx.arcTo(x+w, y+h, x, y+h, r); ctx.arcTo(x, y+h, x, y, r); ctx.arcTo(x, y, x+w, y, r); ctx.closePath(); }
+  function text(t, x, y, size, color, align, weight){ ctx.font = (weight || 700) + ' ' + size + 'px Manrope, system-ui, sans-serif'; ctx.fillStyle = color; ctx.textAlign = align || 'center'; ctx.textBaseline = 'middle'; ctx.fillText(t, x, y); }
+  function dot(x, y, r, color, glow){ if (glow) glowOn(color, r*3); ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2); ctx.fill(); glowOff(); }
+  function grid(){ ctx.strokeStyle = 'rgba(90,120,255,.07)'; ctx.lineWidth = 1; const s = Math.max(28, W/40); for (let x = (W % s)/2; x < W; x += s){ ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); } for (let y = (H % s)/2; y < H; y += s){ ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); } }
+  let ZOOM = 1;   // 1 = zoom sur le virage, 0 = circuit entier
+  function M(){ const a = area(), aw = a.x1 - a.x0, ah = a.y1 - a.y0;
+    const sZ = Math.min(aw/9.6, ah/7.6), cZ = [1.6 , 2.6], sO = Math.min(aw/19, ah/18.5), cO = [-2.5, 3.6];
+    const s = Math.exp(lerp(Math.log(sO), Math.log(sZ), ZOOM)), cx = lerp(cO[0], cZ[0], ZOOM), cy = lerp(cO[1], cZ[1], ZOOM), mx = (a.x0 + a.x1)/2, my = (a.y0 + a.y1)/2;
+    return { X: x => mx + (x - cx)*s, Y: y => my - (y - cy)*s, s }; }
+  const seg = (G, p, q, col, w, dash) => { ctx.strokeStyle = col; ctx.lineWidth = w; if (dash) ctx.setLineDash(dash); ctx.beginPath(); ctx.moveTo(G.X(p[0]), G.Y(p[1])); ctx.lineTo(G.X(q[0]), G.Y(q[1])); ctx.stroke(); ctx.setLineDash([]); };
+  function curvePath(G, Q, t1, col, w){ ctx.strokeStyle = col; ctx.lineWidth = w; glowOn(col, 10); ctx.beginPath(); for (let i=0;i<=160;i++){ const p = bez(Q, t1*i/160); i ? ctx.lineTo(G.X(p[0]), G.Y(p[1])) : ctx.moveTo(G.X(p[0]), G.Y(p[1])); } ctx.stroke(); glowOff(); }
+  function terrain(G, al){ const a = area(); ctx.globalAlpha = al*.9; const gstep = G.s > 30 ? 1 : 2; const g = ctx.createLinearGradient(0, a.y0, 0, a.y1); g.addColorStop(0, 'rgba(30,70,55,.55)'); g.addColorStop(1, 'rgba(20,50,40,.55)'); ctx.fillStyle = g; roundRect(a.x0, a.y0, a.x1 - a.x0, a.y1 - a.y0, 14); ctx.fill();
+    ctx.strokeStyle = 'rgba(120,220,170,.08)'; ctx.lineWidth = 1; for (let x = -14; x <= 10; x += gstep){ ctx.beginPath(); ctx.moveTo(G.X(x), a.y0); ctx.lineTo(G.X(x), a.y1); ctx.stroke(); } for (let y = -8; y <= 14; y += gstep){ ctx.beginPath(); ctx.moveTo(a.x0, G.Y(y)); ctx.lineTo(a.x1, G.Y(y)); ctx.stroke(); }
+    text('ÉDITEUR DE NIVEAU', a.x0 + 14, a.y0 + 16, 11, 'rgba(180,230,200,.7)', 'left', 800); ctx.globalAlpha = 1; }
+  function roadStroke(G, pts, al, k){ if (pts.length < 2) return; ctx.globalAlpha = al; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    const path = () => { ctx.beginPath(); pts.forEach((p, i) => i ? ctx.lineTo(G.X(p[0]), G.Y(p[1])) : ctx.moveTo(G.X(p[0]), G.Y(p[1]))); };
+    ctx.strokeStyle = '#2b2f3a'; ctx.lineWidth = G.s*.95*k; path(); ctx.stroke(); ctx.strokeStyle = '#3d4352'; ctx.lineWidth = G.s*.8*k; path(); ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = Math.max(1.5, G.s*.05); ctx.setLineDash([G.s*.25, G.s*.22]); path(); ctx.stroke(); ctx.setLineDash([]); ctx.lineCap = 'butt'; ctx.globalAlpha = 1; }
+  const ANCH = [[0, 0], [5, 5], [3, 10], [-4, 11], [-9, 7], [-6, 3], [-10, -2], [-5, -4]], NA = ANCH.length;
+  const TAN = ANCH.map((p, i) => { if (i === 0) return [9, 0]; if (i === 1) return [0, 9]; const a = ANCH[(i - 1 + NA) % NA], b = ANCH[(i + 1) % NA]; return [(b[0] - a[0])/2, (b[1] - a[1])/2]; });
+  const SEGS = ANCH.map((p, i) => { const q = ANCH[(i + 1) % NA], tp = TAN[i], tq = TAN[(i + 1) % NA]; return [p, [p[0] + tp[0]/3, p[1] + tp[1]/3], [q[0] - tq[0]/3, q[1] - tq[1]/3], q]; });
+  const segPts = (k, n) => { const pts = []; for (let i=0;i<=n;i++) pts.push(bez(SEGS[k], i/n)); return pts; };
+  const SEGCOL = ['#ff5a6e', '#4fc3ff', '#ffa94d', '#c77dff', '#6dff94', '#ffd23f', '#ff7eb6', '#3ee6ff'];
+  function car(x, y, s, dir, al){ ctx.save(); ctx.globalAlpha = al; ctx.translate(x, y); ctx.rotate(dir); glowOn('#ff5a6e', 10); ctx.fillStyle = '#ff5a6e'; roundRect(-s*.5, -s*.27, s, s*.54, s*.14); ctx.fill(); glowOff();
+    ctx.fillStyle = '#1b2240'; roundRect(-s*.1, -s*.21, s*.32, s*.42, s*.08); ctx.fill(); ctx.fillStyle = '#ffe9a0'; ctx.fillRect(s*.42, -s*.22, s*.08, s*.12); ctx.fillRect(s*.42, s*.1, s*.08, s*.12); ctx.restore(); }
+  // une lettre « S » faite de deux courbes de Bézier
+  const LETTER = [[[3.6, 4.6], [2.6, 5.4], [1.2, 4.9], [1.4, 3.8]], [[1.4, 3.8], [1.6, 2.8], [3.8, 3.1], [3.8, 1.9]], [[3.8, 1.9], [3.8, .7], [1.8, .6], [1.1, 1.4]]];
+  function label(G, p, t, col, dx, dy){ text(t, G.X(p[0]) + (dx || 0), G.Y(p[1]) + (dy || -16), Math.max(13, G.s*.32), col, 'center', 800); }
+  function handle(G, p, col){ ctx.fillStyle = col; glowOn(col, 8); ctx.fillRect(G.X(p[0]) - 6, G.Y(p[1]) - 6, 12, 12); glowOff(); }
+
+  // ---------- rendu ----------
+  const titleEl = $('title'), card = $('card'), captxt = $('captxt'), capEl = $('caption');
+  let capIdx = -2;
+  function renderAt(T){
+    ctx.clearRect(0, 0, W, H); grid();
+    titleEl.style.opacity = clamp((T-.2)/.6)*(1 - clamp((T-3.4)/.6));
+    ZOOM = T < K.zoom[0] ? 0 : T < K.zoom[1] ? ease((T - K.zoom[0])/(K.zoom[1] - K.zoom[0])) : T < K.dezoom[0] ? 1 : T < K.dezoom[1] ? 1 - ease((T - K.dezoom[0])/(K.dezoom[1] - K.dezoom[0])) : 0;
+    const G = M(), a = area(), kL = clamp((T - K.letters[0] - .3)/1.2), kScene = 1 - clamp((T - K.letters[0] - 3.5)/1.2), shr = ease(clamp((T - K.letters[0] + .6)/1.6));
+    const Q = P.map(p => p.slice()); let grab = -1; if (T >= K.bend[0] && T < K.bend[1]){ const mid = (K.bend[0] + K.bend[1])/2;
+      if (T < mid){ const k = (T - K.bend[0])/(mid - K.bend[0]); Q[1] = [3 + 2*Math.sin(k*Math.PI*2)*(k < .5 ? 1 : .75), 0]; grab = 1; } else { const k = (T - mid)/(K.bend[1] - mid); Q[2] = [5, 2 + 1.6*Math.sin(k*Math.PI*2)*(k < .5 ? -1 : .9)]; grab = 2; } }
+    if (kScene > 0){ ctx.save(); { const cx = (a.x0 + a.x1)/2, cy = (a.y0 + a.y1)/2, sc = 1 - .5*shr; ctx.translate(cx - (a.x1 - a.x0)*.26*shr, cy); ctx.scale(sc, sc); ctx.translate(-cx, -cy); } roundRect(a.x0, a.y0, a.x1 - a.x0, a.y1 - a.y0, 14); ctx.clip();
+      if (T >= K.scene) terrain(G, clamp((T - K.scene)/.6)*kScene);
+      // le circuit (tous les virages sauf celui qu'on reconstruit pendant le zoom)
+      if (T >= K.scene){ const kd = clamp((T - K.scene)/2); for (let k=1;k<NA;k++){ const kk = clamp(kd*NA - k + 1); if (kk > 0) roadStroke(G, segPts(k, 50).slice(0, Math.max(2, Math.round(51*kk))), kScene, 1); }
+        const gone = T >= K.gap && T < K.sweep[1] ? 1 : 0, k0 = clamp(kd*NA); if (!gone && !(T >= K.road && T < K.dezoom[0])){ roadStroke(G, segPts(0, 50).slice(0, Math.max(2, Math.round(51*k0))), kScene*(T >= K.gap - .6 && T < K.gap ? 1 - (T - K.gap + .6)/.6 : 1), 1); } }
+      if (T >= K.zoom[0] && T < K.gap){ ctx.globalAlpha = kScene*clamp((T - K.zoom[0])/.6)*(1 - clamp((T - K.gap + .6)/.6)); ctx.strokeStyle = 'rgba(255,210,63,.9)'; ctx.lineWidth = 2; ctx.setLineDash([6, 6]); const pp = segPts(0, 30); ctx.beginPath(); pp.forEach((p, i) => i ? ctx.lineTo(G.X(p[0]), G.Y(p[1])) : ctx.moveTo(G.X(p[0]), G.Y(p[1]))); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = kScene; }
+      if (T >= K.ends && T < K.ctrl[0] + .5){ ctx.globalAlpha = kScene*(1 - clamp((T - K.ctrl[0])/.5)); const ph = (T*1.2) % 1; ctx.strokeStyle = 'rgba(255,210,63,' + (1 - ph) + ')'; ctx.lineWidth = 2; [P[0], P[3]].forEach(p => { ctx.beginPath(); ctx.arc(G.X(p[0]), G.Y(p[1]), 8 + ph*18, 0, 7); ctx.stroke(); }); ctx.globalAlpha = 1; }
+      // le virage reconstruit (dans la vue zoomée)
+      const tc = tAt(T), roadK = clamp((T - K.road)/1.2), zoomPart = T >= K.ctrl[0] && T < K.dezoom[1];
+      if (T >= K.road && (T < K.lerp[0] + .5 || T >= K.sweep[1])){ const pts = []; for (let i=0;i<=80;i++) pts.push(bez(Q, (T < K.lerp[0] ? roadK : 1)*i/80)); roadStroke(G, pts, kScene*(T >= K.lerp[0] && T < K.sweep[1] ? 1 - clamp((T - K.lerp[0])/.5) : 1), 1); }
+      ctx.globalAlpha = kScene*(zoomPart ? 1 - clamp((T - K.dezoom[0])/.8) : 0);
+      if (zoomPart){ const al0 = ctx.globalAlpha;
+        if (T >= K.ctrl[0]){ ctx.globalAlpha = al0*clamp((T - K.ctrl[0])/.5); dot(G.X(Q[0][0]), G.Y(Q[0][1]), 7, css('--c0'), true); dot(G.X(Q[3][0]), G.Y(Q[3][1]), 7, css('--c0'), true); label(G, Q[0], 'P₀', css('--c0'), -2, 24); label(G, Q[3], 'P₃', css('--c0'), 24, 4); }
+        if (T >= K.ctrl[1]){ ctx.globalAlpha = al0*clamp((T - K.ctrl[1])/.5); seg(G, Q[0], Q[1], 'rgba(255,169,77,.8)', 1.6); seg(G, Q[3], Q[2], 'rgba(255,169,77,.8)', 1.6); if (T >= K.lerp[0]) seg(G, Q[1], Q[2], 'rgba(255,169,77,.6)', 1.4, [5, 5]);
+          handle(G, Q[1], css('--c1')); handle(G, Q[2], css('--c1')); label(G, Q[1], 'P₁', css('--c1'), 0, 22); label(G, Q[2], 'P₂', css('--c1'), 22, 4); }
+        if (grab > 0){ const h = Q[grab], ph = (T*2) % 1; ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; glowOn('#fff', 10); ctx.beginPath(); ctx.arc(G.X(h[0]), G.Y(h[1]), 14 + 4*Math.sin(T*8), 0, 7); ctx.stroke(); glowOff();
+          text('(' + fr(h[0], 1) + ' ; ' + fr(h[1], 1) + ')', G.X(h[0]) + 20, G.Y(h[1]) + (grab === 1 ? 26 : -22), 13, css('--c1'), 'left', 800);
+          // petite main qui tient la poignée
+          ctx.save(); ctx.translate(G.X(h[0]) + 10, G.Y(h[1]) + 12); ctx.fillStyle = '#fff'; ctx.strokeStyle = '#1b2240'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, 16); ctx.lineTo(4, 12); ctx.lineTo(7, 19); ctx.lineTo(10, 18); ctx.lineTo(7, 11); ctx.lineTo(12, 11); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.restore(); }
+        if (T >= K.ctrl[2] && T < K.road + 1.2){ ctx.globalAlpha = al0*clamp((T - K.ctrl[2])/.6); curvePath(G, Q, clamp((T - K.ctrl[2])/1.4), css('--cv'), 3); }
+        ctx.globalAlpha = al0;
+        if (T >= K.lerp[0] && T < K.sweep[1] + .6){ ctx.globalAlpha = al0*(1 - clamp((T - K.sweep[1])/.6));
+          const q0 = L(Q[0], Q[1], tc), q1 = L(Q[1], Q[2], tc), q2 = L(Q[2], Q[3], tc), r0 = L(q0, q1, tc), r1 = L(q1, q2, tc), b = L(r0, r1, tc);
+          if (T >= K.sweep[0]) curvePath(G, Q, tc, css('--cv'), 3.5);
+          if (T >= K.lerp[1]){ dot(G.X(q0[0]), G.Y(q0[1]), 6, css('--c0'), true); if (T < K.lv1[0]) label(G, q0, 't = ' + fr(tc, 2), css('--c0'), 0, -18); }
+          if (T >= K.lv1[0]){ dot(G.X(q1[0]), G.Y(q1[1]), 6, css('--c0'), true); dot(G.X(q2[0]), G.Y(q2[1]), 6, css('--c0'), true); }
+          if (T >= K.lv2[0]){ seg(G, q0, q1, 'rgba(79,195,255,.85)', 2); seg(G, q1, q2, 'rgba(79,195,255,.85)', 2); dot(G.X(r0[0]), G.Y(r0[1]), 6, css('--c2'), true); dot(G.X(r1[0]), G.Y(r1[1]), 6, css('--c2'), true); }
+          if (T >= K.lv3[0]){ seg(G, r0, r1, 'rgba(199,125,255,.9)', 2); dot(G.X(b[0]), G.Y(b[1]), 8, css('--cv'), true); if (T < K.sweep[0] + 1) label(G, b, 'B(0,3)', css('--cv'), -30, -14); }
+          ctx.globalAlpha = al0; }
+        if (T >= K.b05[0] && T < K.bmove[0]){ const pb = bez(Q, .5), kb = T >= K.b05[2] ? back(clamp((T - K.b05[2])/.6)) : 0;
+          ctx.setLineDash([5, 5]); ctx.strokeStyle = 'rgba(255,90,110,.7)'; ctx.lineWidth = 1.5; if (T >= K.b05[0] + .8){ ctx.beginPath(); ctx.moveTo(G.X(pb[0]), G.Y(-.6)); ctx.lineTo(G.X(pb[0]), G.Y(pb[1])); ctx.stroke(); text('3,625', G.X(pb[0]) + 6, G.Y(-.45), 12, css('--cv'), 'left', 800); }
+          if (T >= K.b05[0] + 1.2){ ctx.beginPath(); ctx.moveTo(G.X(-1.6), G.Y(pb[1])); ctx.lineTo(G.X(pb[0]), G.Y(pb[1])); ctx.stroke(); text('1,375', G.X(-1.6) - 4, G.Y(pb[1]) - 10, 12, css('--cv'), 'left', 800); } ctx.setLineDash([]);
+          if (kb > 0 && T < K.bmove[0]){ dot(G.X(pb[0]), G.Y(pb[1]), 9*kb, css('--cv'), true); text('B(0,5)', G.X(pb[0]) + 14, G.Y(pb[1]) + 18, Math.max(13, G.s*.3), css('--cv'), 'left', 800); } }
+        if (T >= K.bmove[0] && T < K.dezoom[0] + .8){ const tt = clamp((T - K.bmove[0] - .4)/(K.bmove[1] - K.bmove[0] - 1));
+          for (let i=0;i<=Math.floor(tt*60);i++){ const p = bez(Q, i/60); dot(G.X(p[0]), G.Y(p[1]), 2.6, 'rgba(255,208,214,.9)'); }
+          const pb = bez(Q, tt); dot(G.X(pb[0]), G.Y(pb[1]), 9, css('--cv'), true); text('B(' + fr(tt, 3) + ')', G.X(pb[0]) + 14, G.Y(pb[1]) - 16, Math.max(14, G.s*.32), css('--cv'), 'left', 800); } }
+      ctx.globalAlpha = kScene;
+      // vue d'ensemble : chaque virage avec ses points et poignées
+      if (T >= K.segs[0] && T < K.letters[0] + 1){ const kAll = 1 - clamp((T - K.race[0] + .5)/1);
+        for (let k=0;k<NA;k++){ const t0 = K.segs[0] + k*(K.segs[1] - K.segs[0])/NA, kk = clamp((T - t0)/.5); if (kk <= 0) continue; const S = SEGS[k], col = SEGCOL[k];
+          ctx.globalAlpha = kScene*kk*kAll; if (kAll <= 0) continue; ctx.strokeStyle = col; ctx.lineWidth = 3; glowOn(col, 8); ctx.beginPath(); segPts(k, 40).forEach((p, i) => i ? ctx.lineTo(G.X(p[0]), G.Y(p[1])) : ctx.moveTo(G.X(p[0]), G.Y(p[1]))); ctx.stroke(); glowOff();
+          seg(G, S[0], S[1], 'rgba(255,169,77,.85)', 1.3); seg(G, S[3], S[2], 'rgba(255,169,77,.85)', 1.3); ctx.fillStyle = css('--c1'); [S[1], S[2]].forEach(h => ctx.fillRect(G.X(h[0]) - 4, G.Y(h[1]) - 4, 8, 8)); dot(G.X(S[0][0]), G.Y(S[0][1]), 5, '#fff', true); }
+        ctx.globalAlpha = kScene; }
+      // la course : trois voitures, pour le plaisir
+      if (T >= K.race[0] - .5){ const kr = clamp((T - K.race[0] + .5)/.5), el = Math.max(0, T - K.race[0]);
+        const S0 = SEGS[0][0], w = .45; ctx.globalAlpha = kScene*kr; for (let i=0;i<6;i++) for (let j=0;j<2;j++){ ctx.fillStyle = (i + j) % 2 ? '#fff' : '#111'; const yy = -w + i*(2*w/6), xx = -.12 + j*.12; ctx.fillRect(G.X(S0[0] + xx), G.Y(S0[1] + yy + 2*w/6), G.s*.12, G.s*2*w/6); }
+        const CARS = [['#ff5a6e', -.22, 1.00, .00], ['#4fc3ff', .22, .965, .9], ['#ffd23f', 0, .93, 1.8]];
+        CARS.forEach(([col, off, spd, ph]) => { const u = Math.min(NA - .001, el*spd*.92 + .08*Math.sin(el*.9 + ph)), uu = Math.max(0, u) % NA, k = Math.floor(uu), tt = uu - k;
+          const p = bez(SEGS[k], tt), p2 = bez(SEGS[k], Math.min(1, tt + .01)), dx = p2[0] - p[0], dy = p2[1] - p[1], dl = Math.hypot(dx, dy) || 1, q = [p[0] - dy/dl*off, p[1] + dx/dl*off];
+          ctx.save(); ctx.globalAlpha = kScene*kr; ctx.translate(G.X(q[0]), G.Y(q[1])); ctx.rotate(Math.atan2(-dy, dx)); glowOn(col, 10); ctx.fillStyle = col; roundRect(-G.s*.42, -G.s*.2, G.s*.84, G.s*.4, G.s*.1); ctx.fill(); glowOff();
+          ctx.fillStyle = '#1b2240'; roundRect(-G.s*.08, -G.s*.15, G.s*.26, G.s*.3, G.s*.06); ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,.35)'; for (let k2=1;k2<5;k2++) ctx.fillRect(-G.s*.42 - k2*G.s*.18, -G.s*.05, G.s*.1, G.s*.1); ctx.restore(); });
+        ctx.globalAlpha = kScene*kr; text('COURSE · 1 TOUR', a.x1 - 16, a.y0 + 18, 14, '#fff', 'right', 800);
+        if (el*.92 >= NA - .05){ const kw = back(clamp((el - (NA - .05)/.92)/.6)); for (let i=0;i<30;i++){ const ph2 = ((el - (NA - .05)/.92)*.6 + i*.137) % 1; ctx.fillStyle = ['#ff5a6e','#ffd23f','#4fc3ff','#6dff94','#c77dff'][i % 5]; ctx.fillRect(a.x0 + ((i*.377) % 1)*(a.x1 - a.x0), a.y0 + ph2*(a.y1 - a.y0), 6, 10); } ctx.globalAlpha = kScene; text('🏁 Victoire de la voiture rouge\u00a0!', (a.x0 + a.x1)/2, a.y0 + (a.y1 - a.y0)*.5, Math.max(18, G.s*.9)*kw, '#ff5a6e', 'center', 800); } }
+      ctx.globalAlpha = 1; ctx.restore(); }
+    // ---- la lettre « S » en courbes de Bézier ----
+    if (kL > 0){ ctx.globalAlpha = kL; const k2 = clamp((T - K.letters[0] - .3)/2.5); const aw2 = a.x1 - a.x0, sL = Math.min(aw2/12, (a.y1 - a.y0)/6.5), cxL = a.x0 + aw2*(.62 - .12*clamp((T - K.letters[0] - 3.5)/1.2)), cyL = (a.y0 + a.y1)/2;
+      const G = { X: x => cxL + (x - 3.3)*sL, Y: y => cyL - (y - 3)*sL, s: sL };
+      LETTER.forEach((Qs, j) => { const kk = clamp(k2*3 - j); if (kk <= 0) return; ctx.strokeStyle = '#fff'; ctx.lineWidth = G.s*.42; ctx.lineCap = 'round'; ctx.beginPath(); for (let i=0;i<=60;i++){ const p = bez(Qs, kk*i/60); i ? ctx.lineTo(G.X(p[0]), G.Y(p[1])) : ctx.moveTo(G.X(p[0]), G.Y(p[1])); } ctx.stroke(); ctx.lineCap = 'butt';
+        if (T >= K.letters[1]){ seg(G, Qs[0], Qs[1], 'rgba(255,169,77,.9)', 1.5); seg(G, Qs[3], Qs[2], 'rgba(255,169,77,.9)', 1.5); handle(G, Qs[1], css('--c1')); handle(G, Qs[2], css('--c1')); dot(G.X(Qs[0][0]), G.Y(Qs[0][1]), 6, css('--c0'), true); dot(G.X(Qs[3][0]), G.Y(Qs[3][1]), 6, css('--c0'), true); } });
+      text('Aa', G.X(7.4), G.Y(4.2), G.s*1.4, 'rgba(255,255,255,.85)', 'center', 800); text('polices · logos · dessins', G.X(7.4), G.Y(2.8), Math.max(12, G.s*.28), css('--muted'), 'center', 800);
+      ctx.globalAlpha = 1; }
+    // ---------- panneau ----------
+    const part = T < K.ctrl[1] ? null : T < K.formula[0] ? 'A' : T < K.dezoom[0] ? 'B' : null; const cOp = part ? clamp((T - K.ctrl[1])/.6) : 0; card.style.opacity = cOp; card.style.transform = 'translateY(' + (1-cOp)*10 + 'px)';
+    $('sA').style.display = part === 'A' ? '' : 'none'; $('sB').style.display = part === 'B' ? '' : 'none';
+    if (part === 'A'){ const tc = tAt(T); { let q1 = [3, 0], q2 = [5, 2]; if (T >= K.bend[0] && T < K.bend[1]){ const mid = (K.bend[0] + K.bend[1])/2; if (T < mid){ const k = (T - K.bend[0])/(mid - K.bend[0]); q1 = [3 + 2*Math.sin(k*Math.PI*2)*(k < .5 ? 1 : .75), 0]; } else { const k = (T - mid)/(K.bend[1] - mid); q2 = [5, 2 + 1.6*Math.sin(k*Math.PI*2)*(k < .5 ? -1 : .9)]; } }
+        $('p1v').textContent = '(' + fr(q1[0], 1) + ' ; ' + fr(q1[1], 0) + ')'; $('p2v').textContent = '(' + fr(q2[0], 0) + ' ; ' + fr(q2[1], 1) + ')'; $('p1v').style.color = T >= K.bend[0] && T < (K.bend[0] + K.bend[1])/2 ? '#ffa94d' : ''; $('p2v').style.color = T >= (K.bend[0] + K.bend[1])/2 && T < K.bend[1] ? '#ffa94d' : ''; } $('tval').innerHTML = T >= K.lerp[1] ? '<span class="m">t</span> = ' + fr(tc, 2) : '&nbsp;'; $('tnote').innerHTML = T >= K.lv3[0] ? 'le dernier point est sur la courbe' : (T >= K.lerp[1] ? 'fraction du chemin, de 0 à 1' : '&nbsp;'); }
+    if (part === 'B'){ $('f0').style.opacity = clamp((T - K.formula[0])/.5); $('f1').style.opacity = clamp((T - K.formula[1])/.5); $('f2').style.opacity = clamp((T - K.coords[0])/.5); $('f3').style.opacity = clamp((T - K.coords[1])/.5); $('f4').style.opacity = clamp((T - K.coords[2])/.5); $('f5').style.opacity = clamp((T - K.b05[0])/.5); $('f6').style.opacity = clamp((T - K.b05[0] - .6)/.5); $('f7').style.opacity = clamp((T - K.b05[2])/.5); }
+    let ci = -1; caps.forEach((c,i) => { if (T >= c[0]) ci = i; });
+    if (ci !== capIdx){ capIdx = ci; captxt.innerHTML = ci >= 0 ? caps[ci][1] : ''; }
+    capEl.style.opacity = (ci >= 0 && caps[ci][1]) ? clamp((T - caps[ci][0])/.35) : 0;
+  }
+  if (REC){ window.renderAt = T => { resize(); renderAt(T); }; window.END = END; return; }
+
+  // ---------- son (style « puce » rétro) ----------
+  const AU = { ctx:null, on:false, master:null, noise:null };
+  function auInit(){ const C = new (window.AudioContext || window.webkitAudioContext)(); const comp = C.createDynamicsCompressor(); comp.connect(C.destination);
+    const m = C.createGain(); m.gain.value = 0; m.connect(comp); AU.ctx = C; AU.master = m; }
+  function tone(f, vol, dur, type, delay){ const C = AU.ctx, t = C.currentTime + (delay||0), o = C.createOscillator(), g = C.createGain(); o.type = type || 'square'; o.frequency.value = f;
+    g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(Math.max(vol, .0002), t+.005); g.gain.exponentialRampToValueAtTime(.0001, t+dur); o.connect(g); g.connect(AU.master); o.start(t); o.stop(t+dur+.05); return o; }
+  const midi = mm => 440*Math.pow(2,(mm-69)/12);
+  const blip = (n, v) => tone(midi(n), v || .06, .09, 'square');
+  const jingle = (ns, v) => ns.forEach((n, i) => tone(midi(n), v || .06, .14, 'square', i*.09));
+  const FX = [[.3, () => jingle([72, 76, 79, 84])], [K.scene, () => jingle([60, 67])], [K.ctrl[0], () => blip(76)], [K.ctrl[1], () => blip(79)], [K.road, () => jingle([72, 76, 79], .05)], [K.lv1[0], () => blip(72)], [K.lv2[0], () => blip(76)], [K.lv3[0], () => jingle([79, 84], .05)],
+    [K.sweep[0] + 1, () => { const o = tone(300, .05, 6, 'triangle'); o.frequency.exponentialRampToValueAtTime(900, AU.ctx.currentTime + 6); }], [K.formula[0], () => jingle([67, 71, 74])], [K.coords[2], () => jingle([72, 76, 79, 84])], [K.b05[2], () => jingle([79, 84], .05)], [K.race[0] + (NA - .05)/.92, () => applause()], [K.race[0], () => { [0, .4, .8].forEach((d, i) => setTimeout(() => AU.on && blip(i < 2 ? 64 : 76, .08), d*1000)); const o = tone(80, .07, 12, 'sawtooth'); o.frequency.exponentialRampToValueAtTime(260, AU.ctx.currentTime + 4); }], [K.bmove[0], () => { const o = tone(300, .05, 7, 'triangle'); o.frequency.exponentialRampToValueAtTime(900, AU.ctx.currentTime + 7); }], [K.zoom[0], () => jingle([67, 72], .06)], [K.dezoom[0], () => jingle([72, 67], .06)], [K.letters[0], () => jingle([79, 84], .05)], [K.final, () => jingle([60, 64, 67, 72])]];
+  // applaudissements : des centaines de petits « clap » de bruit filtré
+  function applause(){ if (!AU.ctx) return; const C = AU.ctx, nb = C.createBuffer(1, C.sampleRate*.05, C.sampleRate), d = nb.getChannelData(0); for (let i=0;i<d.length;i++) d[i] = (Math.random()*2 - 1)*Math.exp(-i/(C.sampleRate*.008));
+    const now = C.currentTime; for (let i=0;i<260;i++){ const t = now + Math.random()*3.6, src = C.createBufferSource(); src.buffer = nb; const f = C.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 900 + Math.random()*1800; f.Q.value = .8;
+      const g = C.createGain(); g.gain.value = .12*(1 - (t - now)/4.2)*(.5 + Math.random()*.5); src.connect(f); f.connect(g); g.connect(AU.master); src.start(t); }
+    [0, .25, .5].forEach((d2, i) => setTimeout(() => AU.on && jingle([72 + i*4, 79 + i*4], .06), d2*1000)); }
+  function audioTick(a, b){ if (!AU.on || b <= a) return; FX.forEach(([tm, fn]) => { if (tm > a && tm <= b) fn(); });
+    if (b > 4 && b < END - 2){ for (let i=Math.floor(a/.5)+1;i<=Math.floor(b/.5);i++){ const seq = [48, 55, 52, 55, 45, 52, 50, 55]; tone(midi(seq[i%8]), .018, .2, 'triangle'); } } }
+  function masterTo(v){ if (!AU.ctx) return; const t = AU.ctx.currentTime; AU.master.gain.cancelScheduledValues(t); AU.master.gain.setTargetAtTime(v, t, .15); }
+
+  // ---------- voix off ----------
+  const VO = { on:false, busy:false, until:0, voice:null, supported:'speechSynthesis' in window };
+  function pickVoice(){ if (!VO.supported) return; const vs = speechSynthesis.getVoices().filter(v => /^fr/i.test(v.lang)); if (!vs.length) return;
+    const score = v => (/natural|online|neural/i.test(v.name) ? 8 : 0) + (/google/i.test(v.name) ? 4 : 0) + (/fr-CH/i.test(v.lang) ? 2 : 0) + (/fr-FR/i.test(v.lang) ? 1 : 0) + (v.localService ? 0 : 1);
+    VO.voice = vs.sort((a,b) => score(b) - score(a))[0]; }
+  if (VO.supported){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+  function say(text){ if (!VO.supported) return; speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = VO.voice ? VO.voice.lang : 'fr-FR'; if (VO.voice) u.voice = VO.voice; u.rate = .97;
+    u.onstart = () => { VO.busy = true; if (AU.on) masterTo(.45); }; u.onend = u.onerror = () => { VO.busy = false; if (AU.on && playing) masterTo(.9); };
+    VO.busy = true; VO.until = performance.now() + (text.length*.085/.97 + 2)*1000; speechSynthesis.speak(u); }
+  function hush(){ if (VO.supported) speechSynthesis.cancel(); VO.busy = false; }
+  function voiceTick(a, b){ if (!VO.on || b <= a) return; for (const [tm, txt] of VOICE){ if (tm > a && tm <= b) say(txt); } }
+  function holdForVoice(prev, next){ if (!VO.on || !VO.busy || performance.now() > VO.until) return next; for (const [tm] of VOICE){ if (tm > prev && tm <= next) return Math.max(prev, tm - .001); } return next; }
+
+  // ---------- commandes ----------
+  let T = 0, playing = true, last = performance.now();
+  const pauseBtn = $('pause'), replayBtn = $('replay'), soundBtn = $('sound'), voiceBtn = $('voice'), seekEl = $('seek'), clockEl = $('clock');
+  pauseBtn.addEventListener('click', () => { if (T >= END){ T = 0; playing = true; hush(); } else playing = !playing; pauseBtn.textContent = playing ? 'Pause' : 'Lecture';
+    if (VO.supported){ if (playing) speechSynthesis.resume(); else speechSynthesis.pause(); } if (AU.on) masterTo(playing ? .9 : 0); });
+  replayBtn.addEventListener('click', () => { hush(); T = -0.001; playing = true; pauseBtn.textContent = 'Pause'; if (AU.on) masterTo(.9); });
+  soundBtn.addEventListener('click', () => { if (!AU.ctx) auInit(); AU.ctx.resume(); AU.on = !AU.on; soundBtn.textContent = AU.on ? 'Couper le son' : 'Activer le son'; soundBtn.setAttribute('aria-pressed', AU.on); masterTo(AU.on && playing ? .9 : 0); });
+  voiceBtn.addEventListener('click', () => { if (!VO.supported){ voiceBtn.textContent = 'Voix indisponible'; return; }
+    VO.on = !VO.on; voiceBtn.textContent = VO.on ? 'Couper la voix' : 'Activer la voix'; voiceBtn.setAttribute('aria-pressed', VO.on);
+    if (!VO.on){ hush(); if (AU.on && playing) masterTo(.9); return; } pickVoice();
+    if (T < .3){ say(VOICE[0][1]); T = .301; } else { let cur = null; for (const v of VOICE){ if (v[0] <= T) cur = v; } if (cur && T - cur[0] < 3) say(cur[1]); } });
+  seekEl.max = END;
+  let skipAudio = false, dragging = false;
+  const mmss = x => { x = Math.max(0, Math.round(x)); return Math.floor(x/60) + ':' + String(x%60).padStart(2,'0'); };
+  function jump(sec){ T = Math.max(0, Math.min(END, sec)); skipAudio = true; hush(); if (T >= END){ playing = false; pauseBtn.textContent = 'Lecture'; } }
+  const seekBox = seekEl.parentElement;
+  seekEl.addEventListener('pointerdown', () => { dragging = true; seekBox.classList.add('drag'); });
+  window.addEventListener('pointerup', () => { if (dragging) seekEl.blur(); dragging = false; seekBox.classList.remove('drag'); });
+  seekEl.addEventListener('input', () => jump(parseFloat(seekEl.value)));
+  document.addEventListener('keydown', e => { if (e.target.tagName === 'BUTTON' && (e.key === ' ' || e.key === 'Enter')) return; if (e.target === seekEl && e.key.startsWith('Arrow')) return;
+    if (e.key === ' '){ e.preventDefault(); pauseBtn.click(); } else if (e.key === 'ArrowLeft') jump(T - 5); else if (e.key === 'ArrowRight') jump(T + 5); });
+  function loop(now){
+    const dt = Math.min(.1, (now-last)/1000); last = now; const prevT = T;
+    if (playing){ T = holdForVoice(prevT, Math.min(END, T + dt)); if (T >= END){ playing = false; pauseBtn.textContent = 'Lecture'; } }
+    if (skipAudio) skipAudio = false; else { audioTick(prevT, T); voiceTick(prevT, T); }
+    if (!dragging) seekEl.value = T.toFixed(1); clockEl.textContent = mmss(T) + ' / ' + mmss(END);
+    renderAt(Math.max(0, T)); requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
+</script>
+<script>if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js');</script>
+</body>
+</html>
