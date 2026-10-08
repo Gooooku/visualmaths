@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icone.svg">
+<link rel="apple-touch-icon" href="icone.svg">
+<meta name="theme-color" content="#0b1024">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Application — le thermocouple et les polynômes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link id="gf" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&family=STIX+Two+Text:ital,wght@0,500;1,500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg1:#070b1c; --bg2:#151b46; --ink:#eef1ff; --muted:#8e97c4; --glass:rgba(255,255,255,.06); --stroke:rgba(255,255,255,.14);
+  --bip:#3ee6ff; --zap:#ff4f6d; --zip:#c77dff; --hot:#ff8a3d; --mv:#3ee6ff; --cur:#ffd23f; --err:#ff5a6e; --star:#ffd23f; --x:#ff7a85; --y:#5ee3a1; --wall:#2f5bff; --ok:#6dff94;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light){ :root:not([data-theme="dark"]){ --glass:rgba(255,255,255,.08); } }
+:root[data-theme="light"]{ --glass:rgba(255,255,255,.08); }
+:root{ box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); }
+*,*::before,*::after{ box-sizing:inherit; }
+html{ height:100%; scroll-padding-top:env(safe-area-inset-top,0px); }
+body{ height:100%; margin:0; background:var(--bg1); color:var(--ink); overflow:hidden; font-family:"Manrope", system-ui, -apple-system, "Segoe UI", sans-serif; }
+.m{ font-family:"STIX Two Text","Cambria Math","Times New Roman",serif; font-style:italic; font-weight:500; }
+.cB{ color:var(--bip); } .cZ{ color:var(--zap); } .cI{ color:var(--zip); } .cS{ color:var(--star); } .cx{ color:var(--x); } .cy{ color:var(--y); } .cOk{ color:var(--ok); } .mu{ color:var(--muted); }
+.stage{ position:relative; width:100%; height:100%; overflow:hidden; background:radial-gradient(120% 90% at 70% 15%, var(--bg2) 0%, var(--bg1) 62%); --u:min(1vw, 1.78vh); }
+canvas{ position:absolute; inset:0; width:100%; height:100%; display:block; }
+.title{ position:absolute; inset:0; display:grid; place-content:center; text-align:center; pointer-events:none; }
+.title h1{ margin:0; font-weight:800; font-size:calc(var(--u)*5.4); letter-spacing:-.02em; line-height:1.05; }
+.title p{ margin:calc(var(--u)*1.4) 0 0; font-size:calc(var(--u)*2.2); color:var(--muted); font-weight:600; }
+.caption{ position:absolute; left:calc(var(--u)*4); bottom:calc(var(--u)*4.5 + 20px); max-width:min(46%, 30em); pointer-events:none; font-size:calc(var(--u)*2.1); font-weight:700; line-height:1.25; }
+.caption > span{ display:block; }
+.caption .bar{ display:block; width:calc(var(--u)*6); height:calc(var(--u)*.5); border-radius:99px; margin-bottom:calc(var(--u)*1.2); background:linear-gradient(90deg, var(--bip), var(--zip), var(--zap)); }
+.card{ position:absolute; right:calc(var(--u)*3.5); bottom:calc(var(--u)*3.5 + 20px); width:21em; padding:calc(var(--u)*1.8) calc(var(--u)*2.2); font-size:calc(var(--u)*1.7);
+  background:var(--glass); border:1px solid var(--stroke); border-radius:calc(var(--u)*1.8); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); }
+.card h3{ margin:0 0 .5em; font-size:.8em; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:800; }
+.sec{ display:grid; gap:.35em; }
+.line{ white-space:nowrap; font-variant-numeric:tabular-nums; }
+.big{ font-size:1.25em; }
+.hr{ height:1px; background:var(--stroke); margin:.6em 0; }
+.num{ display:inline-block; min-width:1.6em; text-align:right; }
+table.cmp{ border-collapse:collapse; width:100%; font-variant-numeric:tabular-nums; }
+table.cmp td, table.cmp th{ padding:.25em .3em; text-align:left; white-space:nowrap; }
+table.cmp th{ font-size:.82em; color:var(--muted); font-weight:700; }
+.ctrl{ position:absolute; right:calc(var(--u)*3.5); top:calc(var(--u)*3); display:flex; gap:8px; }
+.ctrl button, .ctrl a.home{ font:inherit; font-weight:700; font-size:14px; padding:9px 15px; border-radius:99px; border:1px solid var(--stroke); background:var(--glass); color:var(--ink); cursor:pointer; backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); }
+.ctrl button:focus-visible{ outline:3px solid var(--bip); outline-offset:2px; }
+.seek{ position:absolute; left:0; right:0; bottom:0; padding:28px calc(var(--u)*3.5) calc(var(--u)*1.2) calc(var(--u)*4); display:flex; align-items:center; gap:14px; transition:opacity .25s; }
+.seek input{ flex:1; accent-color:var(--bip); height:22px; cursor:pointer; }
+.seek span{ font-size:14px; font-weight:600; color:var(--muted); font-variant-numeric:tabular-nums; min-width:6.5em; text-align:right; }
+@media (hover: hover){ .seek{ opacity:0; } .seek:hover, .seek:has(input:focus-visible), .seek.drag{ opacity:1; } }
+.rec .ctrl, .rec .seek{ display:none; } .rec *{ transition:none !important; }
+@media (max-aspect-ratio: 1/1){
+  .stage{ --u:min(1.9vw, 1.2vh); }
+  .card{ left:calc(var(--u)*2.5); right:calc(var(--u)*2.5); top:calc(var(--u)*2.5); bottom:auto; width:auto; font-size:calc(var(--u)*1.7); }
+  .ctrl{ left:calc(var(--u)*2.5); right:calc(var(--u)*2.5); top:auto; bottom:calc(var(--u)*2 + 34px); flex-wrap:wrap; gap:6px; }
+  .ctrl button, .ctrl a.home{ padding:7px 11px; font-size:13px; }
+  .caption{ left:calc(var(--u)*2.5); right:calc(var(--u)*2.5); max-width:none; bottom:calc(var(--u)*2 + 90px); font-size:calc(var(--u)*2.6); }
+  .seek{ padding:10px calc(var(--u)*3) calc(var(--u)*2); }
+}
+.cH{ color:var(--hot); } .cV{ color:var(--mv); } .cY{ color:var(--cur); } .cE{ color:var(--err); }
+table.tb{ border-collapse:collapse; width:100%; font-variant-numeric:tabular-nums; } table.tb td{ padding:.14em .4em; white-space:nowrap; } table.tb td:last-child{ text-align:right; font-weight:800; }
+table.tb tr.on td{ background:rgba(255,210,63,.13); }
+.coef{ font-size:.82em; line-height:1.45; font-variant-numeric:tabular-nums; }
+.ctrl a.home{ text-decoration:none; display:inline-flex; align-items:center; }
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <canvas id="c" aria-label="Animation : un four industriel mesure sa température avec un thermocouple ; un polynôme transforme la tension en température"></canvas>
+  <div class="title" id="title"><div><h1>Combien de degrés dans le four&nbsp;?</h1><p>Application · fonctions polynomiales</p></div></div>
+  <div class="card" id="card" style="opacity:0">
+    <div class="sec" id="sA">
+      <h3>Mesures (thermocouple de type K)</h3>
+      <table class="tb" id="tab">
+        <tr id="r0"><td>10 mV</td><td>→</td><td class="cH">246 °C</td></tr>
+        <tr id="r1"><td>20 mV</td><td>→</td><td class="cH">485 °C</td></tr>
+        <tr id="r2"><td>30 mV</td><td>→</td><td class="cH">721 °C</td></tr>
+        <tr id="r3"><td>40 mV</td><td>→</td><td class="cH">967 °C</td></tr>
+        <tr id="r4"><td><b class="cY">27,4 mV</b></td><td>→</td><td><b class="cY">?</b></td></tr>
+      </table>
+      <div class="line mu" style="font-size:.85em; margin-top:.3em">valeurs réelles, arrondies</div>
+    </div>
+    <div class="sec" id="sB" style="display:none">
+      <h3>Quel polynôme choisir&nbsp;?</h3>
+      <table class="tb" id="deg">
+        <tr id="g1"><td>degré 1 (droite)</td><td>écart max</td><td class="cE">≈ 20 °C</td></tr>
+        <tr id="g2"><td>degré 2</td><td>écart max</td><td class="cE">≈ 3,6 °C</td></tr>
+        <tr id="g3"><td>degré 3</td><td>écart max</td><td class="cY">≈ 0,6 °C</td></tr>
+        <tr id="g6"><td>degré 6 <span class="mu">(norme)</span></td><td>écart max</td><td style="color:var(--ok)">≈ 0,06 °C</td></tr>
+      </table>
+      <div class="hr"></div>
+      <div class="line" id="gf6"><span class="m">T</span>(<span class="m">U</span>) = <span class="m">d</span><sub>0</sub> + <span class="m">d</span><sub>1</sub><span class="m">U</span> + <span class="m">d</span><sub>2</sub><span class="m">U</span><sup>2</sup> + … + <span class="m">d</span><sub>6</sub><span class="m">U</span><sup>6</sup></div>
+      <div class="coef" id="cf">d₀ = −131,8 · d₁ = 48,30 · d₂ = −1,646<br>d₃ = 0,054 65 · d₄ = −0,000 965 1<br>d₅ = 0,000 008 802 · d₆ = −0,000 000 031 11</div>
+    </div>
+    <div class="sec" id="sC" style="display:none">
+      <h3>La mesure inconnue</h3>
+      <div class="line big"><span class="m">U</span> = <b class="cY">27,4 mV</b></div>
+      <div class="line big" id="c1"><span class="m">T</span>(27,4) ≈ <b class="cH">659 °C</b> <span class="mu" style="font-size:.7em">(lecture)</span></div>
+      <div class="hr"></div>
+      <div id="c3" class="coef" style="font-size:.8em; line-height:1.55; white-space:normal">
+        <span class="m">T</span>(27,4) = −131,8058 + 48,30222 · 27,4 − 1,646031 · 27,4<sup>2</sup> + 0,05464731 · 27,4<sup>3</sup> − 0,0009650715 · 27,4<sup>4</sup> + 0,000008802193 · 27,4<sup>5</sup> − 0,0000000311081 · 27,4<sup>6</sup>
+      </div>
+      <div class="line big" id="c4" style="margin-top:.2em">≈ <b class="cH">658,9 °C</b></div>
+      <div class="line mu" id="c2" style="white-space:normal">calculé par l’électronique en une fraction de seconde</div>
+    </div>
+    <div class="sec" id="sD" style="display:none">
+      <h3>Régulation du four</h3>
+      <div class="line">consigne&nbsp;: <b>800 °C</b></div>
+      <div class="line">tension&nbsp;: <b class="cV" id="dU">27,4 mV</b></div>
+      <div class="line big">température&nbsp;: <b class="cH" id="dT">659 °C</b></div>
+      <div class="line" id="dS" style="white-space:normal">&nbsp;</div>
+    </div>
+  </div>
+  <div class="caption" id="caption" style="opacity:0"><i class="bar"></i><span id="captxt"></span></div>
+  <div class="ctrl"><a class="home" href="index.html" aria-label="Retour à l'accueil">← Accueil</a><button id="voice" aria-pressed="false">Activer la voix</button><button id="sound" aria-pressed="false">Activer le son</button><button id="pause">Pause</button><button id="replay">Rejouer</button></div>
+  <div class="seek"><input type="range" id="seek" min="0" max="175" step="0.1" value="0" aria-label="Position dans l'animation"><span id="clock">0:00 / 2:55</span></div>
+</div>
+<script>
+(function(){
+  const REC = /[?&]record/.test(location.search); if (REC) document.body.classList.add('rec');
+  const $ = id => document.getElementById(id);
+  const clamp = x => Math.max(0, Math.min(1, x));
+  const ease = x => x<.5 ? 4*x*x*x : 1-Math.pow(-2*x+2,3)/2;
+  const lerp = (a,b,k) => a + (b-a)*k;
+  const back = x => { const c=1.7, c3=c+1; return 1 + c3*Math.pow(x-1,3) + c*Math.pow(x-1,2); };
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const fr = (v, d) => v.toFixed(d).replace('.', ',').replace('-', '−');
+
+  // ---------- les polynômes (norme ITS-90, thermocouple type K, 20,644 à 54,886 mV) ----------
+  const D6 = [-1.318058E+02, 4.830222E+01, -1.646031E+00, 5.464731E-02, -9.650715E-04, 8.802193E-06, -3.110810E-08];
+  const FIT = { 1:[-35.5212, 25.27954], 2:[77.01657, 18.87893, .0847426], 3:[7.929191, 24.88475, -.0811417, .00146418] };
+  const poly = (c, u) => c.reduce((s, a, i) => s + a*Math.pow(u, i), 0), Tref = u => poly(D6, u);
+  const MEAS = [[21, 508.5], [24, 579.6], [27, 648.6], [30, 720.9], [33, 794.9], [36, 868.6], [39, 940.6], [42, 1017.4], [45, 1095.1], [48, 1176.9], [51, 1258.1]];
+
+  // ---------- chronologie ----------
+  const K = { oven:4.2, use:[8.5, 14], q:19, zoom:[21, 24], tc:24.5, chain:28.5, volt:32.5, table:[36, 38.5], unk:42.5, unkQ:46, graph:[49.5, 51.5], pts:52.5, line:57, curved:60.5, d1:64.5, d2:68.5, d3:72.5, d6:76.5, coef:81, d9:85.5, out:[90, 93], outTxt:93.5, valid:98, outBack:[103, 105.5], read:[107, 109, 111.5, 114.5], auto:120.5, back:[124.5, 127], chainAll:128, reg:[133.5, 136.5, 141.5, 146.5], concl:[151.5, 156.5, 161.5], note:166 };
+  const END = 175;
+  const caps = [
+    [0.3, ''],
+    [K.oven, 'Dans ce four industriel, des pièces métalliques chauffent. L’écran indique 800 °C.'],
+    [K.use[0], 'À quoi sert un tel four\u00a0? Par exemple au <b>traitement thermique</b>\u00a0: une entreprise fabrique une pièce en acier – un engrenage, un outil, un ressort de montre…'],
+    [K.use[1], '… et doit la chauffer à une température très précise pour modifier ses propriétés\u00a0: dureté, résistance, élasticité. Quelques dizaines de degrés d’erreur, et la pièce est ratée\u00a0!'],
+    [K.q, 'Mais comment le système électronique sait-il qu’il fait 800 °C à l’intérieur\u00a0?'],
+    [K.tc, 'Grâce à un <b>thermocouple</b>\u00a0: deux fils de métaux différents, soudés ensemble à leur extrémité.'],
+    [K.chain, 'Quand sa température change, il produit une petite <b>tension électrique</b>, de quelques millivolts.'],
+    [K.table[0], 'On mesure cette tension à des températures connues. Ce sont les vraies valeurs d’un thermocouple de type K, arrondies.'],
+    [K.unk, 'Le four fonctionne. Soudain, le thermocouple transmet\u00a0: <b class="cY">27,4 mV</b>.'],
+    [K.unkQ, '27,4 mV n’est pas dans le tableau\u00a0! Comment connaître la température pour <b>toutes</b> les tensions possibles\u00a0?'],
+    [K.graph[0], 'Transformons les mesures en points\u00a0: la tension <span class="m">U</span> en abscisse, la température <span class="m">T</span> en ordonnée.'],
+    [K.pts, 'Pour la plage du four, de 500 à 1300 °C, on fait de nombreuses mesures de calibration.'],
+    [K.line, 'Les points semblent presque alignés…'],
+    [K.curved, '… mais pas tout à fait\u00a0: la relation n’est pas exactement une droite. Il nous faut une règle qui donne toutes les valeurs intermédiaires.'],
+    [K.d1, 'On cherche une <b>fonction polynomiale</b> qui passe au plus près des points. Avec une droite (degré 1), l’erreur peut atteindre 20 °C.'],
+    [K.d2, 'Avec un polynôme de degré 2, l’écart tombe à environ 3,6 °C.'],
+    [K.d3, 'Degré 3\u00a0: environ 0,6 °C.'],
+    [K.d6, 'La norme internationale des thermocouples utilise un polynôme de <b>degré 6</b>\u00a0: l’écart n’est plus que de quelques centièmes de degré\u00a0!'],
+    [K.coef, 'Ses coefficients sont fixés par la norme\u00a0: le même polynôme sert pour tous les thermocouples de type K du monde.'],
+    [K.d9, 'Et pour les températures plus basses, de 0 à 500 °C, la norme utilise même un polynôme de <b>degré 9</b>\u00a0!'],
+    [K.out[0], 'Sur la plage de mesure, toutes les courbes se ressemblent. Dézoomons pour voir la vraie forme du polynôme de degré 6…'],
+    [K.outTxt, '… il monte, atteint un maximum, puis redescend\u00a0: c’est bien une courbe de degré 6, et non une droite\u00a0!'],
+    [K.valid, 'Mais attention\u00a0: ce polynôme n’est valable que dans sa plage de mesure (en vert), de 20,6 à 54,9 mV. En dehors, il n’a plus aucun sens physique.'],
+    [K.outBack[0], 'Revenons à la plage de mesure.'],
+    [K.read[0], 'Revenons à notre mesure inconnue\u00a0: <span class="m">U</span> = 27,4 mV.'],
+    [K.read[1], 'On monte jusqu’à la courbe…'],
+    [K.read[2], '… puis on lit la température\u00a0: <span class="m">T</span>(27,4) ≈ 659 °C.'],
+    [K.read[3], 'Par le calcul\u00a0: on remplace <span class="m">U</span> par 27,4 dans la fonction de degré 6. <span class="m">T</span>(27,4) ≈ 659 °C.'],
+    [K.auto, 'L’électronique fait ce calcul automatiquement, des dizaines de fois par seconde.'],
+    [K.back[0], 'Retour au four. Voici toute la chaîne\u00a0: de la température réelle jusqu’à la commande du chauffage.'],
+    [K.reg[0], '659 °C, alors que la consigne est de 800 °C\u00a0: trop bas → le chauffage s’active.'],
+    [K.reg[1], 'La température monte, la tension aussi… et le polynôme recalcule la température en continu.'],
+    [K.reg[2], '800 °C\u00a0: la température est correcte → on la maintient.'],
+    [K.reg[3], 'Si elle dépasse, le chauffage est réduit.'],
+    [K.concl[0], 'Regardons une dernière fois toute la courbe\u00a0: une fonction polynomiale de degré 6, utilisée dans sa plage de mesure. Elle transforme quelques mesures en un modèle mathématique utilisable par l’électronique…'],
+    [K.concl[1], '… qui estime la température même pour une tension qui n’avait jamais été mesurée.'],
+    [K.concl[2], 'MESURES → POINTS → POLYNÔME → PRÉDICTION'],
+    [K.note, 'C’est une méthode courante pour les capteurs dont la réponse n’est pas une droite\u00a0; d’autres méthodes existent, comme les tables de correspondance.']
+  ];
+  const VOICE = [
+    [0.3, "Combien de degrés dans le four ?"],
+    [K.oven, "Dans ce four industriel, des pièces métalliques chauffent. L'écran indique huit cents degrés."],
+    [K.use[0], "À quoi sert un tel four ? Par exemple au traitement thermique : une entreprise fabrique une pièce en acier, un engrenage, un outil, un ressort de montre…"],
+    [K.use[1], "… et doit la chauffer à une température très précise pour modifier ses propriétés : dureté, résistance, élasticité. Quelques dizaines de degrés d'erreur, et la pièce est ratée !"],
+    [K.q, "Mais comment le système électronique sait-il qu'il fait huit cents degrés à l'intérieur ?"],
+    [K.tc, "Grâce à un thermocouple : deux fils de métaux différents, soudés ensemble à leur extrémité."],
+    [K.chain, "Quand sa température change, il produit une petite tension électrique, de quelques millivolts."],
+    [K.table[0], "On mesure cette tension à des températures connues. Ce sont les vraies valeurs d'un thermocouple de type K, arrondies."],
+    [K.unk, "Le four fonctionne. Soudain, le thermocouple transmet : vingt-sept virgule quatre millivolts."],
+    [K.unkQ, "Vingt-sept virgule quatre millivolts n'est pas dans le tableau ! Comment connaître la température pour toutes les tensions possibles ?"],
+    [K.graph[0], "Transformons les mesures en points : la tension U en abscisse, la température T en ordonnée."],
+    [K.pts, "Pour la plage du four, de cinq cents à mille trois cents degrés, on fait de nombreuses mesures de calibration."],
+    [K.line, "Les points semblent presque alignés…"],
+    [K.curved, "… mais pas tout à fait : la relation n'est pas exactement une droite. Il nous faut une règle qui donne toutes les valeurs intermédiaires."],
+    [K.d1, "On cherche une fonction polynomiale qui passe au plus près des points. Avec une droite, de degré un, l'erreur peut atteindre vingt degrés."],
+    [K.d2, "Avec un polynôme de degré deux, l'écart tombe à environ trois virgule six degrés."],
+    [K.d3, "Degré trois : environ zéro virgule six degré."],
+    [K.d6, "La norme internationale des thermocouples utilise un polynôme de degré six : l'écart n'est plus que de quelques centièmes de degré !"],
+    [K.coef, "Ses coefficients sont fixés par la norme : le même polynôme sert pour tous les thermocouples de type K du monde."],
+    [K.d9, "Et pour les températures plus basses, de zéro à cinq cents degrés, la norme utilise même un polynôme de degré neuf !"],
+    [K.out[0], "Sur la plage de mesure, toutes les courbes se ressemblent. Dézoomons pour voir la vraie forme du polynôme de degré six…"],
+    [K.outTxt, "… il monte, atteint un maximum, puis redescend : c'est bien une courbe de degré six, et non une droite !"],
+    [K.valid, "Mais attention : ce polynôme n'est valable que dans sa plage de mesure, en vert, de vingt virgule six à cinquante-quatre virgule neuf millivolts. En dehors, il n'a plus aucun sens physique."],
+    [K.outBack[0], "Revenons à la plage de mesure."],
+    [K.read[0], "Revenons à notre mesure inconnue : vingt-sept virgule quatre millivolts."],
+    [K.read[1], "On monte jusqu'à la courbe…"],
+    [K.read[2], "… puis on lit la température : environ six cent cinquante-neuf degrés."],
+    [K.read[3], "Par le calcul : on remplace U par vingt-sept virgule quatre dans la fonction de degré six. T de vingt-sept virgule quatre, environ six cent cinquante-neuf degrés."],
+    [K.auto, "L'électronique fait ce calcul automatiquement, des dizaines de fois par seconde."],
+    [K.back[0], "Retour au four. Voici toute la chaîne : de la température réelle jusqu'à la commande du chauffage."],
+    [K.reg[0], "Six cent cinquante-neuf degrés, alors que la consigne est de huit cents : trop bas, le chauffage s'active."],
+    [K.reg[1], "La température monte, la tension aussi… et le polynôme recalcule la température en continu."],
+    [K.reg[2], "Huit cents degrés : la température est correcte, on la maintient."],
+    [K.reg[3], "Si elle dépasse, le chauffage est réduit."],
+    [K.concl[0], "Regardons une dernière fois toute la courbe : une fonction polynomiale de degré six, utilisée dans sa plage de mesure. Elle transforme quelques mesures en un modèle mathématique utilisable par l'électronique…"],
+    [K.concl[1], "… qui estime la température même pour une tension qui n'avait jamais été mesurée."],
+    [K.concl[2], "Mesures, points, polynôme, prédiction."],
+    [K.note, "C'est une méthode courante pour les capteurs dont la réponse n'est pas une droite ; d'autres méthodes existent, comme les tables de correspondance."]
+  ];
+
+  // ---------- canevas ----------
+  const stage = $('stage'), cv = $('c'), ctx = cv.getContext('2d');
+  let W = 1, H = 1, DPR = 1;
+  function resize(){ DPR = REC ? 1 : Math.min(devicePixelRatio || 1, 2); W = stage.clientWidth; H = stage.clientHeight; cv.width = W*DPR; cv.height = H*DPR; ctx.setTransform(DPR, 0, 0, DPR, 0, 0); }
+  new ResizeObserver(resize).observe(stage); resize();
+  const portrait = () => W/H < 1;
+  function area(){ return portrait() ? {x0:W*.04, x1:W*.96, y0:H*.32, y1:H*.72} : {x0:W*.03, x1:W*.6, y0:H*.06, y1:H*.72}; }
+  function glowOn(color, b){ ctx.shadowColor = color; ctx.shadowBlur = b; } function glowOff(){ ctx.shadowBlur = 0; }
+  function roundRect(x, y, w, h, r){ ctx.beginPath(); ctx.moveTo(x+r, y); ctx.arcTo(x+w, y, x+w, y+h, r); ctx.arcTo(x+w, y+h, x, y+h, r); ctx.arcTo(x, y+h, x, y, r); ctx.arcTo(x, y, x+w, y, r); ctx.closePath(); }
+  function text(t, x, y, size, color, align, weight){ ctx.font = (weight || 700) + ' ' + size + 'px Manrope, system-ui, sans-serif'; ctx.fillStyle = color; ctx.textAlign = align || 'center'; ctx.textBaseline = 'middle'; ctx.fillText(t, x, y); }
+  function dot(x, y, r, color, glow){ if (glow) glowOn(color, r*3); ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2); ctx.fill(); glowOff(); }
+  function grid(){ ctx.strokeStyle = 'rgba(90,120,255,.07)'; ctx.lineWidth = 1; const s = Math.max(28, W/40); for (let x = (W % s)/2; x < W; x += s){ ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); } for (let y = (H % s)/2; y < H; y += s){ ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); } }
+  const serif = sz => '500 ' + sz + 'px "STIX Two Text", "Cambria Math", "Times New Roman", serif';
+
+  // ---------- le four ----------
+  function oven(T, a, al, zoom, tempShown, heat){ const aw = a.x1 - a.x0, ah = a.y1 - a.y0; ctx.save(); ctx.globalAlpha = al;
+    const z = 1 + zoom*1.6, cx = a.x0 + aw*.42, cy = a.y0 + ah*.52; ctx.translate(cx, cy); ctx.scale(z, z); ctx.translate(-cx - zoom*aw*.05, -cy + zoom*ah*.06);
+    const ox = a.x0 + aw*.08, oy = a.y0 + ah*.12, ow = aw*.6, oh = ah*.78;
+    // carcasse
+    const g = ctx.createLinearGradient(ox, 0, ox + ow, 0); g.addColorStop(0, '#3a4256'); g.addColorStop(.5, '#58627a'); g.addColorStop(1, '#3a4256'); ctx.fillStyle = g; roundRect(ox, oy, ow, oh, 10); ctx.fill(); ctx.strokeStyle = '#7d89a6'; ctx.lineWidth = 2; ctx.stroke();
+    for (let i=0;i<8;i++){ ctx.fillStyle = '#2a3042'; ctx.fillRect(ox + ow*.06 + i*ow*.11, oy + oh*.04, ow*.05, oh*.03); }
+    // chambre chaude
+    const ix = ox + ow*.1, iy = oy + oh*.14, iw = ow*.8, ih = oh*.66, hk = .6 + .4*heat; const hg = ctx.createRadialGradient(ix + iw/2, iy + ih*.65, 10, ix + iw/2, iy + ih*.6, iw*.75);
+    hg.addColorStop(0, 'rgba(255,' + Math.round(180 + 40*hk) + ',90,1)'); hg.addColorStop(.5, 'rgba(255,' + Math.round(110 + 30*hk) + ',40,.95)'); hg.addColorStop(1, 'rgba(120,30,10,1)'); ctx.fillStyle = hg; roundRect(ix, iy, iw, ih, 6); ctx.fill();
+    // résistances chauffantes
+    for (let i=0;i<5;i++){ const yy = iy + ih*.12 + i*ih*.04; ctx.strokeStyle = 'rgba(255,' + Math.round(80 + 100*heat) + ',40,' + (.5 + .5*heat) + ')'; ctx.lineWidth = 2; ctx.beginPath(); for (let x = 0; x <= iw*.9; x += 6) ctx.lineTo(ix + iw*.05 + x, yy + Math.sin(x*.5)*2); ctx.stroke(); }
+    // pièces métalliques
+    for (let i=0;i<4;i++){ const px = ix + iw*(.1 + i*.21), py = iy + ih*.7; ctx.fillStyle = 'rgba(255,' + Math.round(150 + 50*Math.sin(T*2 + i)) + ',80,1)'; glowOn('#ff9a3d', 14); ctx.fillRect(px, py, iw*.16, ih*.16); glowOff(); ctx.fillStyle = 'rgba(255,240,200,.4)'; ctx.fillRect(px, py, iw*.16, ih*.03); }
+    ctx.fillStyle = '#2a3042'; ctx.fillRect(ix, iy + ih*.86, iw, ih*.05);
+    // thermocouple (deux fils soudés)
+    const tx = ix + iw*.82, ty0 = oy - oh*.02, ty1 = iy + ih*.5; ctx.lineCap = 'round'; ctx.strokeStyle = '#d9c35a'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(tx - 3, ty0); ctx.lineTo(tx - 3, ty1); ctx.stroke(); ctx.strokeStyle = '#6fc4d8'; ctx.beginPath(); ctx.moveTo(tx + 3, ty0); ctx.lineTo(tx + 3, ty1); ctx.stroke();
+    ctx.fillStyle = '#9aa3b8'; ctx.fillRect(tx - 8, ty0 - 10, 16, 22); dot(tx, ty1 + 2, 4.5, '#ffe9a0', true); ctx.lineCap = 'butt';
+    // écran de contrôle
+    const sx = ox + ow + aw*.04, sy = oy + oh*.1, sw = aw*.24, sh = oh*.34; ctx.fillStyle = '#1a2036'; roundRect(sx, sy, sw, sh, 8); ctx.fill(); ctx.strokeStyle = '#7d89a6'; ctx.stroke();
+    ctx.fillStyle = '#05080f'; roundRect(sx + 8, sy + 10, sw - 16, sh*.52, 4); ctx.fill(); text(tempShown, sx + sw/2, sy + 10 + sh*.26, Math.max(14, sw*.17), '#ff9a3d', 'center', 800);
+    text('TEMPÉRATURE', sx + sw/2, sy + sh*.78, Math.max(9, sw*.07), '#9aa3b8', 'center', 800);
+    // câble vers l'écran
+    ctx.strokeStyle = 'rgba(160,170,190,.7)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(tx, ty0 - 10); ctx.quadraticCurveTo(tx + aw*.08, oy - oh*.12, sx + sw*.3, sy); ctx.stroke();
+    ctx.restore(); return { tx, ty1 }; }
+  // gros plan du thermocouple
+  function tcZoom(T, a, al, kU){ const aw = a.x1 - a.x0, ah = a.y1 - a.y0, cx = a.x0 + aw*.36, cy = a.y0 + ah*.5; ctx.globalAlpha = al;
+    const bg = ctx.createRadialGradient(cx, cy + ah*.2, 10, cx, cy, aw*.5); bg.addColorStop(0, 'rgba(255,140,60,.35)'); bg.addColorStop(1, 'rgba(255,140,60,0)'); ctx.fillStyle = bg; ctx.fillRect(a.x0, a.y0, aw, ah);
+    ctx.lineCap = 'round'; ctx.lineWidth = 9; ctx.strokeStyle = '#d9c35a'; ctx.beginPath(); ctx.moveTo(cx - 40, a.y0 + 10); ctx.lineTo(cx - 6, cy + ah*.25); ctx.stroke(); ctx.strokeStyle = '#6fc4d8'; ctx.beginPath(); ctx.moveTo(cx + 40, a.y0 + 10); ctx.lineTo(cx + 6, cy + ah*.25); ctx.stroke(); ctx.lineCap = 'butt';
+    dot(cx, cy + ah*.27, 12, '#ffe9a0', true); text('soudure chaude', cx, cy + ah*.27 + 28, 13, '#ffd27a', 'center', 800);
+    text('métal A', cx - 70, a.y0 + ah*.22, 13, '#d9c35a', 'center', 800); text('métal B', cx + 70, a.y0 + ah*.22, 13, '#6fc4d8', 'center', 800);
+    // voltmètre
+    if (kU > 0){ ctx.globalAlpha = al*kU; const vx = a.x0 + aw*.78, vy = a.y0 + ah*.3, vw = aw*.3, vh = ah*.32; ctx.fillStyle = '#ffd23f'; roundRect(vx - vw/2, vy - vh/2, vw, vh, 12); ctx.fill(); ctx.fillStyle = '#10142a'; roundRect(vx - vw/2 + 10, vy - vh/2 + 10, vw - 20, vh*.5, 6); ctx.fill();
+      const u = 30 + 3.3*Math.sin(T*.8); text(fr(u, 1) + ' mV', vx, vy - vh/2 + 10 + vh*.25, Math.max(14, vw*.14), '#6dff94', 'center', 800); text('mV', vx, vy + vh*.3, 13, '#10142a', 'center', 800);
+      ctx.strokeStyle = 'rgba(200,210,230,.8)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(cx - 40, a.y0 + 12); ctx.quadraticCurveTo(vx - vw*.6, a.y0, vx - vw/2, vy); ctx.stroke(); ctx.beginPath(); ctx.moveTo(cx + 40, a.y0 + 12); ctx.quadraticCurveTo(vx - vw*.3, a.y0 + ah*.08, vx - vw*.2, vy - vh/2); ctx.stroke(); }
+    ctx.globalAlpha = 1; }
+  // chaîne de flèches (boîtes empilées)
+  function chainBoxes(items, x, y0, w, gap, kIn, al){ items.forEach(([t, col], i) => { const k = clamp(kIn*items.length - i); if (k <= 0) return; ctx.globalAlpha = al*k; const y = y0 + i*gap;
+      ctx.fillStyle = 'rgba(12,18,48,.92)'; ctx.strokeStyle = col; ctx.lineWidth = 2; roundRect(x - w/2, y - 15, w, 30, 10); ctx.fill(); ctx.stroke(); text(t, x, y, 13, '#eef1ff', 'center', 800);
+      if (i < items.length - 1 && k >= 1){ ctx.strokeStyle = 'rgba(200,210,255,.6)'; ctx.beginPath(); ctx.moveTo(x, y + 16); ctx.lineTo(x, y + gap - 17); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x - 5, y + gap - 23); ctx.lineTo(x, y + gap - 17); ctx.lineTo(x + 5, y + gap - 23); ctx.stroke(); } }); ctx.globalAlpha = 1; }
+
+  // ---------- le graphique ----------
+  let VZ = 0;   // 0 : plage de mesure, 1 : dézoom
+  function GR(a){ const gx0 = a.x0 + 70, gx1 = a.x1 - 20, gy0 = a.y1 - 92, gy1 = a.y0 + 26, u0 = lerp(18, -30, VZ), u1 = lerp(52, 125, VZ), t0 = lerp(400, -3000, VZ), t1 = lerp(1350, 3800, VZ); return { X: u => lerp(gx0, gx1, (u - u0)/(u1 - u0)), Y: t => gy0 - (t - t0)/(t1 - t0)*(gy0 - gy1), gx0, gx1, gy0, gy1, u0, u1, t0, t1 }; }
+  function drawGraph(T, a, al){ const G = GR(a); ctx.globalAlpha = al;
+    ctx.strokeStyle = 'rgba(80,110,255,.16)'; ctx.lineWidth = 1; const big = VZ > .5, ts = big ? 1000 : 100, us = big ? 20 : 5;
+    for (let t = Math.ceil(G.t0/ts)*ts; t <= G.t1; t += ts){ ctx.beginPath(); ctx.moveTo(G.gx0, G.Y(t)); ctx.lineTo(G.gx1, G.Y(t)); ctx.stroke(); if (big || t % 200 === 0) text(t + ' °C', G.gx0 - 8, G.Y(t), 11, css('--muted'), 'right', 600); }
+    for (let u = Math.ceil(G.u0/us)*us; u <= G.u1; u += us){ ctx.beginPath(); ctx.moveTo(G.X(u), G.gy0); ctx.lineTo(G.X(u), G.gy1); ctx.stroke(); text(u + '', G.X(u), G.gy0 + 13, 11, css('--muted'), 'center', 600); }
+    if (VZ > 0){ ctx.globalAlpha = al*VZ; const z0 = G.Y(0); if (z0 > G.gy1 && z0 < G.gy0){ ctx.strokeStyle = 'rgba(210,220,255,.5)'; ctx.beginPath(); ctx.moveTo(G.gx0, z0); ctx.lineTo(G.gx1, z0); ctx.stroke(); }
+      if (T >= K.valid){ const kv = clamp((T - K.valid)/.8); ctx.globalAlpha = al*VZ*kv; ctx.fillStyle = 'rgba(109,255,148,.12)'; ctx.fillRect(G.X(20.644), G.gy1, G.X(54.886) - G.X(20.644), G.gy0 - G.gy1); text('plage de mesure', (G.X(20.644) + G.X(54.886))/2, G.gy1 + 12, 12, css('--ok'), 'center', 800); }
+      ctx.globalAlpha = al; }
+    ctx.strokeStyle = 'rgba(210,220,255,.85)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(G.gx0, G.gy1 - 6); ctx.lineTo(G.gx0, G.gy0); ctx.lineTo(G.gx1 + 6, G.gy0); ctx.stroke();
+    text('tension U (mV)', G.gx1, G.gy0 + 28, 12, css('--mv'), 'right', 800); text('température T', G.gx0 + 6, G.gy1 - 12, 12, css('--hot'), 'left', 800);
+    // la droite « presque » (avant les polynômes)
+    if (T >= K.line && T < K.d1){ ctx.globalAlpha = al*clamp((T - K.line)/.6); ctx.setLineDash([6, 6]); ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(G.X(21), G.Y(508.5)); ctx.lineTo(G.X(51), G.Y(1258.1)); ctx.stroke(); ctx.setLineDash([]);
+      if (T >= K.curved){ text('pas tout à fait une droite', G.X(40), G.Y(780), 13, css('--cur'), 'center', 800); } ctx.globalAlpha = al; }
+    // polynômes successifs
+    const cur = T >= K.d6 ? 6 : T >= K.d3 ? 3 : T >= K.d2 ? 2 : T >= K.d1 ? 1 : 0, cols = {1:'#ff5a6e', 2:'#ffa94d', 3:'#ffd23f', 6:'#6dff94'};
+    if (cur){ const t0 = {1:K.d1, 2:K.d2, 3:K.d3, 6:K.d6}[cur], kc = clamp((T - t0)/1.4), f = cur === 6 ? Tref : (u => poly(FIT[cur], u));
+      ctx.save(); ctx.beginPath(); ctx.rect(G.gx0, G.gy1 - 4, G.gx1 - G.gx0, G.gy0 - G.gy1 + 4); ctx.clip();
+      const ua = lerp(19, G.u0, VZ), ub = lerp(19 + 33*kc, G.u1, VZ);
+      const seg = (from, to, dash, w, alpha) => { ctx.globalAlpha = al*alpha; ctx.strokeStyle = cols[cur]; ctx.lineWidth = w; if (dash) ctx.setLineDash([7, 6]); else glowOn(cols[cur], 8); ctx.beginPath(); for (let i=0;i<=240;i++){ const u = lerp(from, to, i/240); i ? ctx.lineTo(G.X(u), G.Y(f(u))) : ctx.moveTo(G.X(u), G.Y(f(u))); } ctx.stroke(); ctx.setLineDash([]); glowOff(); };
+      if (VZ > 0 && T >= K.valid){ seg(ua, 20.644, true, 2.4, .8); seg(54.886, ub, true, 2.4, .8); seg(20.644, 54.886, false, 3.4, 1); } else seg(ua, ub, false, 3.2, 1);
+      ctx.restore(); ctx.globalAlpha = al;
+      text('degré ' + cur, G.gx0 + 30, G.gy1 + 6, 14, cols[cur], 'left', 800); }
+    // points de mesure
+    const np = Math.floor(clamp((T - K.pts)/2.5)*MEAS.length + 1e-6); for (let i=0;i<np;i++){ const [u, t] = MEAS[i], r = 5.5 - 1.5*VZ; ctx.fillStyle = '#0b1030'; ctx.beginPath(); ctx.arc(G.X(u), G.Y(t), r + 2, 0, 7); ctx.fill(); dot(G.X(u), G.Y(t), r, '#ff5ac8', true); }
+    // mini-graphique des écarts
+    if (cur && T < K.out[0]){ const ey0 = G.gy0 + 54, eh = 18, ex0 = G.gx0, ex1 = G.gx1; ctx.globalAlpha = al*clamp((T - K.d1)/.6);
+      ctx.strokeStyle = 'rgba(255,255,255,.25)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(ex0, ey0); ctx.lineTo(ex1, ey0); ctx.stroke(); text('écart', ex0 - 8, ey0, 11, css('--muted'), 'right', 700);
+      const f = cur === 6 ? Tref : (u => poly(FIT[cur], u)); ctx.strokeStyle = cols[cur]; ctx.lineWidth = 2; ctx.beginPath(); for (let i=0;i<=160;i++){ const u = 20.7 + 34*i/160, e = f(u) - Tref(u); const x = lerp(ex0, ex1, i/160), y = ey0 - e/22*eh; i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); } ctx.stroke();
+      text('écart max ' + {1:'≈ 20 °C', 2:'≈ 3,6 °C', 3:'≈ 0,6 °C', 6:'≈ 0,06 °C'}[cur], ex1, ey0 + 14, 11, cols[cur], 'right', 800); ctx.globalAlpha = al; }
+    // lecture de 27,4 mV
+    if (T >= K.read[0]){ const u = 27.4, t = Tref(u), k1 = clamp((T - K.read[1])/1.2), k2 = clamp((T - K.read[2])/1.2); dot(G.X(u), G.gy0, 7, css('--cur'), true); text('27,4 mV', G.X(u), G.gy0 + 28, 13, css('--cur'), 'center', 800);
+      ctx.strokeStyle = css('--cur'); ctx.lineWidth = 2.5; ctx.setLineDash([6, 5]); ctx.beginPath(); ctx.moveTo(G.X(u), G.gy0); ctx.lineTo(G.X(u), lerp(G.gy0, G.Y(t), k1)); ctx.stroke();
+      if (k2 > 0){ ctx.beginPath(); ctx.moveTo(G.X(u), G.Y(t)); ctx.lineTo(lerp(G.X(u), G.gx0, k2), G.Y(t)); ctx.stroke(); } ctx.setLineDash([]);
+      if (k1 >= 1) dot(G.X(u), G.Y(t), 7, css('--cur'), true); if (k2 >= 1){ dot(G.gx0, G.Y(t), 7, css('--hot'), true); text('≈ 659 °C', G.gx0 + 10, G.Y(t) - 14, 14, css('--hot'), 'left', 800); } }
+    ctx.globalAlpha = 1; }
+
+  // ---------- régulation ----------
+  function regTemp(T){ if (T < K.reg[0] + 1) return 659; if (T < K.reg[2]) return lerp(659, 800, ease(clamp((T - K.reg[0] - 1)/(K.reg[2] - K.reg[0] - 1)))); if (T < K.reg[3]) return 800 + Math.sin((T - K.reg[2])*2)*.6; return 800 + 14*Math.sin(clamp((T - K.reg[3])/4)*Math.PI)*Math.exp(-(T - K.reg[3])*.3); }
+  function invU(t){ let lo = 20.6, hi = 55; for (let i=0;i<40;i++){ const m = (lo + hi)/2; if (Tref(m) < t) lo = m; else hi = m; } return (lo + hi)/2; }
+
+  // ---------- rendu ----------
+  const titleEl = $('title'), card = $('card'), captxt = $('captxt'), capEl = $('caption');
+  let capIdx = -2;
+  function renderAt(T){
+    ctx.clearRect(0, 0, W, H); grid();
+    titleEl.style.opacity = clamp((T-.2)/.6)*(1 - clamp((T-3.4)/.6));
+    const a = area();
+    const wOven1 = clamp((T - K.oven)/.8)*(1 - clamp((T - K.tc + .3)/.8)), zoomK = ease(clamp((T - K.zoom[0])/(K.zoom[1] - K.zoom[0])));
+    if (wOven1 > 0) oven(T, a, wOven1, zoomK, '800 °C', .7);
+    if (T >= K.use[0] && T < K.q + .5){ const ku = clamp((T - K.use[0])/.6)*(1 - clamp((T - K.q)/.5)), aw = a.x1 - a.x0, gx = a.x0 + aw*.5, gy = a.y0 + (a.y1 - a.y0)*.52, R = Math.min(aw, a.y1 - a.y0)*.2, hot = clamp((T - K.use[1])/3);
+      ctx.globalAlpha = ku; ctx.fillStyle = 'rgba(8,12,30,.88)'; roundRect(gx - R*2.3, gy - R*1.6, R*4.6, R*3.4, 18); ctx.fill();
+      ctx.save(); ctx.translate(gx - R*.7, gy); ctx.rotate(T*.4); const col = 'rgb(' + Math.round(lerp(150, 255, hot)) + ',' + Math.round(lerp(160, 140, hot)) + ',' + Math.round(lerp(175, 60, hot)) + ')'; glowOn(hot > .3 ? '#ff8a3d' : '#9aa3b8', 20*hot);
+      ctx.fillStyle = col; ctx.beginPath(); for (let i=0;i<24;i++){ const an = i/24*Math.PI*2, r = i % 2 ? R*.82 : R; ctx.lineTo(Math.cos(an)*r, Math.sin(an)*r); } ctx.closePath(); ctx.fill(); glowOff(); ctx.fillStyle = 'rgba(8,12,30,.9)'; ctx.beginPath(); ctx.arc(0, 0, R*.3, 0, 7); ctx.fill(); ctx.restore();
+      text('pièce en acier', gx - R*.7, gy + R*1.3, 13, '#cfd6ff', 'center', 800); text(hot > .1 ? Math.round(lerp(20, 800, hot)) + ' °C' : '20 °C', gx + R*1.2, gy - R*.3, Math.max(18, R*.35), hot > .3 ? '#ff8a3d' : '#cfd6ff', 'center', 800);
+      if (T >= K.use[1] + 1.5){ ['dureté', 'résistance', 'élasticité'].forEach((w2, i) => text('✓ ' + w2, gx + R*1.2, gy + R*(.25 + i*.35), 13, css('--ok'), 'center', 800)); } ctx.globalAlpha = 1; }
+    if (T >= K.q && T < K.tc){ ctx.globalAlpha = wOven1*clamp((T - K.q)/.5); text('?', a.x0 + (a.x1 - a.x0)*.42, a.y0 + (a.y1 - a.y0)*.45, 60, '#fff', 'center', 800); ctx.globalAlpha = 1; }
+    // thermocouple en gros plan + chaîne
+    const wTc = clamp((T - K.tc)/.8)*(1 - clamp((T - K.unk + .6)/.6)); if (wTc > 0){ tcZoom(T, a, wTc, clamp((T - K.volt)/.6));
+      if (T >= K.chain) chainBoxes([['TEMPÉRATURE', '#ff8a3d'], ['THERMOCOUPLE', '#d9c35a'], ['TENSION ÉLECTRIQUE', '#3ee6ff']], a.x0 + (a.x1 - a.x0)*.78, a.y0 + (a.y1 - a.y0)*.62, 180, 52, clamp((T - K.chain)/2), wTc); }
+    // la mesure inconnue
+    const wUnk = clamp((T - K.unk)/.6)*(1 - clamp((T - K.graph[0] + .4)/.6)); if (wUnk > 0){ ctx.globalAlpha = wUnk; const cx = (a.x0 + a.x1)/2, cy = (a.y0 + a.y1)/2;
+      text('27,4 mV = ? °C', cx, cy, Math.max(30, W*.045), '#fff', 'center', 800); if (T >= K.unkQ){ ctx.globalAlpha = wUnk*clamp((T - K.unkQ)/.6); text('pas dans le tableau\u00a0!', cx, cy + 56, 18, css('--err'), 'center', 800); } ctx.globalAlpha = 1; }
+    // le graphique
+    VZ = T < K.out[0] ? 0 : T < K.out[1] ? ease((T - K.out[0])/(K.out[1] - K.out[0])) : T < K.outBack[0] ? 1 : T < K.outBack[1] ? 1 - ease((T - K.outBack[0])/(K.outBack[1] - K.outBack[0])) : 0;
+    const wGr = clamp((T - K.graph[0])/1)*(1 - clamp((T - K.back[0] + .4)/.8)); if (wGr > 0) drawGraph(T, a, wGr);
+    // retour au four, chaîne complète et régulation
+    const wBack = clamp((T - K.back[0])/1)*(1 - clamp((T - K.concl[0] + .3)/.8)); if (wBack > 0){ const tt = regTemp(T), heat = T < K.reg[0] ? .4 : T < K.reg[2] ? 1 : T < K.reg[3] ? .55 : .15;
+      const aw = a.x1 - a.x0, sub = { x0:a.x0, x1:a.x0 + aw*.68, y0:a.y0, y1:a.y1 }; oven(T, sub, wBack, 0, Math.round(tt) + ' °C', heat);
+      chainBoxes([['TEMPÉRATURE DU FOUR', '#ff8a3d'], ['THERMOCOUPLE', '#d9c35a'], ['TENSION ÉLECTRIQUE', '#3ee6ff'], ['FONCTION POLYNOMIALE', '#6dff94'], ['TEMPÉRATURE CALCULÉE', '#ffd23f'], ['COMMANDE DU CHAUFFAGE', '#c77dff']], a.x0 + aw*.84, a.y0 + 22, Math.min(190, aw*.3), (a.y1 - a.y0 - 44)/5.2, clamp((T - K.chainAll)/3), wBack);
+      if (T >= K.reg[0]){ const st = T < K.reg[2] ? ['trop basse → chauffage activé', '#ff8a3d'] : T < K.reg[3] ? ['correcte → maintien', '#6dff94'] : ['trop haute → chauffage réduit', '#3ee6ff']; ctx.globalAlpha = wBack; text(st[0], a.x0 + aw*.34, a.y1 - 8, 15, st[1], 'center', 800); ctx.globalAlpha = 1; } }
+    // conclusion
+    const wC = clamp((T - K.concl[0])/1); if (wC > 0){ ctx.globalAlpha = wC; const sub = { x0:a.x0, x1:a.x1, y0:a.y0, y1:a.y1 - 40 }; VZ = ease(clamp((T - K.concl[0] - .5)/2.5)); drawGraph(K.read[2] + 2, sub, wC*.9);
+      if (T >= K.concl[2]){ const items = ['MESURES', 'POINTS', 'POLYNÔME', 'PRÉDICTION'], k = clamp((T - K.concl[2])/2); items.forEach((t, i) => { const kk = clamp(k*4 - i); if (kk <= 0) return; ctx.globalAlpha = wC*kk; const x = a.x0 + (a.x1 - a.x0)*(.12 + i*.25);
+          text(t, x, a.y1 - 10, 14, ['#fff', '#3ee6ff', '#6dff94', '#ffd23f'][i], 'center', 800); if (i < 3) text('→', x + (a.x1 - a.x0)*.125, a.y1 - 10, 14, '#fff', 'center', 800); }); } ctx.globalAlpha = 1; }
+    // ---------- panneau ----------
+    const part = T < K.table[0] ? null : T < K.d1 ? 'A' : T < K.read[0] ? 'B' : T < K.back[0] ? 'C' : T < K.concl[0] ? 'D' : null;
+    const cOp = part ? clamp((T - K.table[0])/.6) : 0; card.style.opacity = cOp; card.style.transform = 'translateY(' + (1-cOp)*10 + 'px)';
+    ['A','B','C','D'].forEach(p => $('s' + p).style.display = part === p ? '' : 'none');
+    if (part === 'A'){ for (let i=0;i<4;i++) $('r' + i).style.opacity = clamp((T - K.table[0] - i*.6)/.5); $('r4').style.opacity = clamp((T - K.unk)/.5); $('r4').classList.toggle('on', T >= K.unk); }
+    if (part === 'B'){ [['g1', K.d1], ['g2', K.d2], ['g3', K.d3], ['g6', K.d6]].forEach(([id, t0]) => { const el = $(id); el.style.opacity = clamp((T - t0)/.5); el.classList.toggle('on', T >= t0 && T < t0 + 4); }); $('gf6').style.opacity = clamp((T - K.coef)/.5); $('cf').style.opacity = clamp((T - K.coef - .6)/.5); }
+    if (part === 'C'){ $('c1').style.opacity = clamp((T - K.read[2])/.5); $('c3').style.opacity = clamp((T - K.read[3])/.6); $('c4').style.opacity = clamp((T - K.read[3] - 1.5)/.5); $('c2').style.opacity = clamp((T - K.auto)/.5); }
+    if (part === 'D'){ const tt = regTemp(T); $('dT').textContent = Math.round(tt) + ' °C'; $('dU').textContent = fr(invU(tt), 1) + ' mV'; $('dS').innerHTML = T < K.reg[0] ? '&nbsp;' : T < K.reg[2] ? '<b style="color:#ff8a3d">trop basse → chauffage activé</b>' : T < K.reg[3] ? '<b style="color:#6dff94">correcte → maintien</b>' : '<b style="color:#3ee6ff">trop haute → chauffage réduit</b>'; }
+    let ci = -1; caps.forEach((c,i) => { if (T >= c[0]) ci = i; });
+    if (ci !== capIdx){ capIdx = ci; captxt.innerHTML = ci >= 0 ? caps[ci][1] : ''; }
+    capEl.style.opacity = (ci >= 0 && caps[ci][1]) ? clamp((T - caps[ci][0])/.35) : 0;
+  }
+  if (REC){ window.renderAt = T => { resize(); renderAt(T); }; window.END = END; return; }
+
+  // ---------- son (style « puce » rétro) ----------
+  const AU = { ctx:null, on:false, master:null, noise:null };
+  function auInit(){ const C = new (window.AudioContext || window.webkitAudioContext)(); const comp = C.createDynamicsCompressor(); comp.connect(C.destination);
+    const m = C.createGain(); m.gain.value = 0; m.connect(comp); AU.ctx = C; AU.master = m; }
+  function tone(f, vol, dur, type, delay){ const C = AU.ctx, t = C.currentTime + (delay||0), o = C.createOscillator(), g = C.createGain(); o.type = type || 'square'; o.frequency.value = f;
+    g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(Math.max(vol, .0002), t+.005); g.gain.exponentialRampToValueAtTime(.0001, t+dur); o.connect(g); g.connect(AU.master); o.start(t); o.stop(t+dur+.05); return o; }
+  const midi = mm => 440*Math.pow(2,(mm-69)/12);
+  const blip = (n, v) => tone(midi(n), v || .06, .09, 'square');
+  const jingle = (ns, v) => ns.forEach((n, i) => tone(midi(n), v || .06, .14, 'square', i*.09));
+  const FX = [[.3, () => jingle([72, 76, 79, 84])], [K.oven, () => { const o = tone(70, .05, 3, 'sawtooth'); }], [K.out[0], () => { const o = tone(600, .05, 3, 'triangle'); o.frequency.exponentialRampToValueAtTime(200, AU.ctx.currentTime + 3); }], [K.valid, () => jingle([67, 72], .05)], [K.q, () => blip(79)], [K.tc, () => jingle([67, 72], .05)], [K.volt, () => blip(84)], [K.unk, () => jingle([79, 74, 79], .06)], [K.unkQ, () => jingle([60, 55], .07)],
+    [K.d1, () => blip(64)], [K.d2, () => blip(67)], [K.d3, () => blip(71)], [K.d6, () => jingle([72, 76, 79, 84], .06)], [K.read[2], () => jingle([72, 79, 84])], [K.reg[0], () => jingle([60, 64], .06)], [K.reg[2], () => jingle([72, 76, 79], .06)], [K.concl[2], () => jingle([60, 64, 67, 72])]];
+  for (let i=0;i<11;i++) FX.push([K.pts + i*2.5/11, () => blip(70 + i, .03)]);
+  for (let i=0;i<4;i++) FX.push([K.table[0] + i*.6, () => blip(72 + i*3, .04)]);
+  function audioTick(a, b){ if (!AU.on || b <= a) return; FX.forEach(([tm, fn]) => { if (tm > a && tm <= b) fn(); });
+    if (b > 4 && b < END - 2){ for (let i=Math.floor(a/.5)+1;i<=Math.floor(b/.5);i++){ const seq = [48, 55, 52, 55, 45, 52, 50, 55]; tone(midi(seq[i%8]), .018, .2, 'triangle'); } } }
+  function masterTo(v){ if (!AU.ctx) return; const t = AU.ctx.currentTime; AU.master.gain.cancelScheduledValues(t); AU.master.gain.setTargetAtTime(v, t, .15); }
+
+  // ---------- voix off ----------
+  const VO = { on:false, busy:false, until:0, voice:null, supported:'speechSynthesis' in window };
+  function pickVoice(){ if (!VO.supported) return; const vs = speechSynthesis.getVoices().filter(v => /^fr/i.test(v.lang)); if (!vs.length) return;
+    const score = v => (/natural|online|neural/i.test(v.name) ? 8 : 0) + (/google/i.test(v.name) ? 4 : 0) + (/fr-CH/i.test(v.lang) ? 2 : 0) + (/fr-FR/i.test(v.lang) ? 1 : 0) + (v.localService ? 0 : 1);
+    VO.voice = vs.sort((a,b) => score(b) - score(a))[0]; }
+  if (VO.supported){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+  function say(text){ if (!VO.supported) return; speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = VO.voice ? VO.voice.lang : 'fr-FR'; if (VO.voice) u.voice = VO.voice; u.rate = .97;
+    u.onstart = () => { VO.busy = true; if (AU.on) masterTo(.45); }; u.onend = u.onerror = () => { VO.busy = false; if (AU.on && playing) masterTo(.9); };
+    VO.busy = true; VO.until = performance.now() + (text.length*.085/.97 + 2)*1000; speechSynthesis.speak(u); }
+  function hush(){ if (VO.supported) speechSynthesis.cancel(); VO.busy = false; }
+  function voiceTick(a, b){ if (!VO.on || b <= a) return; for (const [tm, txt] of VOICE){ if (tm > a && tm <= b) say(txt); } }
+  function holdForVoice(prev, next){ if (!VO.on || !VO.busy || performance.now() > VO.until) return next; for (const [tm] of VOICE){ if (tm > prev && tm <= next) return Math.max(prev, tm - .001); } return next; }
+
+  // ---------- commandes ----------
+  let T = 0, playing = true, last = performance.now();
+  const pauseBtn = $('pause'), replayBtn = $('replay'), soundBtn = $('sound'), voiceBtn = $('voice'), seekEl = $('seek'), clockEl = $('clock');
+  pauseBtn.addEventListener('click', () => { if (T >= END){ T = 0; playing = true; hush(); } else playing = !playing; pauseBtn.textContent = playing ? 'Pause' : 'Lecture';
+    if (VO.supported){ if (playing) speechSynthesis.resume(); else speechSynthesis.pause(); } if (AU.on) masterTo(playing ? .9 : 0); });
+  replayBtn.addEventListener('click', () => { hush(); T = -0.001; playing = true; pauseBtn.textContent = 'Pause'; if (AU.on) masterTo(.9); });
+  soundBtn.addEventListener('click', () => { if (!AU.ctx) auInit(); AU.ctx.resume(); AU.on = !AU.on; soundBtn.textContent = AU.on ? 'Couper le son' : 'Activer le son'; soundBtn.setAttribute('aria-pressed', AU.on); masterTo(AU.on && playing ? .9 : 0); });
+  voiceBtn.addEventListener('click', () => { if (!VO.supported){ voiceBtn.textContent = 'Voix indisponible'; return; }
+    VO.on = !VO.on; voiceBtn.textContent = VO.on ? 'Couper la voix' : 'Activer la voix'; voiceBtn.setAttribute('aria-pressed', VO.on);
+    if (!VO.on){ hush(); if (AU.on && playing) masterTo(.9); return; } pickVoice();
+    if (T < .3){ say(VOICE[0][1]); T = .301; } else { let cur = null; for (const v of VOICE){ if (v[0] <= T) cur = v; } if (cur && T - cur[0] < 3) say(cur[1]); } });
+  seekEl.max = END;
+  let skipAudio = false, dragging = false;
+  const mmss = x => { x = Math.max(0, Math.round(x)); return Math.floor(x/60) + ':' + String(x%60).padStart(2,'0'); };
+  function jump(sec){ T = Math.max(0, Math.min(END, sec)); skipAudio = true; hush(); if (T >= END){ playing = false; pauseBtn.textContent = 'Lecture'; } }
+  const seekBox = seekEl.parentElement;
+  seekEl.addEventListener('pointerdown', () => { dragging = true; seekBox.classList.add('drag'); });
+  window.addEventListener('pointerup', () => { if (dragging) seekEl.blur(); dragging = false; seekBox.classList.remove('drag'); });
+  seekEl.addEventListener('input', () => jump(parseFloat(seekEl.value)));
+  document.addEventListener('keydown', e => { if (e.target.tagName === 'BUTTON' && (e.key === ' ' || e.key === 'Enter')) return; if (e.target === seekEl && e.key.startsWith('Arrow')) return;
+    if (e.key === ' '){ e.preventDefault(); pauseBtn.click(); } else if (e.key === 'ArrowLeft') jump(T - 5); else if (e.key === 'ArrowRight') jump(T + 5); });
+  function loop(now){
+    const dt = Math.min(.1, (now-last)/1000); last = now; const prevT = T;
+    if (playing){ T = holdForVoice(prevT, Math.min(END, T + dt)); if (T >= END){ playing = false; pauseBtn.textContent = 'Lecture'; } }
+    if (skipAudio) skipAudio = false; else { audioTick(prevT, T); voiceTick(prevT, T); }
+    if (!dragging) seekEl.value = T.toFixed(1); clockEl.textContent = mmss(T) + ' / ' + mmss(END);
+    renderAt(Math.max(0, T)); requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
+</script>
+<script>if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js');</script>
+</body>
+</html>
