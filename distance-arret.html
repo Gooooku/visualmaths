@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icone.svg">
+<link rel="apple-touch-icon" href="icone.svg">
+<meta name="theme-color" content="#0b1024">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Application — la distance d’arrêt</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link id="gf" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&family=STIX+Two+Text:ital,wght@0,500;1,500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg1:#070b1c; --bg2:#151b46; --ink:#eef1ff; --muted:#8e97c4; --glass:rgba(255,255,255,.06); --stroke:rgba(255,255,255,.14);
+  --bip:#3ee6ff; --zap:#ff4f6d; --zip:#c77dff; --re:#4fc3ff; --fr:#ff8a3d; --tot:#ffd23f; --err:#ff5a6e; --star:#ffd23f; --x:#ff7a85; --y:#5ee3a1; --wall:#2f5bff; --ok:#6dff94;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light){ :root:not([data-theme="dark"]){ --glass:rgba(255,255,255,.08); } }
+:root[data-theme="light"]{ --glass:rgba(255,255,255,.08); }
+:root{ box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); }
+*,*::before,*::after{ box-sizing:inherit; }
+html{ height:100%; scroll-padding-top:env(safe-area-inset-top,0px); }
+body{ height:100%; margin:0; background:var(--bg1); color:var(--ink); overflow:hidden; font-family:"Manrope", system-ui, -apple-system, "Segoe UI", sans-serif; }
+.m{ font-family:"STIX Two Text","Cambria Math","Times New Roman",serif; font-style:italic; font-weight:500; }
+.cB{ color:var(--bip); } .cZ{ color:var(--zap); } .cI{ color:var(--zip); } .cS{ color:var(--star); } .cx{ color:var(--x); } .cy{ color:var(--y); } .cOk{ color:var(--ok); } .mu{ color:var(--muted); }
+.stage{ position:relative; width:100%; height:100%; overflow:hidden; background:radial-gradient(120% 90% at 70% 15%, var(--bg2) 0%, var(--bg1) 62%); --u:min(1vw, 1.78vh); }
+canvas{ position:absolute; inset:0; width:100%; height:100%; display:block; }
+.title{ position:absolute; inset:0; display:grid; place-content:center; text-align:center; pointer-events:none; }
+.title h1{ margin:0; font-weight:800; font-size:calc(var(--u)*5.4); letter-spacing:-.02em; line-height:1.05; }
+.title p{ margin:calc(var(--u)*1.4) 0 0; font-size:calc(var(--u)*2.2); color:var(--muted); font-weight:600; }
+.caption{ position:absolute; left:calc(var(--u)*4); bottom:calc(var(--u)*4.5 + 20px); max-width:min(46%, 30em); pointer-events:none; font-size:calc(var(--u)*2.1); font-weight:700; line-height:1.25; }
+.caption > span{ display:block; }
+.caption .bar{ display:block; width:calc(var(--u)*6); height:calc(var(--u)*.5); border-radius:99px; margin-bottom:calc(var(--u)*1.2); background:linear-gradient(90deg, var(--bip), var(--zip), var(--zap)); }
+.card{ position:absolute; right:calc(var(--u)*3.5); bottom:calc(var(--u)*3.5 + 20px); width:21em; padding:calc(var(--u)*1.8) calc(var(--u)*2.2); font-size:calc(var(--u)*1.7);
+  background:var(--glass); border:1px solid var(--stroke); border-radius:calc(var(--u)*1.8); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); }
+.card h3{ margin:0 0 .5em; font-size:.8em; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:800; }
+.sec{ display:grid; gap:.35em; }
+.line{ white-space:nowrap; font-variant-numeric:tabular-nums; }
+.big{ font-size:1.25em; }
+.hr{ height:1px; background:var(--stroke); margin:.6em 0; }
+.num{ display:inline-block; min-width:1.6em; text-align:right; }
+table.cmp{ border-collapse:collapse; width:100%; font-variant-numeric:tabular-nums; }
+table.cmp td, table.cmp th{ padding:.25em .3em; text-align:left; white-space:nowrap; }
+table.cmp th{ font-size:.82em; color:var(--muted); font-weight:700; }
+.ctrl{ position:absolute; right:calc(var(--u)*3.5); top:calc(var(--u)*3); display:flex; gap:8px; }
+.ctrl button, .ctrl a.home{ font:inherit; font-weight:700; font-size:14px; padding:9px 15px; border-radius:99px; border:1px solid var(--stroke); background:var(--glass); color:var(--ink); cursor:pointer; backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); }
+.ctrl button:focus-visible{ outline:3px solid var(--bip); outline-offset:2px; }
+.seek{ position:absolute; left:0; right:0; bottom:0; padding:28px calc(var(--u)*3.5) calc(var(--u)*1.2) calc(var(--u)*4); display:flex; align-items:center; gap:14px; transition:opacity .25s; }
+.seek input{ flex:1; accent-color:var(--bip); height:22px; cursor:pointer; }
+.seek span{ font-size:14px; font-weight:600; color:var(--muted); font-variant-numeric:tabular-nums; min-width:6.5em; text-align:right; }
+@media (hover: hover){ .seek{ opacity:0; } .seek:hover, .seek:has(input:focus-visible), .seek.drag{ opacity:1; } }
+.rec .ctrl, .rec .seek{ display:none; } .rec *{ transition:none !important; }
+@media (max-aspect-ratio: 1/1){
+  .stage{ --u:min(1.9vw, 1.2vh); }
+  .card{ left:calc(var(--u)*2.5); right:calc(var(--u)*2.5); top:calc(var(--u)*2.5); bottom:auto; width:auto; font-size:calc(var(--u)*1.7); }
+  .ctrl{ left:calc(var(--u)*2.5); right:calc(var(--u)*2.5); top:auto; bottom:calc(var(--u)*2 + 34px); flex-wrap:wrap; gap:6px; }
+  .ctrl button, .ctrl a.home{ padding:7px 11px; font-size:13px; }
+  .caption{ left:calc(var(--u)*2.5); right:calc(var(--u)*2.5); max-width:none; bottom:calc(var(--u)*2 + 90px); font-size:calc(var(--u)*2.6); }
+  .seek{ padding:10px calc(var(--u)*3) calc(var(--u)*2); }
+}
+.cR{ color:var(--re); } .cF{ color:var(--fr); } .cT{ color:var(--tot); } .cE{ color:var(--err); }
+table.tb{ border-collapse:collapse; width:100%; font-variant-numeric:tabular-nums; } table.tb td{ padding:.16em .35em; white-space:nowrap; text-align:right; } table.tb td:first-child{ text-align:left; } table.tb tr.on td{ background:rgba(255,210,63,.12); }
+.ctrl a.home{ text-decoration:none; display:inline-flex; align-items:center; }
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <canvas id="c" aria-label="Animation : la distance d'arrêt d'une voiture est une fonction du deuxième degré de la vitesse"></canvas>
+  <div class="title" id="title"><div><h1>Pourra-t-elle s’arrêter à temps&nbsp;?</h1><p>Fonctions du 2<sup>e</sup> degré · la distance d’arrêt</p></div></div>
+  <div class="card" id="card" style="opacity:0">
+    <div class="sec" id="sA">
+      <h3>Distance d’arrêt à 50 km/h</h3>
+      <div class="line"><b class="cR">réaction</b> (1 s)&nbsp;: 50 / 3,6 ≈ <b class="cR">14 m</b></div>
+      <div class="line" id="a1"><b class="cF">freinage</b>&nbsp;: ≈ <b class="cF">12 m</b></div>
+      <div class="line big" id="a2">total&nbsp;: ≈ <b class="cT">26 m</b></div>
+      <div class="hr"></div>
+      <div class="line mu" style="font-size:.86em; white-space:normal">hypothèses&nbsp;: réaction 1 s · freinage d’urgence sur route sèche</div>
+    </div>
+    <div class="sec" id="sB" style="display:none">
+      <h3>Comparer les vitesses</h3>
+      <table class="tb"><tr><td></td><td class="cR">réaction</td><td class="cF">freinage</td><td class="cT">total</td></tr>
+        <tr id="r30"><td>30 km/h</td><td>8 m</td><td>4 m</td><td><b>13 m</b></td></tr>
+        <tr id="r50"><td>50 km/h</td><td>14 m</td><td>12 m</td><td><b>26 m</b></td></tr>
+        <tr id="r60"><td>60 km/h</td><td>17 m</td><td>17 m</td><td><b>34 m</b></td></tr></table>
+      <div class="hr"></div>
+      <div class="line" id="b1" style="white-space:normal">vitesse ×2 → freinage <b class="cF">×4</b></div>
+      <div class="line big" id="b2"><span class="m">d</span>(<span class="m">v</span>) ≈ <b class="cF">0,0048</b><span class="m">v</span><sup>2</sup> + <b class="cR">0,28</b><span class="m">v</span></div>
+      <div class="line mu" id="b3" style="font-size:.86em"><span class="m">v</span> en km/h · <span class="m">d</span> en m</div>
+    </div>
+    <div class="sec" id="sC" style="display:none">
+      <h3>S’arrêter en 25 m au maximum</h3>
+      <div class="line" id="c0">0,0048<span class="m">v</span><sup>2</sup> + 0,28<span class="m">v</span> = 25</div>
+      <div class="line" id="c1">0,0048<span class="m">v</span><sup>2</sup> + 0,28<span class="m">v</span> − 25 = 0</div>
+      <div class="line" id="c2">Δ = 0,28<sup>2</sup> − 4 · 0,0048 · (−25) = 0,5584</div>
+      <div class="line" id="c3"><span class="m">v</span> = (−0,28 ± √0,5584) / (2 · 0,0048)</div>
+      <div class="line" id="c4"><span class="m">v</span><sub>1</sub> ≈ <b class="cT">48,7</b> · <span class="m">v</span><sub>2</sub> ≈ <s class="cE">−107</s> <span class="mu">(vitesse négative)</span></div>
+      <div class="line big" id="c5">vitesse max ≈ <b class="cT">48,7 km/h</b></div>
+    </div>
+  </div>
+  <div class="caption" id="caption" style="opacity:0"><i class="bar"></i><span id="captxt"></span></div>
+  <div class="ctrl"><a class="home" href="index.html" aria-label="Retour à l'accueil">← Accueil</a><button id="voice" aria-pressed="false">Activer la voix</button><button id="sound" aria-pressed="false">Activer le son</button><button id="pause">Pause</button><button id="replay">Rejouer</button></div>
+  <div class="seek"><input type="range" id="seek" min="0" max="115" step="0.1" value="0" aria-label="Position dans l'animation"><span id="clock">0:00 / 1:55</span></div>
+</div>
+<script>
+(function(){
+  const REC = /[?&]record/.test(location.search); if (REC) document.body.classList.add('rec');
+  const $ = id => document.getElementById(id);
+  const clamp = x => Math.max(0, Math.min(1, x));
+  const ease = x => x<.5 ? 4*x*x*x : 1-Math.pow(-2*x+2,3)/2;
+  const lerp = (a,b,k) => a + (b-a)*k;
+  const back = x => { const c=1.7, c3=c+1; return 1 + c3*Math.pow(x-1,3) + c*Math.pow(x-1,2); };
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const fr = (v, d) => v.toFixed(d).replace('.', ',').replace('-', '−');
+  const DEC = 8;                                   // décélération (m/s²), route sèche
+  const dR = v => v/3.6, dF = v => (v/3.6)*(v/3.6)/(2*DEC), dA = v => dR(v) + dF(v);
+  // position (m) et vitesse (km/h) au temps s après l'apparition de l'obstacle (réaction 1 s, puis freinage)
+  function motion(v, s){ const v0 = v/3.6; if (s <= 1) return [v0*s, v]; const tb = s - 1, tf = v0/DEC; if (tb >= tf) return [dA(v), 0]; return [dR(v) + v0*tb - DEC*tb*tb/2, (v0 - DEC*tb)*3.6]; }
+  const CHILD = 27;
+
+  // ---------- chronologie ----------
+  const K = { scene:4, child:8, run1:[10.5, 17], react:11, brake:13.5, stop:17.5, split:21, compare:[26, 33], x2:34.5, func:39, graph:[42, 44], parab:47, dz:[50.5, 53.5], dzTxt:54, dzNeg:57.5, dzBack:[61.5, 64], sixty:[65, 71.5], impact:72, q:77.5, eq:[81, 84, 87, 90.5, 94], ans:97.5, wet:102, final:107 };
+  const END = 115;
+  const caps = [
+    [0.3, ''],
+    [K.scene, 'Une voiture roule à 50 km/h dans un quartier.'],
+    [K.child, 'Soudain, un enfant surgit sur la route, à 27 m devant elle\u00a0!'],
+    [K.react, 'Pendant le <b class="cR">temps de réaction</b>, environ 1 seconde, la voiture continue à pleine vitesse\u00a0: 14 m.'],
+    [K.brake, 'Puis le conducteur freine\u00a0: c’est la <b class="cF">distance de freinage</b>, environ 12 m.'],
+    [K.stop, 'Elle s’arrête après environ <b class="cT">26 m</b>… juste avant l’enfant\u00a0!'],
+    [K.split, 'Distance d’arrêt = distance de réaction + distance de freinage. Mais comment dépend-elle de la vitesse\u00a0?'],
+    [K.compare[0], 'Comparons trois voitures, à 30, 50 et 60 km/h, avec le même conducteur et la même route.'],
+    [K.x2, 'De 30 à 60 km/h, la vitesse double… mais la distance de freinage est multipliée par 4\u00a0!'],
+    [K.func, 'La distance de freinage dépend du <b>carré</b> de la vitesse. La distance d’arrêt est une <b>fonction du 2<sup>e</sup> degré</b>\u00a0: <span class="m">d</span>(<span class="m">v</span>) ≈ 0,0048<span class="m">v</span><sup>2</sup> + 0,28<span class="m">v</span>.'],
+    [K.graph[0], 'Son graphique est une branche de parabole\u00a0: plus on va vite, plus la distance augmente rapidement.'],
+    [K.parab, 'Les trois voitures sont des points de cette courbe.'],
+    [K.dz[0], 'Dézoomons pour voir la courbe en entier…'],
+    [K.dzTxt, '… c’est bien une <b>parabole</b>, tournée vers le haut, avec son sommet.'],
+    [K.dzNeg, 'Mais seule la partie où <span class="m">v</span> ≥ 0 a un sens\u00a0: une vitesse négative n’existe pas ici. Le reste est en pointillés.'],
+    [K.dzBack[0], 'Revenons aux vitesses réelles.'],
+    [K.sixty[0], 'Et à 60 km/h, avec le même enfant à 27 m\u00a0?'],
+    [K.impact, 'Arrivée au niveau de l’enfant, la voiture roule encore à environ <b class="cE">41 km/h</b>\u00a0! 10 km/h de plus au départ, et tout change.'],
+    [K.q, 'Question\u00a0: à quelle vitesse maximale faut-il rouler pour pouvoir s’arrêter en 25 m\u00a0?'],
+    [K.eq[0], 'On cherche <span class="m">v</span> tel que <span class="m">d</span>(<span class="m">v</span>) = 25.'],
+    [K.eq[1], 'On met tout du même côté\u00a0: c’est une <b>équation du 2<sup>e</sup> degré</b>.'],
+    [K.eq[2], 'On calcule le discriminant\u00a0: Δ = 0,5584.'],
+    [K.eq[3], 'La formule donne deux solutions…'],
+    [K.eq[4], '… environ 48,7 et −107. Une vitesse négative n’a pas de sens ici\u00a0: on la rejette.'],
+    [K.ans, 'Pour s’arrêter en 25 m, il faut rouler à <b class="cT">48,7 km/h</b> au maximum. Sur le graphique\u00a0: là où la courbe atteint 25 m.'],
+    [K.wet, 'Et sur une route mouillée, on freine moins fort\u00a0: la distance de freinage est encore plus grande.'],
+    [K.final, 'Distance de freinage proportionnelle au carré de la vitesse\u00a0: un peu plus vite, beaucoup plus loin.']
+  ];
+  const VOICE = [
+    [0.3, "Pourra-t-elle s'arrêter à temps ?"],
+    [K.scene, "Une voiture roule à cinquante kilomètres-heure dans un quartier."],
+    [K.child, "Soudain, un enfant surgit sur la route, à vingt-sept mètres devant elle !"],
+    [K.react, "Pendant le temps de réaction, environ une seconde, la voiture continue à pleine vitesse : quatorze mètres."],
+    [K.brake, "Puis le conducteur freine : c'est la distance de freinage, environ douze mètres."],
+    [K.stop, "Elle s'arrête après environ vingt-six mètres… juste avant l'enfant !"],
+    [K.split, "Distance d'arrêt égale distance de réaction plus distance de freinage. Mais comment dépend-elle de la vitesse ?"],
+    [K.compare[0], "Comparons trois voitures, à trente, cinquante et soixante kilomètres-heure, avec le même conducteur et la même route."],
+    [K.x2, "De trente à soixante, la vitesse double… mais la distance de freinage est multipliée par quatre !"],
+    [K.func, "La distance de freinage dépend du carré de la vitesse. La distance d'arrêt est une fonction du deuxième degré."],
+    [K.graph[0], "Son graphique est une branche de parabole : plus on va vite, plus la distance augmente rapidement."],
+    [K.parab, "Les trois voitures sont des points de cette courbe."],
+    [K.dz[0], "Dézoomons pour voir la courbe en entier…"],
+    [K.dzTxt, "… c'est bien une parabole, tournée vers le haut, avec son sommet."],
+    [K.dzNeg, "Mais seule la partie où v est positif a un sens : une vitesse négative n'existe pas ici. Le reste est en pointillés."],
+    [K.dzBack[0], "Revenons aux vitesses réelles."],
+    [K.sixty[0], "Et à soixante kilomètres-heure, avec le même enfant à vingt-sept mètres ?"],
+    [K.impact, "Arrivée au niveau de l'enfant, la voiture roule encore à environ quarante et un kilomètres-heure ! Dix kilomètres-heure de plus au départ, et tout change."],
+    [K.q, "Question : à quelle vitesse maximale faut-il rouler pour pouvoir s'arrêter en vingt-cinq mètres ?"],
+    [K.eq[0], "On cherche v tel que d de v égale vingt-cinq."],
+    [K.eq[1], "On met tout du même côté : c'est une équation du deuxième degré."],
+    [K.eq[2], "On calcule le discriminant : delta égale zéro virgule cinq cinq huit quatre."],
+    [K.eq[3], "La formule donne deux solutions…"],
+    [K.eq[4], "… environ quarante-huit virgule sept, et moins cent sept. Une vitesse négative n'a pas de sens ici : on la rejette."],
+    [K.ans, "Pour s'arrêter en vingt-cinq mètres, il faut rouler à quarante-huit virgule sept kilomètres-heure au maximum."],
+    [K.wet, "Et sur une route mouillée, on freine moins fort : la distance de freinage est encore plus grande."],
+    [K.final, "Distance de freinage proportionnelle au carré de la vitesse : un peu plus vite, beaucoup plus loin."]
+  ];
+
+  // ---------- canevas ----------
+  const stage = $('stage'), cv = $('c'), ctx = cv.getContext('2d');
+  let W = 1, H = 1, DPR = 1;
+  function resize(){ DPR = REC ? 1 : Math.min(devicePixelRatio || 1, 2); W = stage.clientWidth; H = stage.clientHeight; cv.width = W*DPR; cv.height = H*DPR; ctx.setTransform(DPR, 0, 0, DPR, 0, 0); }
+  new ResizeObserver(resize).observe(stage); resize();
+  const portrait = () => W/H < 1;
+  function area(){ return portrait() ? {x0:W*.04, x1:W*.96, y0:H*.3, y1:H*.72} : {x0:W*.03, x1:W*.6, y0:H*.05, y1:H*.72}; }
+  function glowOn(color, b){ ctx.shadowColor = color; ctx.shadowBlur = b; } function glowOff(){ ctx.shadowBlur = 0; }
+  function roundRect(x, y, w, h, r){ ctx.beginPath(); ctx.moveTo(x+r, y); ctx.arcTo(x+w, y, x+w, y+h, r); ctx.arcTo(x+w, y+h, x, y+h, r); ctx.arcTo(x, y+h, x, y, r); ctx.arcTo(x, y, x+w, y, r); ctx.closePath(); }
+  function text(t, x, y, size, color, align, weight){ ctx.font = (weight || 700) + ' ' + size + 'px Manrope, system-ui, sans-serif'; ctx.fillStyle = color; ctx.textAlign = align || 'center'; ctx.textBaseline = 'middle'; ctx.fillText(t, x, y); }
+  function dot(x, y, r, color, glow){ if (glow) glowOn(color, r*3); ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2); ctx.fill(); glowOff(); }
+  function grid(){ ctx.strokeStyle = 'rgba(90,120,255,.07)'; ctx.lineWidth = 1; const s = Math.max(28, W/40); for (let x = (W % s)/2; x < W; x += s){ ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); } for (let y = (H % s)/2; y < H; y += s){ ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); } }
+  function label(x, y, t, col, sz){ ctx.font = '800 ' + sz + 'px Manrope'; const w = ctx.measureText(t).width + 14; ctx.fillStyle = 'rgba(10,14,40,.85)'; roundRect(x - w/2, y - sz*.8, w, sz*1.6, 8); ctx.fill(); text(t, x, y, sz, col, 'center', 800); }
+
+  // ---------- voiture, enfant, route ----------
+  function car(x, y, s, col, braking, spin){ ctx.save(); ctx.translate(x, y); const L = s*4.2, Hh = s*1.4;
+    ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.beginPath(); ctx.ellipse(-L*.45, 0, L*.55, s*.18, 0, 0, 7); ctx.fill();
+    // carrosserie : coffre court à l'arrière (gauche), habitacle, long capot à l'avant (droite)
+    ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(-L, -s*.35); ctx.lineTo(-L, -Hh*.7); ctx.quadraticCurveTo(-L*.99, -Hh*.82, -L*.9, -Hh*.84); ctx.lineTo(-L*.8, -Hh*.86);
+    ctx.lineTo(-L*.68, -Hh*1.28); ctx.lineTo(-L*.4, -Hh*1.28); ctx.lineTo(-L*.24, -Hh*.84); ctx.lineTo(-L*.05, -Hh*.72); ctx.quadraticCurveTo(0, -Hh*.66, 0, -s*.5); ctx.lineTo(0, -s*.35); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,.25)'; ctx.fillRect(-L*.95, -Hh*.6, L*.9, s*.05);
+    ctx.fillStyle = '#bfe6ff'; ctx.beginPath(); ctx.moveTo(-L*.77, -Hh*.88); ctx.lineTo(-L*.67, -Hh*1.2); ctx.lineTo(-L*.55, -Hh*1.2); ctx.lineTo(-L*.55, -Hh*.88); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(-L*.52, -Hh*.88); ctx.lineTo(-L*.52, -Hh*1.2); ctx.lineTo(-L*.42, -Hh*1.2); ctx.lineTo(-L*.29, -Hh*.88); ctx.closePath(); ctx.fill();
+    // phares à l'avant (droite), feux arrière à gauche
+    ctx.fillStyle = '#fff3b0'; glowOn('#fff3b0', 10); ctx.fillRect(-s*.2, -Hh*.68, s*.2, s*.16); glowOff(); ctx.fillStyle = 'rgba(255,240,180,.18)'; ctx.beginPath(); ctx.moveTo(0, -Hh*.66); ctx.lineTo(s*2.2, -Hh*.9); ctx.lineTo(s*2.2, -Hh*.3); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = braking ? '#ff2a2a' : '#7a1a1a'; if (braking) glowOn('#ff2a2a', 14); ctx.fillRect(-L - 1, -Hh*.72, s*.14, s*.22); glowOff();
+    [-L*.8, -L*.22].forEach(wx => { ctx.fillStyle = '#15171c'; ctx.beginPath(); ctx.arc(wx, -s*.35, s*.42, 0, 7); ctx.fill(); ctx.fillStyle = '#9aa3b8'; ctx.beginPath(); ctx.arc(wx, -s*.35, s*.2, 0, 7); ctx.fill(); ctx.strokeStyle = '#15171c'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(wx + Math.cos(spin)*s*.2, -s*.35 + Math.sin(spin)*s*.2); ctx.lineTo(wx - Math.cos(spin)*s*.2, -s*.35 - Math.sin(spin)*s*.2); ctx.stroke(); });
+    ctx.restore(); }
+  function child(x, y, s, T){ ctx.save(); ctx.translate(x, y); ctx.fillStyle = '#ffd23f'; ctx.beginPath(); ctx.arc(s*.55, -s*.25, s*.25, 0, 7); ctx.fill();
+    ctx.strokeStyle = '#ff5ac8'; ctx.lineWidth = s*.22; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(0, -s*1.45); ctx.lineTo(0, -s*.75); ctx.stroke(); ctx.strokeStyle = '#3a5687'; ctx.beginPath(); ctx.moveTo(0, -s*.75); ctx.lineTo(-s*.22, 0); ctx.moveTo(0, -s*.75); ctx.lineTo(s*.22, 0); ctx.stroke();
+    ctx.strokeStyle = '#f0c09a'; ctx.lineWidth = s*.14; ctx.beginPath(); ctx.moveTo(0, -s*1.35); ctx.lineTo(s*.4, -s*1.0 + Math.sin(T*6)*s*.05); ctx.stroke(); ctx.lineCap = 'butt'; ctx.fillStyle = '#f0c09a'; ctx.beginPath(); ctx.arc(0, -s*1.72, s*.27, 0, 7); ctx.fill(); ctx.fillStyle = '#5a3a2a'; ctx.beginPath(); ctx.arc(0, -s*1.8, s*.27, Math.PI, 0); ctx.fill(); ctx.restore(); }
+  function road(a, y0, h, M, scroll, al){ ctx.globalAlpha = al; ctx.fillStyle = '#2b2f3a'; ctx.fillRect(a.x0, y0, a.x1 - a.x0, h); ctx.fillStyle = '#3a3f4c'; ctx.fillRect(a.x0, y0, a.x1 - a.x0, 3);
+    ctx.fillStyle = 'rgba(255,255,255,.75)'; const step = M.s*3; for (let x = a.x0 - ((scroll*M.s) % step); x < a.x1; x += step) ctx.fillRect(x, y0 + h*.5 - 1.5, M.s*1.5, 3); ctx.globalAlpha = 1; }
+  function ruler(a, y, M, al){ ctx.globalAlpha = al; ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = 1; for (let m = 0; m <= 36; m += 2){ const x = M.X(m); ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, y + (m % 10 === 0 ? 9 : 5)); ctx.stroke(); if (m % 10 === 0) text(m + ' m', x, y + 18, 11, css('--muted'), 'center', 700); } ctx.globalAlpha = 1; }
+  function bars(M, y, v, s, al){ const [p] = motion(v, s); const r = Math.min(p, dR(v)); ctx.globalAlpha = al; ctx.fillStyle = 'rgba(79,195,255,.85)'; ctx.fillRect(M.X(0), y, M.X(r) - M.X(0), 7); if (p > dR(v)){ ctx.fillStyle = 'rgba(255,138,61,.9)'; ctx.fillRect(M.X(dR(v)), y, M.X(p) - M.X(dR(v)), 7); } ctx.globalAlpha = 1; }
+
+  // ---------- rendu ----------
+  const titleEl = $('title'), card = $('card'), captxt = $('captxt'), capEl = $('caption');
+  let capIdx = -2;
+  function renderAt(T){
+    ctx.clearRect(0, 0, W, H); grid();
+    titleEl.style.opacity = clamp((T-.2)/.6)*(1 - clamp((T-3.4)/.6));
+    const a = area(), aw = a.x1 - a.x0, ah = a.y1 - a.y0, M = { s: aw/44, X: m => a.x0 + aw*.12 + m*aw/44 };
+    // ---- scène 1 : une seule voiture à 50 km/h ----
+    const w1 = clamp((T - K.scene)/.8)*(1 - clamp((T - K.compare[0] + .5)/.6)); if (w1 > 0){ const yR = a.y0 + ah*.55, s1 = (T - K.run1[0])/(K.run1[1] - K.run1[0])*3.2;
+      const [p, sp] = T < K.run1[0] ? [0, 50] : motion(50, Math.max(0, s1)), scroll = T < K.run1[0] ? (T - K.scene)*14 : 0;
+      ctx.globalAlpha = w1; ctx.fillStyle = 'rgba(80,190,110,.25)'; ctx.fillRect(a.x0, a.y0 + ah*.25, aw, ah*.3); for (let i=0;i<7;i++){ const tx = a.x0 + ((i*.17 + 1 - (scroll*.01) % 1) % 1)*aw; ctx.fillStyle = '#2f6a45'; ctx.beginPath(); ctx.arc(tx, a.y0 + ah*.36, ah*.06, 0, 7); ctx.fill(); ctx.fillStyle = '#5a3a2a'; ctx.fillRect(tx - 3, a.y0 + ah*.4, 6, ah*.14); }
+      road(a, yR, ah*.2, M, scroll, w1); ruler(a, yR + ah*.24, M, w1*clamp((T - K.react)/.6));
+      if (T >= K.child){ const kc = clamp((T - K.child)/.8); child(lerp(M.X(CHILD + 2), M.X(CHILD), kc), yR + ah*.12, M.s*1.1, T); }
+      car(M.X(p), yR + ah*.1, M.s, '#3ee6ff', T >= K.brake && sp > 0, -T*12*(sp/50));
+      if (T >= K.react){ bars(M, yR + ah*.21, 50, Math.max(0, s1), w1); }
+      text(Math.round(sp) + ' km/h', a.x0 + 70, a.y0 + 22, 18, sp > 0 ? '#fff' : css('--ok'), 'center', 800);
+      if (T >= K.react && T < K.stop + 3){ if (T >= K.react) label(M.X(dR(50)/2), yR - ah*.08, 'réaction 14 m', css('--re'), 12); if (T >= K.brake + 1.5) label(M.X(dR(50) + dF(50)/2), yR - ah*.2, 'freinage 12 m', css('--fr'), 12); }
+      if (T >= K.stop){ label(M.X(dA(50)), yR - ah*.32, 'arrêt : 26 m', css('--tot'), 13); }
+      ctx.globalAlpha = 1; }
+    // ---- scène 2 : trois voitures (et 60 km/h face à l'enfant) ----
+    const w2 = clamp((T - K.compare[0])/.8)*(1 - clamp((T - K.func + .4)/.6)) + (T >= K.sixty[0] && T < K.q ? clamp((T - K.sixty[0])/.6)*(1 - clamp((T - K.q + .4)/.6)) : 0);
+    if (w2 > 0){ const lanes = T >= K.sixty[0] ? [[50, '#3ee6ff'], [60, '#ff5a6e']] : [[30, '#6dff94'], [50, '#3ee6ff'], [60, '#ff5a6e']], t0 = T >= K.sixty[0] ? K.sixty[0] + .6 : K.compare[0] + .6, s2 = Math.max(0, (T - t0)/(T >= K.sixty[0] ? 5 : 6)*3.2);
+      lanes.forEach(([v, col], i) => { const yR = a.y0 + 28 + i*(ah - 40)/lanes.length, hR = (ah - 40)/lanes.length*.42; road(a, yR, hR, M, 0, w2); const [p, sp] = motion(v, s2);
+        if (T >= K.sixty[0]) { ctx.globalAlpha = w2; child(M.X(CHILD), yR + hR*.7, M.s*.9, T); ctx.setLineDash([4, 4]); ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.beginPath(); ctx.moveTo(M.X(CHILD), yR - 6); ctx.lineTo(M.X(CHILD), yR + hR + 6); ctx.stroke(); ctx.setLineDash([]); }
+        ctx.globalAlpha = w2; car(M.X(p), yR + hR*.62, M.s*.85, col, s2 > 1 && sp > 0, -T*12*(sp/50)); bars(M, yR + hR + 4, v, s2, w2);
+        text(v + ' km/h', a.x0 + 8, yR - 8, 13, col, 'left', 800); if (sp === 0) text('arrêt : ' + Math.round(dA(v)) + ' m', M.X(dA(v)) + 6, yR - 8, 12, css('--tot'), 'left', 800);
+        if (T >= K.impact && v === 60){ label(M.X(CHILD), yR - 16, '≈ 41 km/h à 27 m !', css('--err'), 13); } ctx.globalAlpha = 1; });
+      ruler(a, a.y1 - 18, M, w2*.8); }
+    // ---- scène 3 : la fonction et son graphique ----
+    const w3 = clamp((T - K.func)/.8)*(T < K.sixty[0] ? 1 - clamp((T - K.sixty[0] + .4)/.6) : clamp((T - K.q + .2)/.6));
+    if (w3 > 0){ const Z = T < K.dz[0] ? 0 : T < K.dz[1] ? ease((T - K.dz[0])/(K.dz[1] - K.dz[0])) : T < K.dzBack[0] ? 1 : T < K.dzBack[1] ? 1 - ease((T - K.dzBack[0])/(K.dzBack[1] - K.dzBack[0])) : 0;
+      const v0 = lerp(0, -120, Z), v1 = lerp(90, 75, Z), d0 = lerp(0, -12, Z), d1 = lerp(55, 70, Z);
+      const gx0 = a.x0 + 64, gx1 = a.x1 - 20, gy0 = a.y1 - 34, gy1 = a.y0 + 26, X = v => lerp(gx0, gx1, (v - v0)/(v1 - v0)), Y = d => gy0 - (d - d0)/(d1 - d0)*(gy0 - gy1); ctx.globalAlpha = w3;
+      ctx.save(); ctx.beginPath(); ctx.rect(gx0 - 2, gy1 - 8, gx1 - gx0 + 10, gy0 - gy1 + 10); ctx.clip();
+      ctx.strokeStyle = 'rgba(80,110,255,.16)'; ctx.lineWidth = 1; const vs = Z > .5 ? 20 : 10;
+      for (let d = Math.ceil(d0/10)*10; d <= d1; d += 10){ ctx.beginPath(); ctx.moveTo(gx0, Y(d)); ctx.lineTo(gx1, Y(d)); ctx.stroke(); }
+      for (let v = Math.ceil(v0/vs)*vs; v <= v1; v += vs){ ctx.beginPath(); ctx.moveTo(X(v), gy0); ctx.lineTo(X(v), gy1); ctx.stroke(); }
+      ctx.strokeStyle = 'rgba(210,220,255,.85)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(X(0), gy1 - 6); ctx.lineTo(X(0), gy0); ctx.moveTo(gx0, Y(0)); ctx.lineTo(gx1 + 6, Y(0)); ctx.stroke(); ctx.restore();
+      for (let d = Math.ceil(d0/10)*10; d <= d1; d += 10) text(d + ' m', gx0 - 8, Y(d), 11, css('--muted'), 'right', 600);
+      for (let v = Math.ceil(v0/vs)*vs; v <= v1; v += vs) text(String(v), X(v), gy0 + 13, 11, css('--muted'), 'center', 600);
+      text('vitesse v (km/h)', gx1, gy0 + 28, 12, '#fff', 'right', 800); text('distance d’arrêt d (m)', X(0) + 6, gy1 - 12, 12, css('--tot'), 'left', 800);
+      if (Z > 0){ ctx.save(); ctx.beginPath(); ctx.rect(gx0, gy1 - 4, gx1 - gx0, gy0 - gy1 + 4); ctx.clip(); ctx.globalAlpha = w3*Z; ctx.strokeStyle = css('--tot'); ctx.lineWidth = 2.6; ctx.setLineDash([7, 6]); ctx.beginPath();
+          for (let i=0;i<=160;i++){ const v = lerp(v0, 0, i/160); i ? ctx.lineTo(X(v), Y(dA(v))) : ctx.moveTo(X(v), Y(dA(v))); } ctx.stroke(); ctx.setLineDash([]);
+          if (T >= K.dzTxt){ const vs2 = -0.28/(2*0.0048), ds = dA(vs2*1); dot(X(-29.17), Y(-4.08), 6, '#fff', true); text('sommet', X(-29.17), Y(-4.08) + 16, 12, '#fff', 'center', 800); }
+          if (T >= K.dzNeg){ ctx.fillStyle = 'rgba(255,90,110,.1)'; ctx.fillRect(gx0, gy1, X(0) - gx0, gy0 - gy1); text('v < 0 : pas de sens', (gx0 + X(0))/2, gy1 + 14, 12, css('--err'), 'center', 800); }
+          ctx.restore(); ctx.globalAlpha = w3; }
+      const kc = clamp((T - K.graph[0])/2); ctx.save(); ctx.beginPath(); ctx.rect(gx0, gy1 - 4, gx1 - gx0, gy0 - gy1 + 4); ctx.clip(); ctx.strokeStyle = css('--tot'); ctx.lineWidth = 3.5; glowOn(css('--tot'), 10); ctx.beginPath(); for (let i=0;i<=120;i++){ const v = v1*kc*i/120; i ? ctx.lineTo(X(v), Y(dA(v))) : ctx.moveTo(X(v), Y(dA(v))); } ctx.stroke(); glowOff(); ctx.restore();
+      if (T >= K.parab) [[30, '#6dff94'], [50, '#3ee6ff'], [60, '#ff5a6e']].forEach(([v, c], i) => { const k = clamp((T - K.parab - i*.5)/.5); if (k <= 0) return; ctx.globalAlpha = w3*k; dot(X(v), Y(dA(v)), 7, c, true); if (Z < .3) label(X(v) - 8, Y(dA(v)) - 20, v + ' km/h → ' + Math.round(dA(v)) + ' m', c, 12); ctx.globalAlpha = w3; });
+      if (T >= K.eq[0]){ ctx.setLineDash([7, 6]); ctx.strokeStyle = 'rgba(255,255,255,.8)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(gx0, Y(25)); ctx.lineTo(gx1, Y(25)); ctx.stroke(); ctx.setLineDash([]); text('25 m', gx1 - 4, Y(25) - 12, 13, '#fff', 'right', 800); }
+      if (T >= K.ans){ const v = 48.67, k = back(clamp((T - K.ans)/.6)); dot(X(v), Y(25), 9*k, css('--tot'), true); ctx.setLineDash([5, 5]); ctx.strokeStyle = css('--tot'); ctx.beginPath(); ctx.moveTo(X(v), Y(25)); ctx.lineTo(X(v), gy0); ctx.stroke(); ctx.setLineDash([]); label(X(v), gy0 - 18, '≈ 48,7 km/h', css('--tot'), 13); }
+      if (T >= K.wet){ const kw = clamp((T - K.wet)/2); ctx.strokeStyle = 'rgba(79,195,255,.9)'; ctx.lineWidth = 2.5; ctx.setLineDash([8, 6]); ctx.beginPath(); for (let i=0;i<=120;i++){ const v = 90*kw*i/120, d = v/3.6 + (v/3.6)*(v/3.6)/(2*5); if (d > 55) break; i ? ctx.lineTo(X(v), Y(d)) : ctx.moveTo(X(v), Y(d)); } ctx.stroke(); ctx.setLineDash([]); if (kw >= 1) label(X(62), Y(48), 'route mouillée', css('--re'), 12); }
+      ctx.globalAlpha = 1; }
+    // ---------- panneau ----------
+    const part = T < K.react ? null : T < K.compare[0] ? 'A' : T < K.q ? 'B' : 'C';
+    const cOp = part ? clamp((T - K.react)/.6) : 0; card.style.opacity = cOp; card.style.transform = 'translateY(' + (1-cOp)*10 + 'px)';
+    ['A','B','C'].forEach(p => $('s' + p).style.display = part === p ? '' : 'none');
+    if (part === 'A'){ $('a1').style.opacity = clamp((T - K.brake - 1.5)/.5); $('a2').style.opacity = clamp((T - K.stop)/.5); }
+    if (part === 'B'){ ['r30', 'r50', 'r60'].forEach((id, i) => { $(id).style.opacity = clamp((T - K.compare[0] - 4 - i*.6)/.5); $(id).classList.toggle('on', T >= K.sixty[0] && i === 2); }); $('b1').style.opacity = clamp((T - K.x2)/.5); $('b2').style.opacity = clamp((T - K.func)/.5); $('b3').style.opacity = clamp((T - K.func)/.5); }
+    if (part === 'C'){ ['c0','c1','c2','c3','c4','c5'].forEach((id, i) => $(id).style.opacity = clamp((T - [K.eq[0], K.eq[1], K.eq[2], K.eq[3], K.eq[4], K.ans][i])/.5)); }
+    let ci = -1; caps.forEach((c,i) => { if (T >= c[0]) ci = i; });
+    if (ci !== capIdx){ capIdx = ci; captxt.innerHTML = ci >= 0 ? caps[ci][1] : ''; }
+    capEl.style.opacity = (ci >= 0 && caps[ci][1]) ? clamp((T - caps[ci][0])/.35) : 0;
+  }
+  if (REC){ window.renderAt = T => { resize(); renderAt(T); }; window.END = END; return; }
+
+  // ---------- son (style « puce » rétro) ----------
+  const AU = { ctx:null, on:false, master:null, noise:null };
+  function auInit(){ const C = new (window.AudioContext || window.webkitAudioContext)(); const comp = C.createDynamicsCompressor(); comp.connect(C.destination);
+    const m = C.createGain(); m.gain.value = 0; m.connect(comp); AU.ctx = C; AU.master = m; }
+  function tone(f, vol, dur, type, delay){ const C = AU.ctx, t = C.currentTime + (delay||0), o = C.createOscillator(), g = C.createGain(); o.type = type || 'square'; o.frequency.value = f;
+    g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(Math.max(vol, .0002), t+.005); g.gain.exponentialRampToValueAtTime(.0001, t+dur); o.connect(g); g.connect(AU.master); o.start(t); o.stop(t+dur+.05); return o; }
+  const midi = mm => 440*Math.pow(2,(mm-69)/12);
+  const blip = (n, v) => tone(midi(n), v || .06, .09, 'square');
+  const jingle = (ns, v) => ns.forEach((n, i) => tone(midi(n), v || .06, .14, 'square', i*.09));
+  const SKID = () => { const o = tone(1400, .04, 1.6, 'sawtooth'); o.frequency.exponentialRampToValueAtTime(500, AU.ctx.currentTime + 1.5); };
+  const FX = [[.3, () => jingle([72, 76, 79, 84])], [K.child, () => jingle([79, 74, 79, 74], .07)], [K.react, () => blip(76)], [K.brake, SKID], [K.stop, () => jingle([72, 79], .06)], [K.compare[0] + 1.5, SKID], [K.x2, () => jingle([67, 71, 74])], [K.func, () => blip(79)],
+    [K.parab, () => jingle([72, 76, 79], .05)], [K.dz[0], () => { const o = tone(600, .05, 2.5, 'triangle'); o.frequency.exponentialRampToValueAtTime(200, AU.ctx.currentTime + 2.5); }], [K.dzTxt, () => jingle([67, 71, 74])], [K.sixty[0] + 1.6, SKID], [K.impact, () => jingle([60, 55, 50], .08)], [K.q, () => jingle([67, 72], .06)], [K.eq[2], () => blip(76)], [K.eq[4], () => blip(79)], [K.ans, () => jingle([72, 76, 79, 84])], [K.final, () => jingle([60, 64, 67, 72])]];
+  function audioTick(a, b){ if (!AU.on || b <= a) return; FX.forEach(([tm, fn]) => { if (tm > a && tm <= b) fn(); });
+    if (b > 4 && b < END - 2){ for (let i=Math.floor(a/.5)+1;i<=Math.floor(b/.5);i++){ const seq = [48, 55, 52, 55, 45, 52, 50, 55]; tone(midi(seq[i%8]), .018, .2, 'triangle'); } } }
+  function masterTo(v){ if (!AU.ctx) return; const t = AU.ctx.currentTime; AU.master.gain.cancelScheduledValues(t); AU.master.gain.setTargetAtTime(v, t, .15); }
+
+  // ---------- voix off ----------
+  const VO = { on:false, busy:false, until:0, voice:null, supported:'speechSynthesis' in window };
+  function pickVoice(){ if (!VO.supported) return; const vs = speechSynthesis.getVoices().filter(v => /^fr/i.test(v.lang)); if (!vs.length) return;
+    const score = v => (/natural|online|neural/i.test(v.name) ? 8 : 0) + (/google/i.test(v.name) ? 4 : 0) + (/fr-CH/i.test(v.lang) ? 2 : 0) + (/fr-FR/i.test(v.lang) ? 1 : 0) + (v.localService ? 0 : 1);
+    VO.voice = vs.sort((a,b) => score(b) - score(a))[0]; }
+  if (VO.supported){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+  function say(text){ if (!VO.supported) return; speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = VO.voice ? VO.voice.lang : 'fr-FR'; if (VO.voice) u.voice = VO.voice; u.rate = .97;
+    u.onstart = () => { VO.busy = true; if (AU.on) masterTo(.45); }; u.onend = u.onerror = () => { VO.busy = false; if (AU.on && playing) masterTo(.9); };
+    VO.busy = true; VO.until = performance.now() + (text.length*.085/.97 + 2)*1000; speechSynthesis.speak(u); }
+  function hush(){ if (VO.supported) speechSynthesis.cancel(); VO.busy = false; }
+  function voiceTick(a, b){ if (!VO.on || b <= a) return; for (const [tm, txt] of VOICE){ if (tm > a && tm <= b) say(txt); } }
+  function holdForVoice(prev, next){ if (!VO.on || !VO.busy || performance.now() > VO.until) return next; for (const [tm] of VOICE){ if (tm > prev && tm <= next) return Math.max(prev, tm - .001); } return next; }
+
+  // ---------- commandes ----------
+  let T = 0, playing = true, last = performance.now();
+  const pauseBtn = $('pause'), replayBtn = $('replay'), soundBtn = $('sound'), voiceBtn = $('voice'), seekEl = $('seek'), clockEl = $('clock');
+  pauseBtn.addEventListener('click', () => { if (T >= END){ T = 0; playing = true; hush(); } else playing = !playing; pauseBtn.textContent = playing ? 'Pause' : 'Lecture';
+    if (VO.supported){ if (playing) speechSynthesis.resume(); else speechSynthesis.pause(); } if (AU.on) masterTo(playing ? .9 : 0); });
+  replayBtn.addEventListener('click', () => { hush(); T = -0.001; playing = true; pauseBtn.textContent = 'Pause'; if (AU.on) masterTo(.9); });
+  soundBtn.addEventListener('click', () => { if (!AU.ctx) auInit(); AU.ctx.resume(); AU.on = !AU.on; soundBtn.textContent = AU.on ? 'Couper le son' : 'Activer le son'; soundBtn.setAttribute('aria-pressed', AU.on); masterTo(AU.on && playing ? .9 : 0); });
+  voiceBtn.addEventListener('click', () => { if (!VO.supported){ voiceBtn.textContent = 'Voix indisponible'; return; }
+    VO.on = !VO.on; voiceBtn.textContent = VO.on ? 'Couper la voix' : 'Activer la voix'; voiceBtn.setAttribute('aria-pressed', VO.on);
+    if (!VO.on){ hush(); if (AU.on && playing) masterTo(.9); return; } pickVoice();
+    if (T < .3){ say(VOICE[0][1]); T = .301; } else { let cur = null; for (const v of VOICE){ if (v[0] <= T) cur = v; } if (cur && T - cur[0] < 3) say(cur[1]); } });
+  seekEl.max = END;
+  let skipAudio = false, dragging = false;
+  const mmss = x => { x = Math.max(0, Math.round(x)); return Math.floor(x/60) + ':' + String(x%60).padStart(2,'0'); };
+  function jump(sec){ T = Math.max(0, Math.min(END, sec)); skipAudio = true; hush(); if (T >= END){ playing = false; pauseBtn.textContent = 'Lecture'; } }
+  const seekBox = seekEl.parentElement;
+  seekEl.addEventListener('pointerdown', () => { dragging = true; seekBox.classList.add('drag'); });
+  window.addEventListener('pointerup', () => { if (dragging) seekEl.blur(); dragging = false; seekBox.classList.remove('drag'); });
+  seekEl.addEventListener('input', () => jump(parseFloat(seekEl.value)));
+  document.addEventListener('keydown', e => { if (e.target.tagName === 'BUTTON' && (e.key === ' ' || e.key === 'Enter')) return; if (e.target === seekEl && e.key.startsWith('Arrow')) return;
+    if (e.key === ' '){ e.preventDefault(); pauseBtn.click(); } else if (e.key === 'ArrowLeft') jump(T - 5); else if (e.key === 'ArrowRight') jump(T + 5); });
+  function loop(now){
+    const dt = Math.min(.1, (now-last)/1000); last = now; const prevT = T;
+    if (playing){ T = holdForVoice(prevT, Math.min(END, T + dt)); if (T >= END){ playing = false; pauseBtn.textContent = 'Lecture'; } }
+    if (skipAudio) skipAudio = false; else { audioTick(prevT, T); voiceTick(prevT, T); }
+    if (!dragging) seekEl.value = T.toFixed(1); clockEl.textContent = mmss(T) + ' / ' + mmss(END);
+    renderAt(Math.max(0, T)); requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
+</script>
+<script>if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js');</script>
+</body>
+</html>

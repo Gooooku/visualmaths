@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icone.svg">
+<link rel="apple-touch-icon" href="icone.svg">
+<meta name="theme-color" content="#0b1024">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Application — le saut parabolique</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link id="gf" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&family=Press+Start+2P&family=STIX+Two+Text:ital,wght@0,500;1,500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg1:#070b1c; --bg2:#151b46; --ink:#eef1ff; --muted:#8e97c4; --glass:rgba(255,255,255,.06); --stroke:rgba(255,255,255,.14);
+  --bip:#3ee6ff; --zap:#ff4f6d; --zip:#c77dff; --p1:#ffd23f; --p2:#6dff94; --ob:#ff8a3d; --err:#ff5a6e; --star:#ffd23f; --x:#ff7a85; --y:#5ee3a1; --wall:#2f5bff; --ok:#6dff94;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light){ :root:not([data-theme="dark"]){ --glass:rgba(255,255,255,.08); } }
+:root[data-theme="light"]{ --glass:rgba(255,255,255,.08); }
+:root{ box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); }
+*,*::before,*::after{ box-sizing:inherit; }
+html{ height:100%; scroll-padding-top:env(safe-area-inset-top,0px); }
+body{ height:100%; margin:0; background:var(--bg1); color:var(--ink); overflow:hidden; font-family:"Manrope", system-ui, -apple-system, "Segoe UI", sans-serif; }
+.m{ font-family:"STIX Two Text","Cambria Math","Times New Roman",serif; font-style:italic; font-weight:500; }
+.cB{ color:var(--bip); } .cZ{ color:var(--zap); } .cI{ color:var(--zip); } .cS{ color:var(--star); } .cx{ color:var(--x); } .cy{ color:var(--y); } .cOk{ color:var(--ok); } .mu{ color:var(--muted); }
+.stage{ position:relative; width:100%; height:100%; overflow:hidden; background:radial-gradient(120% 90% at 70% 15%, var(--bg2) 0%, var(--bg1) 62%); --u:min(1vw, 1.78vh); }
+canvas{ position:absolute; inset:0; width:100%; height:100%; display:block; }
+.title{ position:absolute; inset:0; display:grid; place-content:center; text-align:center; pointer-events:none; }
+.title h1{ margin:0; font-weight:800; font-size:calc(var(--u)*5.4); letter-spacing:-.02em; line-height:1.05; }
+.title p{ margin:calc(var(--u)*1.4) 0 0; font-size:calc(var(--u)*2.2); color:var(--muted); font-weight:600; }
+.caption{ position:absolute; left:calc(var(--u)*4); bottom:calc(var(--u)*4.5 + 20px); max-width:min(46%, 30em); pointer-events:none; font-size:calc(var(--u)*2.1); font-weight:700; line-height:1.25; }
+.caption > span{ display:block; }
+.caption .bar{ display:block; width:calc(var(--u)*6); height:calc(var(--u)*.5); border-radius:99px; margin-bottom:calc(var(--u)*1.2); background:linear-gradient(90deg, var(--bip), var(--zip), var(--zap)); }
+.card{ position:absolute; right:calc(var(--u)*3.5); bottom:calc(var(--u)*3.5 + 20px); width:21em; padding:calc(var(--u)*1.8) calc(var(--u)*2.2); font-size:calc(var(--u)*1.7);
+  background:var(--glass); border:1px solid var(--stroke); border-radius:calc(var(--u)*1.8); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); }
+.card h3{ margin:0 0 .5em; font-size:.8em; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:800; }
+.sec{ display:grid; gap:.35em; }
+.line{ white-space:nowrap; font-variant-numeric:tabular-nums; }
+.big{ font-size:1.25em; }
+.hr{ height:1px; background:var(--stroke); margin:.6em 0; }
+.num{ display:inline-block; min-width:1.6em; text-align:right; }
+table.cmp{ border-collapse:collapse; width:100%; font-variant-numeric:tabular-nums; }
+table.cmp td, table.cmp th{ padding:.25em .3em; text-align:left; white-space:nowrap; }
+table.cmp th{ font-size:.82em; color:var(--muted); font-weight:700; }
+.ctrl{ position:absolute; right:calc(var(--u)*3.5); top:calc(var(--u)*3); display:flex; gap:8px; }
+.ctrl button, .ctrl a.home{ font:inherit; font-weight:700; font-size:14px; padding:9px 15px; border-radius:99px; border:1px solid var(--stroke); background:var(--glass); color:var(--ink); cursor:pointer; backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); }
+.ctrl button:focus-visible{ outline:3px solid var(--bip); outline-offset:2px; }
+.seek{ position:absolute; left:0; right:0; bottom:0; padding:28px calc(var(--u)*3.5) calc(var(--u)*1.2) calc(var(--u)*4); display:flex; align-items:center; gap:14px; transition:opacity .25s; }
+.seek input{ flex:1; accent-color:var(--bip); height:22px; cursor:pointer; }
+.seek span{ font-size:14px; font-weight:600; color:var(--muted); font-variant-numeric:tabular-nums; min-width:6.5em; text-align:right; }
+@media (hover: hover){ .seek{ opacity:0; } .seek:hover, .seek:has(input:focus-visible), .seek.drag{ opacity:1; } }
+.rec .ctrl, .rec .seek{ display:none; } .rec *{ transition:none !important; }
+@media (max-aspect-ratio: 1/1){
+  .stage{ --u:min(1.9vw, 1.2vh); }
+  .card{ left:calc(var(--u)*2.5); right:calc(var(--u)*2.5); top:calc(var(--u)*2.5); bottom:auto; width:auto; font-size:calc(var(--u)*1.7); }
+  .ctrl{ left:calc(var(--u)*2.5); right:calc(var(--u)*2.5); top:auto; bottom:calc(var(--u)*2 + 34px); flex-wrap:wrap; gap:6px; }
+  .ctrl button, .ctrl a.home{ padding:7px 11px; font-size:13px; }
+  .caption{ left:calc(var(--u)*2.5); right:calc(var(--u)*2.5); max-width:none; bottom:calc(var(--u)*2 + 90px); font-size:calc(var(--u)*2.6); }
+  .seek{ padding:10px calc(var(--u)*3) calc(var(--u)*2); }
+}
+.c1{ color:var(--p1); } .c2{ color:var(--p2); } .cO{ color:var(--ob); } .cE{ color:var(--err); }
+.card .line.big{ font-size:1.18em; }
+.fr{ display:inline-flex; flex-direction:column; vertical-align:middle; text-align:center; font-size:.82em; line-height:1.05; margin:0 .12em; } .fr > span:first-child{ border-bottom:1.5px solid currentColor; padding:0 .15em; }
+.ctrl a.home{ text-decoration:none; display:inline-flex; align-items:center; }
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <canvas id="c" aria-label="Animation : le saut d'un personnage de jeu de plateforme suit une parabole ; le sommet donne la hauteur maximale"></canvas>
+  <div class="title" id="title"><div><h1>Peut-il franchir l’obstacle&nbsp;?</h1><p>Fonctions du 2<sup>e</sup> degré · le saut parabolique</p></div></div>
+  <div class="card" id="card" style="opacity:0">
+    <div class="sec" id="sA">
+      <h3>Le modèle du saut</h3>
+      <div class="line big"><span class="m">h</span>(<span class="m">x</span>) = −<span class="fr"><span>5</span><span>16</span></span><span class="m">x</span><sup>2</sup> + <span class="fr"><span>5</span><span>2</span></span><span class="m">x</span> + 1</div>
+      <div class="line mu"><span class="m">x</span>&nbsp;: distance horizontale (m)</div>
+      <div class="line mu"><span class="m">h</span>(<span class="m">x</span>)&nbsp;: hauteur des pieds (m)</div>
+      <div class="hr"></div>
+      <div class="line" id="a0"><span class="m">a</span> = −<span class="fr"><span>5</span><span>16</span></span> · <span class="m">b</span> = <span class="fr"><span>5</span><span>2</span></span></div>
+      <div class="line" id="a1"><span class="m">x</span><sub>S</sub> = <span class="fr"><span>−<span class="m">b</span></span><span>2<span class="m">a</span></span></span> = <span class="fr"><span>−5/2</span><span>2 · (−5/16)</span></span> = <span class="fr"><span>−5/2</span><span>−5/8</span></span> = <b class="c1">4</b></div>
+      <div class="line" id="a2"><span class="m">h</span>(4) = −<span class="fr"><span>5</span><span>16</span></span>· 16 + <span class="fr"><span>5</span><span>2</span></span>· 4 + 1 = −5 + 10 + 1 = <b class="c1">6</b></div>
+      <div class="line big" id="a3">sommet <b class="c1">S(4 ; 6)</b></div>
+    </div>
+    <div class="sec" id="sB" style="display:none">
+      <h3>Comparer avec l’obstacle</h3>
+      <div class="line">hauteur maximale du saut&nbsp;: <b class="c1">6 m</b></div>
+      <div class="line">hauteur de l’obstacle&nbsp;: <b class="cO">6,5 m</b></div>
+      <div class="line big" id="b0"><b class="c1">6</b> &lt; <b class="cO">6,5</b> → <b class="cE">impossible</b></div>
+      <div class="hr"></div>
+      <div class="line" id="b1">nouveau saut&nbsp;: <span class="m">h</span><sub>2</sub>(<span class="m">x</span>) = −<span class="fr"><span>3</span><span>8</span></span><span class="m">x</span><sup>2</sup> + <b class="c2">3</b><span class="m">x</span> + 1</div>
+      <div class="line" id="b2"><span class="m">a</span>&nbsp;: −<span class="fr"><span>5</span><span>16</span></span> → <b class="c2">−<span class="fr"><span>3</span><span>8</span></span></b> · <span class="m">b</span>&nbsp;: <span class="fr"><span>5</span><span>2</span></span> → <b class="c2">3</b></div>
+      <div class="line" id="b3">sommet <b class="c2">S<sub>2</sub>(4 ; 7)</b> <span class="mu">(même <span class="m">x</span>)</span></div>
+    </div>
+    <div class="sec" id="sC" style="display:none">
+      <h3>Au bord de l’obstacle (<span class="m">x</span> = 3,5)</h3>
+      <div class="line" id="c0"><span class="m">h</span>(3,5) = −<span class="fr"><span>5</span><span>16</span></span>· 3,5<sup>2</sup> + <span class="fr"><span>5</span><span>2</span></span>· 3,5 + 1</div>
+      <div class="line big" id="c1">≈ <b class="c1">5,92 m</b> &lt; 6,5 → <b class="cE">raté</b></div>
+      <div class="hr"></div>
+      <div class="line" id="c2"><span class="m">h</span><sub>2</sub>(3,5) = −<span class="fr"><span>5</span><span>16</span></span>· 3,5<sup>2</sup> + 3 · 3,5 + 1</div>
+      <div class="line big" id="c3">≈ <b class="c2">7,67 m</b> &gt; 6,5 → <b style="color:var(--ok)">réussi</b></div>
+    </div>
+  </div>
+  <div class="caption" id="caption" style="opacity:0"><i class="bar"></i><span id="captxt"></span></div>
+  <div class="ctrl"><a class="home" href="index.html" aria-label="Retour à l'accueil">← Accueil</a><button id="voice" aria-pressed="false">Activer la voix</button><button id="sound" aria-pressed="false">Activer le son</button><button id="pause">Pause</button><button id="replay">Rejouer</button></div>
+  <div class="seek"><input type="range" id="seek" min="0" max="130" step="0.1" value="0" aria-label="Position dans l'animation"><span id="clock">0:00 / 2:10</span></div>
+</div>
+<script>
+(function(){
+  const REC = /[?&]record/.test(location.search); if (REC) document.body.classList.add('rec');
+  const $ = id => document.getElementById(id);
+  const clamp = x => Math.max(0, Math.min(1, x));
+  const ease = x => x<.5 ? 4*x*x*x : 1-Math.pow(-2*x+2,3)/2;
+  const lerp = (a,b,k) => a + (b-a)*k;
+  const back = x => { const c=1.7, c3=c+1; return 1 + c3*Math.pow(x-1,3) + c*Math.pow(x-1,2); };
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const fr = (v, d) => v.toFixed(d).replace('.', ',').replace('-', '−');
+  const h1 = x => -5/16*x*x + 2.5*x + 1, h2 = x => -3/8*x*x + 3*x + 1;
+  const OB = [3.5, 4.5, 6.5];   // obstacle : de x = 3,5 à 4,5, hauteur 6,5
+  const XHIT = 3.5 - .3;        // le personnage (demi-largeur 0,3 m) touche l'obstacle
+
+  // ---------- chronologie ----------
+  const K = { scene:4, run:5.5, jump1:[7, 10], fail:10.2, rewind:[14, 16], q1:16.5, q2:20, slow:[24, 33], ghosts:24, axes:33.5, curve:36.5, hx:40, model:[45, 49.5], para:52, top:[56, 59.5], ab:62, xs:65.5, vline:69.5, hs:72, smax:76.5, ob:[81, 84.5], concl1:88, replay:[90.5, 93.5], dev:[97, 100, 103.5, 107], go:[110.5, 113.5], ok:113.8, edge:[1e9, 1e9, 1e9, 1e9, 1e9], fin:[118.5, 122.5, 127, 131.5, 1e9], end:140 };
+  // rythme plus soutenu : toute la chronologie est resserrée
+  (function(){ const sc = v => v >= 1e8 ? v : 4 + (v - 4)*.76; for (const k in K) K[k] = Array.isArray(K[k]) ? K[k].map(sc) : sc(K[k]); })();
+  const END = Math.ceil(K.fin[3] + 6.5);
+  const caps = [
+    [0.3, ''],
+    [K.scene, 'Un jeu de plateforme. Notre personnage doit franchir une haute tour.'],
+    [K.jump1[0], 'Il prend son élan… et saute\u00a0!'],
+    [K.fail, '<b class="cE">Raté\u00a0!</b> Il heurte la tour, juste sous le sommet.'],
+    [K.rewind[0], 'Revenons quelques instants en arrière…'],
+    [K.q1, 'Comment savoir si le personnage peut sauter assez haut pour franchir cet obstacle\u00a0?'],
+    [K.q2, 'Autrement dit\u00a0: quelle est la <b>hauteur maximale</b> de son saut\u00a0?'],
+    [K.slow[0], 'Rejouons le saut au ralenti, en marquant sa position à intervalles réguliers.'],
+    [K.axes, 'Ajoutons un repère\u00a0: la distance horizontale <span class="m">x</span> en mètres, la hauteur <span class="m">h</span> en mètres.'],
+    [K.curve, 'Les points dessinent une courbe en forme d’arc\u00a0: une <b>parabole</b>.'],
+    [K.hx, 'À chaque distance <span class="m">x</span> correspond une hauteur <span class="m">h</span>(<span class="m">x</span>)\u00a0: c’est une fonction\u00a0!'],
+    [K.model[0], 'Ce saut est décrit par une fonction du deuxième degré. Ici, <span class="m">h</span> mesure la hauteur des pieds, et le saut part d’un muret de 1 m.'],
+    [K.para, 'La trajectoire est une parabole. Mais quelle est sa hauteur maximale\u00a0?'],
+    [K.top[0], 'C’est le point le plus haut de la parabole\u00a0: son <b>SOMMET</b>.'],
+    [K.ab, 'On lit les coefficients\u00a0: <span class="m">a</span> = −5/16 et <span class="m">b</span> = 5/2.'],
+    [K.xs, 'L’abscisse du sommet\u00a0: <span class="m">x</span><sub>S</sub> = −<span class="m">b</span> / 2<span class="m">a</span> = 4.'],
+    [K.vline, 'Le personnage atteint sa hauteur maximale après avoir parcouru 4 m horizontalement.'],
+    [K.hs, 'Sa hauteur\u00a0: <span class="m">h</span>(4) = −5 + 10 + 1 = 6.'],
+    [K.smax, 'Hauteur maximale\u00a0: <b class="c1">6 m</b>. Le sommet est <b class="c1">S(4 ; 6)</b>.'],
+    [K.ob[0], 'Et la tour mesure <b class="cO">6,5 m</b>.'],
+    [K.ob[1], '6 m &lt; 6,5 m\u00a0: même au plus haut de son saut, il reste sous le sommet de la tour.'],
+    [K.concl1, 'Avec ce saut, le personnage ne peut pas franchir l’obstacle.'],
+    [K.dev[0], 'Passons dans l’éditeur du jeu. La développeuse rend le saut plus haut, en gardant le sommet juste au-dessus de la tour, en <span class="m">x</span> = 4.'],
+    [K.dev[1], 'Pour cela, elle modifie <span class="m">a</span> et <span class="m">b</span>\u00a0: <span class="m">a</span> passe de −5/16 à −3/8, et <span class="m">b</span> de 5/2 à 3.'],
+    [K.dev[2], 'Nouveau sommet\u00a0: <b class="c2">S<sub>2</sub>(4 ; 7)</b>. Toujours en <span class="m">x</span> = 4, mais à 7 m de haut, plus haut que la tour.'],
+    [K.dev[3], 'Ancienne trajectoire en pointillés, nouvelle en vert\u00a0: la différence est nette.'],
+    [K.go[0], 'Retour au jeu. Nouvel essai…'],
+    [K.ok, '<b style="color:var(--ok)">Réussi\u00a0!</b>'],
+    [K.edge[0], 'Mais attention\u00a0: ce qui compte vraiment, c’est la hauteur <b>au niveau de la tour</b>, pas seulement au sommet.'],
+    [K.edge[1], 'Quelle est la hauteur du personnage quand il arrive au bord de la tour, en <span class="m">x</span> = 3,5\u00a0?'],
+    [K.edge[2], 'Il suffit de calculer <span class="m">h</span>(3,5)\u00a0: environ 5,92 m. C’est moins que 6,5 m\u00a0: voilà pourquoi il heurtait la tour.'],
+    [K.edge[3], 'Avec le nouveau saut\u00a0: <span class="m">h</span><sub>2</sub>(3,5) ≈ 7,67 m. C’est plus que 6,5 m\u00a0: il passe\u00a0!'],
+    [K.edge[4], 'La fonction donne la hauteur du personnage pour <b>n’importe quelle</b> distance horizontale.'],
+    [K.fin[0], 'Un mouvement soumis à une accélération verticale constante, comme la gravité, suit une parabole.'],
+    [K.fin[1], 'Le sommet donne la hauteur maximale du saut.'],
+    [K.fin[2], 'SAUT → TRAJECTOIRE → PARABOLE → SOMMET → HAUTEUR MAXIMALE'],
+    [K.fin[3], 'Les moteurs de jeu ne calculent pas ce sommet à la main\u00a0: ils simulent la gravité, et la parabole apparaît d’elle-même.'],
+    [K.fin[4], 'Mais comment les paramètres <span class="m">a</span>, <span class="m">b</span> et <span class="m">c</span> modifient-ils la forme de la trajectoire\u00a0?']
+  ];
+  const VOICE = [
+    [0.3, "Peut-il franchir l'obstacle ?"],
+    [K.scene, "Un jeu de plateforme. Notre personnage doit franchir une haute tour."],
+    [K.jump1[0], "Il prend son élan… et saute !"],
+    [K.fail, "Raté ! Il heurte la tour, juste sous le sommet."],
+    [K.rewind[0], "Revenons quelques instants en arrière…"],
+    [K.q1, "Comment savoir si le personnage peut sauter assez haut pour franchir cet obstacle ?"],
+    [K.q2, "Autrement dit : quelle est la hauteur maximale de son saut ?"],
+    [K.slow[0], "Rejouons le saut au ralenti, en marquant sa position à intervalles réguliers."],
+    [K.axes, "Ajoutons un repère : la distance horizontale x en mètres, la hauteur h en mètres."],
+    [K.curve, "Les points dessinent une courbe en forme d'arc : une parabole."],
+    [K.hx, "À chaque distance x correspond une hauteur h de x : c'est une fonction !"],
+    [K.model[0], "Ce saut est décrit par une fonction du deuxième degré. Ici, h mesure la hauteur des pieds, et le saut part d'un muret de un mètre."],
+    [K.para, "La trajectoire est une parabole. Mais quelle est sa hauteur maximale ?"],
+    [K.top[0], "C'est le point le plus haut de la parabole : son sommet."],
+    [K.ab, "On lit les coefficients : a égale moins cinq seizièmes, et b égale cinq demis."],
+    [K.xs, "L'abscisse du sommet : moins b sur deux a, égale quatre."],
+    [K.vline, "Le personnage atteint sa hauteur maximale après avoir parcouru quatre mètres horizontalement."],
+    [K.hs, "Sa hauteur : h de quatre égale moins cinq, plus dix, plus un : six."],
+    [K.smax, "Hauteur maximale : six mètres. Le sommet est le point S, quatre, six."],
+    [K.ob[0], "Et la tour mesure six mètres cinquante."],
+    [K.ob[1], "Six mètres est plus petit que six mètres cinquante : même au plus haut de son saut, il reste sous le sommet de la tour."],
+    [K.concl1, "Avec ce saut, le personnage ne peut pas franchir l'obstacle."],
+    [K.dev[0], "Passons dans l'éditeur du jeu. La développeuse rend le saut plus haut, en gardant le sommet juste au-dessus de la tour, en x égale quatre."],
+    [K.dev[1], "Pour cela, elle modifie a et b : a passe de moins cinq seizièmes à moins trois huitièmes, et b de cinq demis à trois."],
+    [K.dev[2], "Nouveau sommet : quatre, sept. Toujours en x égale quatre, mais à sept mètres de haut, plus haut que la tour."],
+    [K.dev[3], "Ancienne trajectoire en pointillés, nouvelle en vert : la différence est nette."],
+    [K.go[0], "Retour au jeu. Nouvel essai…"],
+    [K.ok, "Réussi !"],
+    [K.edge[0], "Mais attention : ce qui compte vraiment, c'est la hauteur au niveau de la tour, pas seulement au sommet."],
+    [K.edge[1], "Quelle est la hauteur du personnage quand il arrive au bord de la tour, en x égale trois virgule cinq ?"],
+    [K.edge[2], "Il suffit de calculer h de trois virgule cinq : environ cinq virgule neuf deux mètres. C'est moins que six virgule cinq : voilà pourquoi il heurtait la tour."],
+    [K.edge[3], "Avec le nouveau saut : environ sept virgule six sept mètres. C'est plus que six virgule cinq : il passe !"],
+    [K.edge[4], "La fonction donne la hauteur du personnage pour n'importe quelle distance horizontale."],
+    [K.fin[0], "Un mouvement soumis à une accélération verticale constante, comme la gravité, suit une parabole."],
+    [K.fin[1], "Le sommet donne la hauteur maximale du saut."],
+    [K.fin[2], "Saut, trajectoire, parabole, sommet, hauteur maximale."],
+    [K.fin[3], "Les moteurs de jeu ne calculent pas ce sommet à la main : ils simulent la gravité, et la parabole apparaît d'elle-même."],
+    [K.fin[4], "Mais comment les paramètres a, b et c modifient-ils la forme de la trajectoire ?"]
+  ];
+
+  // ---------- canevas ----------
+  const stage = $('stage'), cv = $('c'), ctx = cv.getContext('2d');
+  let W = 1, H = 1, DPR = 1;
+  function resize(){ DPR = REC ? 1 : Math.min(devicePixelRatio || 1, 2); W = stage.clientWidth; H = stage.clientHeight; cv.width = W*DPR; cv.height = H*DPR; ctx.setTransform(DPR, 0, 0, DPR, 0, 0); }
+  new ResizeObserver(resize).observe(stage); resize();
+  const portrait = () => W/H < 1;
+  function area(){ return portrait() ? {x0:W*.04, x1:W*.96, y0:H*.3, y1:H*.72} : {x0:W*.03, x1:W*.6, y0:H*.05, y1:H*.72}; }
+  function glowOn(color, b){ ctx.shadowColor = color; ctx.shadowBlur = b; } function glowOff(){ ctx.shadowBlur = 0; }
+  function roundRect(x, y, w, h, r){ ctx.beginPath(); ctx.moveTo(x+r, y); ctx.arcTo(x+w, y, x+w, y+h, r); ctx.arcTo(x+w, y+h, x, y+h, r); ctx.arcTo(x, y+h, x, y, r); ctx.arcTo(x, y, x+w, y, r); ctx.closePath(); }
+  function text(t, x, y, size, color, align, weight){ ctx.font = (weight || 700) + ' ' + size + 'px Manrope, system-ui, sans-serif'; ctx.fillStyle = color; ctx.textAlign = align || 'center'; ctx.textBaseline = 'middle'; ctx.fillText(t, x, y); }
+  function pixText(t, x, y, size, color, align){ ctx.font = size + 'px "Press Start 2P", "Courier New", monospace'; ctx.textAlign = align || 'left'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#0b0b1a'; ctx.fillText(t, x + size*.12, y + size*.12); ctx.fillStyle = color; ctx.fillText(t, x, y); }
+  function dot(x, y, r, color, glow){ if (glow) glowOn(color, r*3); ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2); ctx.fill(); glowOff(); }
+  function grid(){ ctx.strokeStyle = 'rgba(90,120,255,.07)'; ctx.lineWidth = 1; const s = Math.max(28, W/40); for (let x = (W % s)/2; x < W; x += s){ ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); } for (let y = (H % s)/2; y < H; y += s){ ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); } }
+  function M(){ const a = area(), s = Math.min((a.x1 - a.x0)/11.4, (a.y1 - a.y0)/10.2), ox = a.x0 + (a.x1 - a.x0 - 11.4*s)/2 + 1.6*s, oy = a.y1 - .5*s; return { X: x => ox + x*s, Y: h => oy - h*s, s }; }
+
+  // ---------- le personnage (dessin original) ----------
+  const PAL = { k:'#14102a', t:'#36c9b4', T:'#8ff0de', w:'#ffffff', e:'#14102a', o:'#ff8a3d', y:'#ffd23f' };
+  const HERO = ["...kkkkkk...", "..kTTTTTTk..", ".kTttttttTk.", ".kttwwttwwtk", ".kttwettwetk", ".ktttttttttk", "..kttkkkttk.", "..kooooook..", ".kooottttk..", ".kttttttttk.", "..kttttttk..", "..kyk..kyk..", ".kyyk..kyyk.", ".kkk....kkk."];
+  function hero(x, y, s, flip, squash){ const px = s/12; ctx.save(); ctx.translate(x, y); ctx.scale(1 + squash*.15, 1 - squash*.15); const w = HERO[0].length, h = HERO.length;
+    for (let r=0;r<h;r++) for (let c=0;c<w;c++){ const ch = HERO[r][flip ? w - 1 - c : c]; if (ch === '.') continue; ctx.fillStyle = PAL[ch]; ctx.fillRect(Math.round((c - w/2)*px), Math.round((r - h)*px), Math.ceil(px) + .5, Math.ceil(px) + .5); }
+    ctx.restore(); }
+
+  // ---------- le décor ----------
+  function scene(G, T, al){ const a = area(); ctx.save(); roundRect(a.x0, a.y0, a.x1 - a.x0, a.y1 - a.y0, 12); ctx.clip(); ctx.globalAlpha = al;
+    const sky = ctx.createLinearGradient(0, a.y0, 0, a.y1); sky.addColorStop(0, '#3b6fd8'); sky.addColorStop(1, '#9fd4ff'); ctx.fillStyle = sky; ctx.fillRect(a.x0, a.y0, a.x1 - a.x0, a.y1 - a.y0);
+    const P = Math.max(2, Math.round(G.s/12));
+    for (let i=0;i<4;i++){ const cx = a.x0 + ((i*.29 + T*.008) % 1.2 - .1)*(a.x1 - a.x0), cy = a.y0 + (a.y1 - a.y0)*(.08 + .07*(i%2)); ctx.fillStyle = 'rgba(255,255,255,.9)'; ctx.fillRect(cx, cy, P*14, P*4); ctx.fillRect(cx + P*3, cy - P*3, P*8, P*3); }
+    // collines
+    ctx.fillStyle = '#5bbf6a'; ctx.beginPath(); ctx.moveTo(a.x0, G.Y(0)); for (let x=0;x<=a.x1 - a.x0;x+=6) ctx.lineTo(a.x0 + x, G.Y(0) - G.s*(1.6 + .9*Math.sin(x*.012) + .5*Math.sin(x*.031))); ctx.lineTo(a.x1, G.Y(0)); ctx.closePath(); ctx.fill();
+    // sol
+    const gs = G.s*.5; for (let x = a.x0 - gs; x < a.x1 + gs; x += gs){ ctx.fillStyle = '#7a4d2b'; ctx.fillRect(x, G.Y(0), gs + 1, a.y1 - G.Y(0)); ctx.fillStyle = '#9b6438'; ctx.fillRect(x + gs*.1, G.Y(0) + gs*.6, gs*.3, gs*.2); ctx.fillStyle = '#3fae4f'; ctx.fillRect(x, G.Y(0), gs + 1, gs*.32); ctx.fillStyle = '#6fd86f'; ctx.fillRect(x, G.Y(0), gs + 1, gs*.1); }
+    // muret de départ (1 m) et tour (6,5 m), en blocs de pierre
+    const blocks = (x0, x1, top, c1, c2) => { const bw = G.s*.5, bh = G.s*.5; for (let hh = 0; hh < top - 1e-6; hh += .5){ const row = Math.round(hh*2); for (let xx = x0 - (row % 2)*.25; xx < x1 - 1e-6; xx += .5){ const xa = Math.max(x0, xx), xb = Math.min(x1, xx + .5), hb = Math.min(top, hh + .5);
+          ctx.fillStyle = (row + Math.round(xx*2)) % 3 ? c1 : c2; ctx.fillRect(G.X(xa), G.Y(hb), G.X(xb) - G.X(xa) - 1, G.Y(hh) - G.Y(hb) - 1); ctx.fillStyle = 'rgba(255,255,255,.18)'; ctx.fillRect(G.X(xa), G.Y(hb), G.X(xb) - G.X(xa) - 1, 2); } } };
+    blocks(-1.6, 0.25, 1, '#9a8f9c', '#857a88');
+    blocks(OB[0], OB[1], OB[2], '#c46a3a', '#a85730');
+    ctx.fillStyle = '#ffd23f'; ctx.fillRect(G.X(OB[0] + .2), G.Y(OB[2]) - G.s*.6, 3, G.s*.6); ctx.fillStyle = '#ff5a6e'; ctx.beginPath(); ctx.moveTo(G.X(OB[0] + .2) + 3, G.Y(OB[2]) - G.s*.6); ctx.lineTo(G.X(OB[0] + .2) + G.s*.45, G.Y(OB[2]) - G.s*.45); ctx.lineTo(G.X(OB[0] + .2) + 3, G.Y(OB[2]) - G.s*.3); ctx.fill();
+    ctx.restore(); ctx.globalAlpha = 1; }
+  function axes(G, al){ const a = area(); ctx.globalAlpha = al; ctx.strokeStyle = 'rgba(20,20,60,.35)'; ctx.lineWidth = 1;
+    for (let x=0;x<=9;x++){ ctx.beginPath(); ctx.moveTo(G.X(x), G.Y(0)); ctx.lineTo(G.X(x), G.Y(9)); ctx.stroke(); } for (let h=1;h<=9;h++){ ctx.beginPath(); ctx.moveTo(G.X(0), G.Y(h)); ctx.lineTo(G.X(9.5), G.Y(h)); ctx.stroke(); }
+    ctx.strokeStyle = '#0b1030'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(G.X(0), G.Y(9.4)); ctx.lineTo(G.X(0), G.Y(0)); ctx.lineTo(G.X(9.7), G.Y(0)); ctx.stroke();
+    for (let x=1;x<=9;x++) text(String(x), G.X(x), G.Y(0) + 12, 11, '#fff', 'center', 800); for (let h=1;h<=9;h++) text(String(h), G.X(0) - 10, G.Y(h), 11, '#fff', 'right', 800);
+    text('x (m)', G.X(9.5), G.Y(0) - 12, 12, '#fff', 'right', 800); text('h (m)', G.X(0) + 8, G.Y(9.3), 12, '#fff', 'left', 800); ctx.globalAlpha = 1; }
+  function para(G, f, x0, x1, col, w, dash, al){ ctx.globalAlpha = al; ctx.strokeStyle = col; ctx.lineWidth = w; if (dash) ctx.setLineDash(dash); else glowOn(col, 8); ctx.beginPath(); for (let i=0;i<=120;i++){ const x = lerp(x0, x1, i/120); i ? ctx.lineTo(G.X(x), G.Y(f(x))) : ctx.moveTo(G.X(x), G.Y(f(x))); } ctx.stroke(); ctx.setLineDash([]); glowOff(); ctx.globalAlpha = 1; }
+  function label(x, y, t, col, sz){ ctx.font = '800 ' + sz + 'px Manrope'; const w = ctx.measureText(t).width + 14; ctx.fillStyle = 'rgba(10,14,40,.85)'; roundRect(x - w/2, y - sz*.8, w, sz*1.6, 8); ctx.fill(); text(t, x, y, sz, col, 'center', 800); }
+
+  // position du personnage : course sur le muret, puis saut
+  const RUNX = -1.3;
+  function heroAt(f, u, xmax){ if (u < 0) return [lerp(RUNX, 0, u + 1), 1, 0]; const x = Math.min(u, xmax); return [x, f(x), 1]; }
+
+  // ---------- rendu ----------
+  const titleEl = $('title'), card = $('card'), captxt = $('captxt'), capEl = $('caption');
+  let capIdx = -2;
+  function renderAt(T){
+    ctx.clearRect(0, 0, W, H); grid();
+    titleEl.style.opacity = clamp((T-.2)/.6)*(1 - clamp((T-3.4)/.6));
+    const G = M(), a = area(); if (T < K.scene) return panel(T);
+    scene(G, T, clamp((T - K.scene)/.8));
+    const axK = clamp((T - K.axes)/1)*(T >= K.dev[0] && T < K.go[0] ? .35 : 1); if (axK > 0) axes(G, axK);
+    // ---- l'état du personnage selon la scène ----
+    let hx = RUNX, hh = 1, fall = 0, squash = 0, jumpF = h1, xmax = XHIT;
+    const runJump = (t0, dur, f, xm) => { const k = (T - t0)/dur; if (k < 0) return [RUNX, 1, 0]; const u = k < .25 ? -1 + k/.25 : (k - .25)/.75*5.2; return heroAt(f, u, xm); };
+    if (T < K.rewind[0]){ const r = runJump(K.run, K.fail - K.run, h1, XHIT); hx = r[0]; hh = r[1]; }
+    else if (T < K.rewind[1]){ const k = ease(clamp((T - K.rewind[0])/(K.rewind[1] - K.rewind[0]))); hx = lerp(XHIT, 0, k); hh = h1(hx); }
+    else if (T < K.slow[0]){ hx = 0; hh = 1; }
+    else if (T < K.ob[0]){ const k = clamp((T - K.slow[0])/(K.slow[1] - K.slow[0])); hx = k*XHIT; hh = h1(hx); }
+    else if (T < K.replay[0]){ hx = XHIT; hh = h1(XHIT); }
+    else if (T < K.dev[0]){ const r = runJump(K.replay[0], K.replay[1] - K.replay[0], h1, XHIT); hx = r[0]; hh = r[1]; }
+    else if (T < K.go[0]){ hx = 0; hh = 1; }
+    else if (T < K.fin[0]){ const r = runJump(K.go[0], K.go[1] - K.go[0] + 1.6, h2, 10); hx = r[0]; hh = Math.max(0, r[1]); if (hx > 4.5 && hh < OB[2] && hx < 5.8){} if (r[1] <= 0){ hh = 0; } }
+    else if (T < K.fin[0]){ hx = 3.5; hh = h1(3.5); }
+    else { const r = runJump(K.fin[0], 3.4, h2, 10); hx = r[0]; hh = Math.max(0, r[1]); }
+    // ---- traces et courbes ----
+    if (T >= K.ghosts && T < K.dev[0]){ const n = Math.floor(clamp((T - K.ghosts)/(K.slow[1] - K.ghosts))*12 + 1e-6); for (let i=0;i<=n;i++){ const x = i*XHIT/12; ctx.globalAlpha = .28; if (i % 3 === 0 && T < K.axes + 3) hero(G.X(x), G.Y(h1(x)), G.s*.9, false, 0); ctx.globalAlpha = 1; dot(G.X(x), G.Y(h1(x)), 4.5, '#ffd23f', true); } }
+    if (T >= K.curve && T < K.dev[0]){ const kc = clamp((T - K.curve)/1.5); para(G, h1, 0, lerp(0, 8.38, kc), css('--p1'), 3, null, 1); }
+    // h(x) qui se promène
+    if (T >= K.hx && T < K.model[0] + 1){ const x = 1 + 6*(.5 - .5*Math.cos((T - K.hx)*1.1)), y = h1(x); ctx.globalAlpha = clamp((T - K.hx)/.5); ctx.setLineDash([5, 5]); ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(G.X(x), G.Y(0)); ctx.lineTo(G.X(x), G.Y(y)); ctx.stroke(); ctx.setLineDash([]); dot(G.X(x), G.Y(y), 6, '#fff', true); label(G.X(x), G.Y(y) - 22, 'x = ' + fr(x, 1) + ' → h = ' + fr(y, 2), '#ffd23f', 13); ctx.globalAlpha = 1; }
+    // le sommet
+    if (T >= K.top[0] && T < K.dev[0]){ const kt = clamp((T - K.top[0])/.8); ctx.globalAlpha = kt; dot(G.X(4), G.Y(6), 9 + 2*Math.sin(T*5), css('--p1'), true); if (T >= K.top[0] + .8) label(G.X(4), G.Y(6) - 28, T >= K.smax ? 'S(4 ; 6)' : 'SOMMET', css('--p1'), 14); ctx.globalAlpha = 1; }
+    if (T >= K.vline && T < K.dev[0]){ const kv = clamp((T - K.vline)/1); ctx.setLineDash([6, 5]); ctx.strokeStyle = css('--p1'); ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(G.X(4), G.Y(0)); ctx.lineTo(G.X(4), G.Y(lerp(0, 6, kv))); ctx.stroke();
+      if (T >= K.hs){ const kh = clamp((T - K.hs)/1); ctx.beginPath(); ctx.moveTo(G.X(4), G.Y(6)); ctx.lineTo(lerp(G.X(4), G.X(0), kh), G.Y(6)); ctx.stroke(); } ctx.setLineDash([]); label(G.X(4), G.Y(0) - 14, 'x = 4', css('--p1'), 12); if (T >= K.hs + 1) label(G.X(0) + 30, G.Y(6) - 16, 'h = 6', css('--p1'), 12); }
+    // hauteur de la tour
+    if (T >= K.ob[0] && T < K.dev[0]){ const ko = clamp((T - K.ob[0])/.8); ctx.globalAlpha = ko; ctx.setLineDash([6, 5]); ctx.strokeStyle = css('--ob'); ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(G.X(0), G.Y(6.5)); ctx.lineTo(G.X(OB[1] + .8), G.Y(6.5)); ctx.stroke(); ctx.setLineDash([]); label(G.X(OB[1] + 1.6), G.Y(6.5), '6,5 m', css('--ob'), 13);
+      if (T >= K.ob[1]){ label(G.X(6.6), G.Y(5.4), '6 m < 6,5 m', '#fff', 15); } ctx.globalAlpha = 1; }
+    // éditeur : nouveau saut
+    if (T >= K.dev[0] && T < K.go[0]){ const kd = clamp((T - K.dev[0])/.6)*(1 - clamp((T - K.go[0] + .6)/.6)); ctx.globalAlpha = kd;
+      const ex = a.x0 + (a.x1 - a.x0)*.55, ey = a.y0 + 14, ew = (a.x1 - a.x0)*.42, eh = 92; ctx.fillStyle = 'rgba(10,14,40,.92)'; roundRect(ex, ey, ew, eh, 10); ctx.fill(); ctx.strokeStyle = '#6dff94'; ctx.lineWidth = 1.5; ctx.stroke();
+      pixText('ÉDITEUR · SAUT', ex + 12, ey + 16, 10, '#6dff94', 'left'); text('hauteur du saut', ex + 12, ey + 42, 13, '#fff', 'left', 700);
+      const ks = ease(clamp((T - K.dev[0] - .8)/2)); ctx.fillStyle = 'rgba(255,255,255,.15)'; ctx.fillRect(ex + 12, ey + 62, ew - 24, 6); ctx.fillStyle = '#6dff94'; ctx.fillRect(ex + 12, ey + 62, (ew - 24)*lerp(.55, .66, ks), 6); dot(ex + 12 + (ew - 24)*lerp(.55, .66, ks), ey + 65, 8, '#fff', true);
+      text(ks < .5 ? 'a = −5/16 · b = 5/2' : 'a = −3/8 · b = 3', ex + ew - 12, ey + 82, 12, ks < .5 ? css('--p1') : css('--p2'), 'right', 800); text(ks < .5 ? '6 m' : '7 m', ex + ew - 12, ey + 42, 14, ks < .5 ? css('--p1') : css('--p2'), 'right', 800);
+      ctx.globalAlpha = 1; para(G, h1, 0, 8.38, css('--p1'), 2.5, [7, 6], kd*.9);
+      if (T >= K.dev[1] + 1){ const kn = clamp((T - K.dev[1] - 1)/1.5); para(G, h2, 0, lerp(0, 8.32, kn), css('--p2'), 3.4, null, kd); }
+      if (T >= K.dev[2]){ ctx.globalAlpha = kd; dot(G.X(4), G.Y(7), 8, css('--p2'), true); label(G.X(4), G.Y(7) - 26, 'S₂(4 ; 7)', css('--p2'), 13); dot(G.X(4), G.Y(6), 6, css('--p1'), true); label(G.X(4) + 52, G.Y(6) + 14, 'S(4 ; 6)', css('--p1'), 12); ctx.setLineDash([5, 5]); ctx.strokeStyle = 'rgba(255,255,255,.7)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(G.X(4), G.Y(0)); ctx.lineTo(G.X(4), G.Y(7)); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1; } }
+    // le bord de la tour : h(3,5) et h2(3,5)
+    if (T >= K.edge[0] && T < K.fin[0]){ const ke = clamp((T - K.edge[0])/.6)*(1 - clamp((T - K.fin[0] + .6)/.6)); para(G, h1, 0, 8.38, css('--p1'), 2.5, null, ke*.8); para(G, h2, 0, 9.9, css('--p2'), 2.5, null, ke*.8);
+      ctx.globalAlpha = ke; if (T >= K.edge[1]){ ctx.setLineDash([5, 5]); ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(G.X(3.5), G.Y(0)); ctx.lineTo(G.X(3.5), G.Y(8.4)); ctx.stroke(); ctx.setLineDash([]); label(G.X(3.5), G.Y(0) - 14, 'x = 3,5', '#fff', 12); }
+      if (T >= K.edge[2]){ dot(G.X(3.5), G.Y(h1(3.5)), 7, css('--p1'), true); label(G.X(3.5) - 58, G.Y(h1(3.5)), '≈ 5,92', css('--p1'), 13); }
+      if (T >= K.edge[3]){ dot(G.X(3.5), G.Y(h2(3.5)), 7, css('--p2'), true); label(G.X(3.5) - 58, G.Y(h2(3.5)), '≈ 7,67', css('--p2'), 13); }
+      ctx.strokeStyle = css('--ob'); ctx.setLineDash([6, 5]); ctx.beginPath(); ctx.moveTo(G.X(2.6), G.Y(6.5)); ctx.lineTo(G.X(5.4), G.Y(6.5)); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1; }
+    // fin : le saut final avec sa parabole
+    if (T >= K.fin[0]){ const kf = clamp((T - K.fin[0])/1); para(G, h2, 0, 8.32, css('--p2'), 3, null, kf); if (T >= K.fin[1]){ dot(G.X(4), G.Y(7), 9, css('--p2'), true); label(G.X(4), G.Y(7) - 28, 'SOMMET · hauteur max', css('--p2'), 13); } }
+    // le personnage
+    const inAir = hh > 1.001 || hx > .05; hero(G.X(hx), G.Y(hh), G.s*.9, false, 0);
+    // messages
+    if (T >= K.fail && T < K.rewind[0] + .3){ const k = back(clamp((T - K.fail)/.5)); ctx.save(); ctx.translate(G.X(XHIT) - G.s*.4, G.Y(h1(XHIT)) - G.s*1.4); ctx.scale(k, k); for (let i=0;i<8;i++){ const an = i/8*Math.PI*2; ctx.strokeStyle = '#fff'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(Math.cos(an)*12, Math.sin(an)*12); ctx.lineTo(Math.cos(an)*22, Math.sin(an)*22); ctx.stroke(); } ctx.restore(); pixText('RATÉ !', (a.x0 + a.x1)/2, a.y0 + 40, Math.max(18, W*.025), '#ff5a6e', 'center'); }
+    if (T >= K.rewind[0] && T < K.rewind[1]){ ctx.globalAlpha = .7; pixText('◀◀', (a.x0 + a.x1)/2, a.y0 + 40, Math.max(18, W*.025), '#fff', 'center'); ctx.globalAlpha = 1; }
+    if (T >= K.replay[1] - .1 && T < K.dev[0]){ pixText('RATÉ !', (a.x0 + a.x1)/2, a.y0 + 40, Math.max(16, W*.02), '#ff5a6e', 'center'); }
+    if (T >= K.ok && T < K.fin[0]){ const k = back(clamp((T - K.ok)/.5)); ctx.save(); ctx.translate((a.x0 + a.x1)/2, a.y0 + 44); ctx.scale(k, k); pixText('RÉUSSI !', 0, 0, Math.max(18, W*.025), '#6dff94', 'center'); ctx.restore();
+      for (let i=0;i<14;i++){ const ph = ((T - K.ok)*.7 + i*.11) % 1; ctx.fillStyle = ['#ffd23f', '#6dff94', '#ff5ac8', '#3ee6ff'][i % 4]; ctx.fillRect(a.x0 + ((i*.37) % 1)*(a.x1 - a.x0), a.y0 + ph*(a.y1 - a.y0), 5, 8); } }
+    if (T >= K.fin[2]){ const items = ['SAUT', 'TRAJECTOIRE', 'PARABOLE', 'SOMMET', 'HAUTEUR MAX'], k = clamp((T - K.fin[2])/2.5); ctx.fillStyle = 'rgba(10,14,40,.85)'; roundRect(a.x0 + 10, a.y0 + 10, a.x1 - a.x0 - 20, 36, 10); ctx.fill();
+      items.forEach((t, i) => { const kk = clamp(k*5 - i); if (kk <= 0) return; ctx.globalAlpha = kk; const x = a.x0 + (a.x1 - a.x0)*(.1 + i*.2); text(t, x, a.y0 + 28, 12, ['#fff', '#3ee6ff', '#ffd23f', '#ffd23f', '#6dff94'][i], 'center', 800); if (i < 4) text('→', x + (a.x1 - a.x0)*.1, a.y0 + 28, 12, '#fff', 'center', 800); }); ctx.globalAlpha = 1; }
+    panel(T);
+  }
+  function panel(T){
+    const part = T < K.model[0] ? null : T < K.ob[0] ? 'A' : T < K.fin[0] ? 'B' : null;
+    const cOp = part ? clamp((T - K.model[0])/.6) : 0; card.style.opacity = cOp; card.style.transform = 'translateY(' + (1-cOp)*10 + 'px)';
+    ['A','B','C'].forEach(p => $('s' + p).style.display = part === p ? '' : 'none');
+    if (part === 'A'){ [['a0', K.ab], ['a1', K.xs], ['a2', K.hs], ['a3', K.smax]].forEach(([id, t0]) => $(id).style.opacity = clamp((T - t0)/.5)); }
+    if (part === 'B'){ $('b0').style.opacity = clamp((T - K.ob[1])/.5); $('b1').style.opacity = clamp((T - K.dev[0])/.5); $('b2').style.opacity = clamp((T - K.dev[1])/.5); $('b3').style.opacity = clamp((T - K.dev[2])/.5); }
+    if (part === 'C'){ $('c0').style.opacity = clamp((T - K.edge[2] + .5)/.5); $('c1').style.opacity = clamp((T - K.edge[2])/.5); $('c2').style.opacity = clamp((T - K.edge[3] + .5)/.5); $('c3').style.opacity = clamp((T - K.edge[3])/.5); }
+    let ci = -1; caps.forEach((c,i) => { if (T >= c[0]) ci = i; });
+    if (ci !== capIdx){ capIdx = ci; captxt.innerHTML = ci >= 0 ? caps[ci][1] : ''; }
+    capEl.style.opacity = (ci >= 0 && caps[ci][1]) ? clamp((T - caps[ci][0])/.35) : 0;
+  }
+  if (REC){ window.renderAt = T => { resize(); renderAt(T); }; window.END = END; return; }
+
+  // ---------- son (style « puce » rétro) ----------
+  const AU = { ctx:null, on:false, master:null, noise:null };
+  function auInit(){ const C = new (window.AudioContext || window.webkitAudioContext)(); const comp = C.createDynamicsCompressor(); comp.connect(C.destination);
+    const m = C.createGain(); m.gain.value = 0; m.connect(comp); AU.ctx = C; AU.master = m; }
+  function tone(f, vol, dur, type, delay){ const C = AU.ctx, t = C.currentTime + (delay||0), o = C.createOscillator(), g = C.createGain(); o.type = type || 'square'; o.frequency.value = f;
+    g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(Math.max(vol, .0002), t+.005); g.gain.exponentialRampToValueAtTime(.0001, t+dur); o.connect(g); g.connect(AU.master); o.start(t); o.stop(t+dur+.05); return o; }
+  const midi = mm => 440*Math.pow(2,(mm-69)/12);
+  const blip = (n, v) => tone(midi(n), v || .06, .09, 'square');
+  const jingle = (ns, v) => ns.forEach((n, i) => tone(midi(n), v || .06, .14, 'square', i*.09));
+  const JUMP = t => () => { const o = tone(300, .06, .35, 'square'); o.frequency.exponentialRampToValueAtTime(900, AU.ctx.currentTime + .3); };
+  const FX = [[.3, () => jingle([72, 76, 79, 84])], [K.run + (K.fail - K.run)*.25, JUMP()], [K.fail, () => jingle([60, 55, 50], .07)], [K.rewind[0], () => { const o = tone(900, .04, 1.5, 'triangle'); o.frequency.exponentialRampToValueAtTime(200, AU.ctx.currentTime + 1.5); }],
+    [K.curve, () => jingle([67, 71, 74])], [K.top[0], () => blip(84)], [K.xs, () => blip(79)], [K.smax, () => jingle([72, 79, 84])], [K.ob[1], () => jingle([60, 55], .07)], [K.replay[0] + (K.replay[1] - K.replay[0])*.25, JUMP()], [K.replay[1], () => jingle([60, 55, 50], .07)],
+    [K.dev[0], () => blip(76)], [K.dev[1] + 1, () => jingle([67, 72, 76], .05)], [K.go[0] + (K.go[1] - K.go[0] + 1.6)*.25, JUMP()], [K.ok, () => jingle([72, 76, 79, 84, 88, 91], .06)], [K.edge[2], () => jingle([60, 55], .06)], [K.edge[3], () => jingle([72, 79, 84])],
+    [K.fin[0] + .85, JUMP()], [K.fin[2], () => jingle([60, 64, 67, 72])], [K.fin[4], () => jingle([67, 71, 74, 79])]];
+  for (let i=0;i<=12;i++) FX.push([K.ghosts + i*(K.slow[1] - K.ghosts)/12, () => blip(70 + i, .03)]);
+  function audioTick(a, b){ if (!AU.on || b <= a) return; FX.forEach(([tm, fn]) => { if (tm > a && tm <= b) fn(); });
+    if (b > 4 && b < END - 2){ for (let i=Math.floor(a/.5)+1;i<=Math.floor(b/.5);i++){ const seq = [60, 64, 67, 72, 67, 64, 62, 65]; tone(midi(seq[i%8]), .016, .18, 'square'); } } }
+  function masterTo(v){ if (!AU.ctx) return; const t = AU.ctx.currentTime; AU.master.gain.cancelScheduledValues(t); AU.master.gain.setTargetAtTime(v, t, .15); }
+
+  // ---------- voix off ----------
+  const VO = { on:false, busy:false, until:0, voice:null, supported:'speechSynthesis' in window };
+  function pickVoice(){ if (!VO.supported) return; const vs = speechSynthesis.getVoices().filter(v => /^fr/i.test(v.lang)); if (!vs.length) return;
+    const score = v => (/natural|online|neural/i.test(v.name) ? 8 : 0) + (/google/i.test(v.name) ? 4 : 0) + (/fr-CH/i.test(v.lang) ? 2 : 0) + (/fr-FR/i.test(v.lang) ? 1 : 0) + (v.localService ? 0 : 1);
+    VO.voice = vs.sort((a,b) => score(b) - score(a))[0]; }
+  if (VO.supported){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+  function say(text){ if (!VO.supported) return; speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = VO.voice ? VO.voice.lang : 'fr-FR'; if (VO.voice) u.voice = VO.voice; u.rate = .97;
+    u.onstart = () => { VO.busy = true; if (AU.on) masterTo(.45); }; u.onend = u.onerror = () => { VO.busy = false; if (AU.on && playing) masterTo(.9); };
+    VO.busy = true; VO.until = performance.now() + (text.length*.085/.97 + 2)*1000; speechSynthesis.speak(u); }
+  function hush(){ if (VO.supported) speechSynthesis.cancel(); VO.busy = false; }
+  function voiceTick(a, b){ if (!VO.on || b <= a) return; for (const [tm, txt] of VOICE){ if (tm > a && tm <= b) say(txt); } }
+  function holdForVoice(prev, next){ if (!VO.on || !VO.busy || performance.now() > VO.until) return next; for (const [tm] of VOICE){ if (tm > prev && tm <= next) return Math.max(prev, tm - .001); } return next; }
+
+  // ---------- commandes ----------
+  let T = 0, playing = true, last = performance.now();
+  const pauseBtn = $('pause'), replayBtn = $('replay'), soundBtn = $('sound'), voiceBtn = $('voice'), seekEl = $('seek'), clockEl = $('clock');
+  pauseBtn.addEventListener('click', () => { if (T >= END){ T = 0; playing = true; hush(); } else playing = !playing; pauseBtn.textContent = playing ? 'Pause' : 'Lecture';
+    if (VO.supported){ if (playing) speechSynthesis.resume(); else speechSynthesis.pause(); } if (AU.on) masterTo(playing ? .9 : 0); });
+  replayBtn.addEventListener('click', () => { hush(); T = -0.001; playing = true; pauseBtn.textContent = 'Pause'; if (AU.on) masterTo(.9); });
+  soundBtn.addEventListener('click', () => { if (!AU.ctx) auInit(); AU.ctx.resume(); AU.on = !AU.on; soundBtn.textContent = AU.on ? 'Couper le son' : 'Activer le son'; soundBtn.setAttribute('aria-pressed', AU.on); masterTo(AU.on && playing ? .9 : 0); });
+  voiceBtn.addEventListener('click', () => { if (!VO.supported){ voiceBtn.textContent = 'Voix indisponible'; return; }
+    VO.on = !VO.on; voiceBtn.textContent = VO.on ? 'Couper la voix' : 'Activer la voix'; voiceBtn.setAttribute('aria-pressed', VO.on);
+    if (!VO.on){ hush(); if (AU.on && playing) masterTo(.9); return; } pickVoice();
+    if (T < .3){ say(VOICE[0][1]); T = .301; } else { let cur = null; for (const v of VOICE){ if (v[0] <= T) cur = v; } if (cur && T - cur[0] < 3) say(cur[1]); } });
+  seekEl.max = END;
+  let skipAudio = false, dragging = false;
+  const mmss = x => { x = Math.max(0, Math.round(x)); return Math.floor(x/60) + ':' + String(x%60).padStart(2,'0'); };
+  function jump(sec){ T = Math.max(0, Math.min(END, sec)); skipAudio = true; hush(); if (T >= END){ playing = false; pauseBtn.textContent = 'Lecture'; } }
+  const seekBox = seekEl.parentElement;
+  seekEl.addEventListener('pointerdown', () => { dragging = true; seekBox.classList.add('drag'); });
+  window.addEventListener('pointerup', () => { if (dragging) seekEl.blur(); dragging = false; seekBox.classList.remove('drag'); });
+  seekEl.addEventListener('input', () => jump(parseFloat(seekEl.value)));
+  document.addEventListener('keydown', e => { if (e.target.tagName === 'BUTTON' && (e.key === ' ' || e.key === 'Enter')) return; if (e.target === seekEl && e.key.startsWith('Arrow')) return;
+    if (e.key === ' '){ e.preventDefault(); pauseBtn.click(); } else if (e.key === 'ArrowLeft') jump(T - 5); else if (e.key === 'ArrowRight') jump(T + 5); });
+  function loop(now){
+    const dt = Math.min(.1, (now-last)/1000); last = now; const prevT = T;
+    if (playing){ T = holdForVoice(prevT, Math.min(END, T + dt)); if (T >= END){ playing = false; pauseBtn.textContent = 'Lecture'; } }
+    if (skipAudio) skipAudio = false; else { audioTick(prevT, T); voiceTick(prevT, T); }
+    if (!dragging) seekEl.value = T.toFixed(1); clockEl.textContent = mmss(T) + ' / ' + mmss(END);
+    renderAt(Math.max(0, T)); requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
+</script>
+<script>if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js');</script>
+</body>
+</html>

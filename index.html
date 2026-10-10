@@ -74,6 +74,7 @@ h1 span{ background:linear-gradient(90deg, var(--acc), var(--theo)); -webkit-bac
 .tag{ padding:4px 9px; border-radius:99px; }
 .tag.theorie{ color:var(--theo); background:color-mix(in srgb, var(--theo) 16%, transparent); }
 .tag.application{ color:var(--app); background:color-mix(in srgb, var(--app) 16%, transparent); }
+.tag.exercice{ color:#6dff94; background:color-mix(in srgb, #6dff94 16%, transparent); }
 .dur{ color:var(--muted); letter-spacing:0; text-transform:none; font-weight:600; font-size:13px; }
 .card h3{ margin:0; font-size:19px; line-height:1.25; letter-spacing:-.01em; }
 .card p{ margin:0; color:var(--muted); font-size:14.5px; line-height:1.45; }
@@ -108,9 +109,12 @@ const ANNEES = [
     chapitres: [
       {
         titre: "Fonctions",
-        description: "Les fonctions en action : droites, paraboles et polynômes pour protéger un secret.",
+        description: "Les fonctions en action : droites, paraboles et polynômes.",
         videos: [
-          { titre: "Application : le secret de Shamir", texte: "Partager une clé privée entre 5 personnes : il faut 2 points pour une droite, 3 pour une parabole, n + 1 pour un degré n.", lien: "shamir.html", image: "thumb-shamir.jpg", duree: "3 min 04", tag: "application" }
+          { titre: "Application : le secret de Shamir", texte: "Partager une clé privée entre 5 personnes : il faut 2 points pour une droite, 3 pour une parabole, n + 1 pour un degré n.", lien: "shamir.html", image: "thumb-shamir.jpg", duree: "3 min 04", tag: "application" },
+          { titre: "Application : peut-il franchir l’obstacle ?", texte: "Le saut d’un personnage de jeu de plateforme est une parabole : son sommet donne la hauteur maximale.", lien: "saut-parabole.html", image: "thumb-saut.jpg", duree: "1 min 48", tag: "application" },
+          { titre: "Application : pourra-t-elle s’arrêter à temps ?", texte: "La distance d’arrêt d’une voiture est une fonction du 2ᵉ degré de la vitesse.", lien: "distance-arret.html", image: "thumb-arret.jpg", duree: "1 min 55", tag: "application" },
+          { titre: "Exercice : la hauteur maximale de la fusée", texte: "Énoncé, temps de recherche, puis correction : sommet de la parabole et retour au sol.", lien: "fusee-exercice.html", image: "thumb-fusee.jpg", duree: "1 min 30", tag: "exercice" }
         ]
       }
     ]
@@ -167,7 +171,7 @@ const ANNEES = [
     ]
   }
 ];
-const TAGS = { theorie: "Théorie", application: "Application" };
+const TAGS = { theorie: "Théorie", application: "Application", exercice: "Exercice" };
 const root = document.getElementById('chapters');
 const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 ANNEES.forEach((an, ai) => {
