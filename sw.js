@@ -1,5 +1,5 @@
 // Mise en cache : le site fonctionne aussi hors connexion après une première visite
-const CACHE = 'visualmaths-v10';
+const CACHE = 'visualmaths-v12';
 const FILES = ['./', 'index.html', 'shamir.html', 'saut-parabole.html', 'distance-arret.html', 'fusee-exercice.html', 'bezier.html', 'thermocouple.html', 'valeur-absolue.html', 'exponentielle.html', 'logarithmes-intro.html', 'log-niveaux.html', 'log-son.html', 'manhattan-applications.html', 'respawn.html', 'points-vecteurs.html', 'droite-theorie.html', 'droite-drones.html', 'droite-rayon.html', 'droite-complete.html', 'plans-intersections.html', 'plans-obelisque.html', 'plans-robot.html', 'plans-complete.html',
   'three.min.js', 'OrbitControls.js', 'RoomEnvironment.js', 'manifest.webmanifest', 'icone.svg',
   'hero.jpg', 'thumb-shamir.jpg', 'thumb-saut.jpg', 'thumb-arret.jpg', 'thumb-fusee.jpg', 'thumb-bezier.jpg', 'thumb-thermocouple.jpg', 'thumb-valeur-absolue.jpg', 'thumb-exponentielle.jpg', 'thumb-log-intro.jpg', 'thumb-log-niveaux.jpg', 'thumb-log-son.jpg', 'thumb-manhattan.jpg', 'thumb-respawn.jpg', 'thumb-plans.jpg', 'thumb-obelisque.jpg', 'thumb-robot.jpg', 'thumb-points.jpg', 'thumb-droite.jpg', 'thumb-drones.jpg', 'thumb-rayon.jpg'];
