@@ -108,6 +108,33 @@ body:not(.rec) .caption{ bottom:calc(var(--u)*4.5 + 26px); }
 }
 @media (prefers-reduced-motion: reduce){ .caption span, .card, .title{ transition:none; } }
 .ctrl a.home{ text-decoration:none; display:inline-flex; align-items:center; }
+
+/* ---- mobile : commandes compactes ---- */
+@media (max-width: 760px), (max-height: 500px){
+  .ctrl{ flex-wrap:nowrap !important; gap:6px !important; }
+  .ctrl button, .ctrl a.home{ width:40px; height:40px; padding:0 !important; font-size:0 !important; display:inline-grid !important; place-items:center; flex:none; color:var(--ink); }
+  .ctrl button::before, .ctrl a.home::before{ content:""; width:20px; height:20px; background:currentColor; -webkit-mask:var(--ic) center/contain no-repeat; mask:var(--ic) center/contain no-repeat; }
+  .ctrl a.home{ --ic:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%20fill%3D%27none%27%20stroke%3D%27black%27%20stroke-width%3D%272.2%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%3E%3Cpath%20d%3D%27M15%205l-7%207%207%207%27/%3E%3C/svg%3E"); }
+  #voice{ --ic:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%20fill%3D%27none%27%20stroke%3D%27black%27%20stroke-width%3D%272.2%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%3E%3Cpath%20d%3D%27M4%205h16v11H10l-5%204v-4H4z%27/%3E%3Cpath%20d%3D%27M8%209.5h8M8%2012.5h5%27/%3E%3C/svg%3E"); } #sound{ --ic:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%20fill%3D%27none%27%20stroke%3D%27black%27%20stroke-width%3D%272.2%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%3E%3Cpath%20d%3D%27M9%2018V5l11-2v13%27/%3E%3Ccircle%20cx%3D%276%27%20cy%3D%2718%27%20r%3D%273%27/%3E%3Ccircle%20cx%3D%2717%27%20cy%3D%2716%27%20r%3D%273%27/%3E%3C/svg%3E"); } #replay{ --ic:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%20fill%3D%27none%27%20stroke%3D%27black%27%20stroke-width%3D%272.2%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%3E%3Cpath%20d%3D%27M4%2012a8%208%200%201%200%202.4-5.7%27/%3E%3Cpath%20d%3D%27M4%204v5h5%27/%3E%3C/svg%3E"); } #rot{ --ic:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%20fill%3D%27none%27%20stroke%3D%27black%27%20stroke-width%3D%272.2%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%3E%3Cellipse%20cx%3D%2712%27%20cy%3D%2712%27%20rx%3D%279%27%20ry%3D%274%27/%3E%3Cpath%20d%3D%27M17%206.5l2.6%201.8-1%203%27/%3E%3Ccircle%20cx%3D%2712%27%20cy%3D%2712%27%20r%3D%271.6%27%20fill%3D%27black%27/%3E%3C/svg%3E"); }
+  #rot[aria-pressed="false"]{ color:var(--muted); } #rot[aria-pressed="true"]{ color:#3ee6ff; border-color:rgba(62,230,255,.55); }
+  #pause{ --ic:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%20fill%3D%27none%27%20stroke%3D%27black%27%20stroke-width%3D%272.2%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%3E%3Cpath%20d%3D%27M8%205v14M16%205v14%27/%3E%3C/svg%3E"); } #pause[data-state="play"]{ --ic:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%20fill%3D%27none%27%20stroke%3D%27black%27%20stroke-width%3D%272.2%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%3E%3Cpath%20d%3D%27M7%204.5l12%207.5-12%207.5z%27%20fill%3D%27black%27/%3E%3C/svg%3E"); }
+  #voice[aria-pressed="false"], #sound[aria-pressed="false"]{ color:var(--muted); }
+  #voice[aria-pressed="true"], #sound[aria-pressed="true"]{ color:#3ee6ff; border-color:rgba(62,230,255,.55); }
+}
+@media (max-width: 760px) and (max-aspect-ratio: 1/1){
+  .ctrl{ bottom:calc(var(--u)*2 + 30px) !important; }
+  .ctrl a.home{ margin-right:auto; }
+  .caption{ bottom:calc(var(--u)*2 + 84px) !important; }
+  .seek{ padding:6px calc(var(--u)*3) calc(var(--u)*2) !important; }
+  .card{ font-size:calc(var(--u)*1.85) !important; }
+}
+@media (max-height: 500px) and (min-aspect-ratio: 1/1){
+  .ctrl{ top:auto !important; right:auto !important; left:calc(var(--u)*4) !important; bottom:calc(var(--u)*1.2 + 2px) !important; }
+  .seek{ padding:8px calc(var(--u)*3.5) calc(var(--u)*1.2) calc(var(--u)*4 + 242px) !important; opacity:1 !important; }
+  .stage:has(#rot) .seek{ padding-left:calc(var(--u)*4 + 288px) !important; }
+  /*LCAP*/.caption{ bottom:calc(var(--u)*1.2 + 54px) !important; }
+  .card{ bottom:calc(var(--u)*1.2 + 54px) !important; }/*LCAP*/
+}
 </style>
 </head>
 <body>
@@ -754,5 +781,7 @@ body:not(.rec) .caption{ bottom:calc(var(--u)*4.5 + 26px); }
 })();
 </script>
 <script>if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js');</script>
+<script>/*mobctrl*/(function(){ var p = document.getElementById('pause'); if (!p) return; var f = function(){ p.dataset.state = /lecture|reprendre|play/i.test(p.textContent) ? 'play' : 'pause'; }; new MutationObserver(f).observe(p, {childList:true, characterData:true, subtree:true}); f();
+  document.querySelectorAll('.ctrl button, .ctrl a.home').forEach(function(b){ var u = function(){ b.setAttribute('title', b.textContent.trim()); }; u(); new MutationObserver(u).observe(b, {childList:true, characterData:true, subtree:true}); }); })();</script>
 </body>
 </html>
