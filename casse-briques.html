@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icone.svg">
+<link rel="apple-touch-icon" href="icone.svg">
+<meta name="theme-color" content="#0b1024">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Application — le casse-briques et l’effet tunnel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link id="gf" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&family=Press+Start+2P&family=STIX+Two+Text:ital,wght@0,500;1,500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg1:#070b1c; --bg2:#151b46; --ink:#eef1ff; --muted:#8e97c4; --glass:rgba(255,255,255,.06); --stroke:rgba(255,255,255,.14);
+  --bip:#3ee6ff; --zap:#ff4f6d; --zip:#c77dff; --bl:#ffd23f; --tt:#c77dff; --err:#ff5a6e; --star:#ffd23f; --x:#ff7a85; --y:#5ee3a1; --wall:#2f5bff; --ok:#6dff94;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light){ :root:not([data-theme="dark"]){ --glass:rgba(255,255,255,.08); } }
+:root[data-theme="light"]{ --glass:rgba(255,255,255,.08); }
+:root{ box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); }
+*,*::before,*::after{ box-sizing:inherit; }
+html{ height:100%; scroll-padding-top:env(safe-area-inset-top,0px); }
+body{ height:100%; margin:0; background:var(--bg1); color:var(--ink); overflow:hidden; font-family:"Manrope", system-ui, -apple-system, "Segoe UI", sans-serif; }
+.m{ font-family:"STIX Two Text","Cambria Math","Times New Roman",serif; font-style:italic; font-weight:500; }
+.cB{ color:var(--bip); } .cZ{ color:var(--zap); } .cI{ color:var(--zip); } .cS{ color:var(--star); } .cx{ color:var(--x); } .cy{ color:var(--y); } .cOk{ color:var(--ok); } .mu{ color:var(--muted); }
+.stage{ position:relative; width:100%; height:100%; overflow:hidden; background:radial-gradient(120% 90% at 70% 15%, var(--bg2) 0%, var(--bg1) 62%); --u:min(1vw, 1.78vh); }
+canvas{ position:absolute; inset:0; width:100%; height:100%; display:block; }
+.title{ position:absolute; inset:0; display:grid; place-content:center; text-align:center; pointer-events:none; }
+.title h1{ margin:0; font-weight:800; font-size:calc(var(--u)*5.4); letter-spacing:-.02em; line-height:1.05; }
+.title p{ margin:calc(var(--u)*1.4) 0 0; font-size:calc(var(--u)*2.2); color:var(--muted); font-weight:600; }
+.caption{ position:absolute; left:calc(var(--u)*4); bottom:calc(var(--u)*4.5 + 20px); max-width:min(46%, 30em); pointer-events:none; font-size:calc(var(--u)*2.1); font-weight:700; line-height:1.25; }
+.caption > span{ display:block; }
+.caption .bar{ display:block; width:calc(var(--u)*6); height:calc(var(--u)*.5); border-radius:99px; margin-bottom:calc(var(--u)*1.2); background:linear-gradient(90deg, var(--bip), var(--zip), var(--zap)); }
+.card{ position:absolute; right:calc(var(--u)*3.5); bottom:calc(var(--u)*3.5 + 20px); width:21em; padding:calc(var(--u)*1.8) calc(var(--u)*2.2); font-size:calc(var(--u)*1.7);
+  background:var(--glass); border:1px solid var(--stroke); border-radius:calc(var(--u)*1.8); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); }
+.card h3{ margin:0 0 .5em; font-size:.8em; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:800; }
+.sec{ display:grid; gap:.35em; }
+.line{ white-space:nowrap; font-variant-numeric:tabular-nums; }
+.big{ font-size:1.25em; }
+.hr{ height:1px; background:var(--stroke); margin:.6em 0; }
+.num{ display:inline-block; min-width:1.6em; text-align:right; }
+table.cmp{ border-collapse:collapse; width:100%; font-variant-numeric:tabular-nums; }
+table.cmp td, table.cmp th{ padding:.25em .3em; text-align:left; white-space:nowrap; }
+table.cmp th{ font-size:.82em; color:var(--muted); font-weight:700; }
+.ctrl{ position:absolute; right:calc(var(--u)*3.5); top:calc(var(--u)*3); display:flex; gap:8px; }
+.ctrl button, .ctrl a.home{ font:inherit; font-weight:700; font-size:14px; padding:9px 15px; border-radius:99px; border:1px solid var(--stroke); background:var(--glass); color:var(--ink); cursor:pointer; backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); }
+.ctrl button:focus-visible{ outline:3px solid var(--bip); outline-offset:2px; }
+.seek{ position:absolute; left:0; right:0; bottom:0; padding:28px calc(var(--u)*3.5) calc(var(--u)*1.2) calc(var(--u)*4); display:flex; align-items:center; gap:14px; transition:opacity .25s; }
+.seek input{ flex:1; accent-color:var(--bip); height:22px; cursor:pointer; }
+.seek span{ font-size:14px; font-weight:600; color:var(--muted); font-variant-numeric:tabular-nums; min-width:6.5em; text-align:right; }
+@media (hover: hover){ .seek{ opacity:0; } .seek:hover, .seek:has(input:focus-visible), .seek.drag{ opacity:1; } }
+.rec .ctrl, .rec .seek{ display:none; } .rec *{ transition:none !important; }
+@media (max-aspect-ratio: 1/1){
+  .stage{ --u:min(1.9vw, 1.2vh); }
+  .card{ left:calc(var(--u)*2.5); right:calc(var(--u)*2.5); top:calc(var(--u)*2.5); bottom:auto; width:auto; font-size:calc(var(--u)*1.7); }
+  .ctrl{ left:calc(var(--u)*2.5); right:calc(var(--u)*2.5); top:auto; bottom:calc(var(--u)*2 + 34px); flex-wrap:wrap; gap:6px; }
+  .ctrl button, .ctrl a.home{ padding:7px 11px; font-size:13px; }
+  .caption{ left:calc(var(--u)*2.5); right:calc(var(--u)*2.5); max-width:none; bottom:calc(var(--u)*2 + 90px); font-size:calc(var(--u)*2.6); }
+  .seek{ padding:10px calc(var(--u)*3) calc(var(--u)*2); }
+}
+.cB{ color:var(--bl); } .cT{ color:var(--tt); } .cE{ color:var(--err); }
+.card .line.big{ font-size:1.16em; }
+.fr{ display:inline-flex; flex-direction:column; vertical-align:middle; text-align:center; font-size:.82em; line-height:1.05; margin:0 .12em; } .fr > span:first-child{ border-bottom:1.5px solid currentColor; padding:0 .15em; }
+.ctrl a.home{ text-decoration:none; display:inline-flex; align-items:center; }
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <canvas id="c" aria-label="Animation : dans un casse-briques, une balle rapide traverse une brique entre deux images ; une équation du premier degré calcule l'instant exact du choc"></canvas>
+  <div class="title" id="title"><div><h1>Le casse-briques</h1><p>Équations du 1<sup>er</sup> degré · pourquoi la balle traverse-t-elle les briques&nbsp;?</p></div></div>
+  <div class="card" id="card" style="opacity:0">
+    <div class="sec" id="sA">
+      <h3>Comment le jeu détecte un choc</h3>
+      <div class="line">60 images par seconde&nbsp;: <span class="fr"><span>1</span><span>60</span></span> s ≈ <b>0,0167 s</b></div>
+      <div class="line">à chaque image, le jeu se demande&nbsp;:</div>
+      <div class="line" style="white-space:normal"><b>«&nbsp;la balle est-elle dans une brique&nbsp;?&nbsp;»</b></div>
+      <div class="line">briques&nbsp;: de <b>y = 11</b> à <b>y = 12,3</b></div>
+      <div class="hr"></div>
+      <div class="line" id="a0">balle normale&nbsp;: monte de <b>1</b> par image</div>
+      <div class="line" id="a1">image 10&nbsp;: <b>y = 11,5</b> → dans la brique <b style="color:var(--ok)">✓</b></div>
+    </div>
+    <div class="sec" id="sA2" style="display:none">
+      <h3>Balle plus rapide, même méthode</h3>
+      <div class="line">balle rapide&nbsp;: monte de <b class="cB">6</b> par image</div>
+      <div class="hr"></div>
+      <div class="line" id="f0">image 0&nbsp;: (3,2 ; 1,5) <span class="mu">raquette</span> <span class="cE">✗</span></div>
+      <div class="line" id="f1">image 1&nbsp;: (5,6 ; 7,5) <span class="mu">sous les briques</span> <span class="cE">✗</span></div>
+      <div class="line" id="f2">image 2&nbsp;: (8 ; 13,5) <span class="mu">au-dessus</span> <span class="cE">✗</span></div>
+      <div class="line" id="f3"><b class="cE">choc jamais détecté&nbsp;: effet tunnel</b></div>
+    </div>
+    <div class="sec" id="sB" style="display:none">
+      <h3>Entre l’image 1 et l’image 2</h3>
+      <div class="line" id="b0"><span class="m">x</span>(<span class="m cT">t</span>) = 5,6 + 144<span class="m cT">t</span></div>
+      <div class="line" id="b0b"><span class="m">y</span>(<span class="m cT">t</span>) = 7,5 + 360<span class="m cT">t</span></div>
+      <div class="hr"></div>
+      <div class="line" id="b1">7,5 + 360<span class="m cT">t</span> = 11 ⇔ 360<span class="m cT">t</span> = 3,5</div>
+      <div class="line big" id="b2"><span class="m cT">t</span> = <span class="fr"><span>3,5</span><span>360</span></span> ≈ <b class="cT">0,0097 s</b> <span class="mu">&lt; 0,0167</span></div>
+      <div class="hr"></div>
+      <div class="line" id="b3"><span class="m">x</span> = 5,6 + 144 · 0,0097 ≈ <b class="cB">7</b></div>
+      <div class="line" id="b4"><b style="color:var(--ok)">choc en (7 ; 11)</b></div>
+    </div>
+  </div>
+  <div class="caption" id="caption" style="opacity:0"><i class="bar"></i><span id="captxt"></span></div>
+  <div class="ctrl"><a class="home" href="index.html" aria-label="Retour à l'accueil">← Accueil</a><button id="voice" aria-pressed="false">Activer la voix</button><button id="sound" aria-pressed="false">Activer le son</button><button id="pause">Pause</button><button id="replay">Rejouer</button></div>
+  <div class="seek"><input type="range" id="seek" min="0" max="110" step="0.1" value="0" aria-label="Position dans l'animation"><span id="clock">0:00 / 1:50</span></div>
+</div>
+<script>
+(function(){
+  const REC = /[?&]record/.test(location.search); if (REC) document.body.classList.add('rec');
+  const $ = id => document.getElementById(id);
+  const clamp = x => Math.max(0, Math.min(1, x));
+  const ease = x => x<.5 ? 4*x*x*x : 1-Math.pow(-2*x+2,3)/2;
+  const lerp = (a,b,k) => a + (b-a)*k;
+  const back = x => { const c=1.7, c3=c+1; return 1 + c3*Math.pow(x-1,3) + c*Math.pow(x-1,2); };
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const FW = 12, FH = 16, ROWY = [11, 11.7, 12.4, 13.1, 13.8], BH = .6, COLS = 6, BW = 2;
+  const RCOL = ['#ff5a6e', '#ffa94d', '#ffd23f', '#6dff94', '#3ee6ff'];
+
+  // ---------- partie jouée (simulation déterministe, 60 images/s) ----------
+  const PLAY = (() => { const fr = [], bricks = new Array(30).fill(1); let x = 6, y = 1.6, vx = 4.6, vy = 7.2, px = 6, score = 0;
+    for (let f = 0; f < 60*11; f++){ const dt = 1/60; x += vx*dt; y += vy*dt;
+      if (x < .25){ x = .25; vx = -vx; } if (x > FW - .25){ x = FW - .25; vx = -vx; } if (y > FH - .25){ y = FH - .25; vy = -vy; }
+      if (y < 1.25 && vy < 0){ y = 1.25; vy = -vy; vx += (x - px)*1.2; }
+      for (let r = 0; r < 5; r++) for (let c = 0; c < COLS; c++){ const k = r*COLS + c; if (!bricks[k]) continue; if (x > c*BW && x < (c + 1)*BW && y + .25 > ROWY[r] && y - .25 < ROWY[r] + BH){ bricks[k] = 0; vy = -vy; score += 10*(r + 1); r = 9; break; } }
+      px += Math.max(-.25, Math.min(.25, x - px)); px = Math.max(1.2, Math.min(FW - 1.2, px)); fr.push([x, y, px, bricks.slice(), score]); }
+    return fr; })();
+  // briques pour la démonstration : deux rangées pleines en bas, quelques briques en haut
+  const DEMO = Array.from({length:30}, (_, k) => (k < 12 || [12, 17, 18, 23, 24, 29].includes(k)) ? 1 : 0);
+
+  // ---------- chronologie ----------
+  const K = { play:[4.5, 12], detect:12.5, photos:16, axes:19.5, slowSnap:[23, 31], hit:31.5, brk:34, bonus:38.5, pass0:[41.5, 42.3], q0:42.8, same:46, fastSnap:[49.5, 51.5, 53.5], pass:[55.5, 56.5], bug:57.1, tunnel:59.5, between:63.5, yt:66.5, eq:[70, 73.5], cmp:77, xt:80, impact:83.5, fix:[87, 90.5], real:93.5, concl:[99, 103.5], fast:[1e9, 1e9], bonusAI:[1e9, 1e9, 1e9, 1e9] };
+  const END = 110;
+  const caps = [
+    [0.3, ''],
+    [K.play[0], 'Un casse-briques\u00a0: la balle rebondit, casse les briques, et la raquette la renvoie.'],
+    [K.detect, 'Mais comment le jeu sait-il que la balle touche une brique\u00a0?'],
+    [K.photos, 'Un jeu ne calcule pas le mouvement en continu\u00a0: il prend des «\u00a0photos\u00a0» du monde, par exemple 60 par seconde.'],
+    [K.axes, 'Ajoutons un <b>repère</b>\u00a0: chaque position de la balle a deux coordonnées, <span class="m">x</span> et <span class="m">y</span>.'],
+    [K.slowSnap[0], 'La balle part de la raquette et monte de 1 à chaque image. À chaque image, le jeu vérifie\u00a0: «\u00a0la balle est-elle dans une brique\u00a0?\u00a0»'],
+    [K.hit, 'À l’image 10, la balle est en <span class="m">y</span> = 11,5\u00a0: dans la brique\u00a0! Choc détecté.'],
+    [K.brk, 'La brique se casse, et la balle rebondit.'],
+    [K.bonus, 'Regardons ce qu’il se passe si la balle est <b>plus rapide</b>, en utilisant la même méthode…'],
+    [K.pass0[0] + .5, 'La balle traverse les briques sans les toucher\u00a0! Pourquoi\u00a0?'],
+    [K.same, 'Rejouons image par image. La balle monte maintenant de 6 à chaque image, et le jeu vérifie toujours\u00a0: «\u00a0la balle est-elle dans une brique\u00a0?\u00a0»'],
+    [K.fastSnap[0], 'Image 0\u00a0: la balle est sur la raquette. Pas de brique.'],
+    [K.fastSnap[1], 'Image 1\u00a0: (5,6 ; 7,5), sous les briques. Pas de brique.'],
+    [K.fastSnap[2], 'Image 2\u00a0: (8 ; 13,5)… déjà au-dessus des briques. Pas de brique non plus\u00a0!'],
+    [K.pass[0], 'Voilà pourquoi, dans le jeu, la balle traverse les briques sans les casser\u00a0!'],
+    [K.tunnel, 'Aucune image ne l’a vue dans une brique\u00a0: le choc n’est jamais détecté. C’est l’«\u00a0effet tunnel\u00a0», un vrai bug bien connu des programmeurs de jeux.'],
+    [K.between, 'La solution\u00a0: entre deux images, la balle avance en ligne droite, à vitesse constante. On peut donc calculer sa position à tout instant.'],
+    [K.yt, 'Entre l’image 1 et l’image 2\u00a0: <span class="m">x</span>(<span class="m cT">t</span>) = 5,6 + 144<span class="m cT">t</span> et <span class="m">y</span>(<span class="m cT">t</span>) = 7,5 + 360<span class="m cT">t</span>.'],
+    [K.eq[0], 'Elle touche le bas des briques quand <span class="m">y</span> = 11\u00a0: 7,5 + 360<span class="m cT">t</span> = 11. Une équation du 1<sup>er</sup> degré\u00a0!'],
+    [K.eq[1], 'On trouve <span class="m cT">t</span> = 3,5/360 ≈ 0,0097 s.'],
+    [K.cmp, 'C’est moins que la durée d’une image, 0,0167 s\u00a0: le choc a lieu <b>entre</b> les deux images.'],
+    [K.xt, 'Et où exactement\u00a0? On remplace <span class="m cT">t</span> dans <span class="m">x</span>(<span class="m cT">t</span>)\u00a0: <span class="m">x</span> ≈ 7. Le choc a lieu en (7 ; 11).'],
+    [K.impact, 'Le jeu connaît l’instant et le point exacts du choc\u00a0: il casse la bonne brique et fait rebondir la balle.'],
+    [K.fix[0], 'Avec ce calcul, même la balle rapide casse les briques.'],
+    [K.real, 'Les moteurs de jeu proposent cette «\u00a0détection de collision continue\u00a0» pour les objets rapides. En 3D, le calcul est plus riche, mais l’idée est la même.'],
+    [K.concl[0], 'Une équation du 1<sup>er</sup> degré, avec le temps comme inconnue, évite que la balle traverse les briques…'],
+    [K.concl[1], 'Les moteurs de jeu résolvent ce genre d’équation des milliers de fois par seconde.']
+  ];
+  const VOICE = [
+    [0.3, "Le casse-briques."],
+    [K.play[0], "Un casse-briques : la balle rebondit, casse les briques, et la raquette la renvoie."],
+    [K.detect, "Mais comment le jeu sait-il que la balle touche une brique ?"],
+    [K.photos, "Un jeu ne calcule pas le mouvement en continu : il prend des photos du monde, par exemple soixante par seconde."],
+    [K.axes, "Ajoutons un repère : chaque position de la balle a deux coordonnées, x et y."],
+    [K.slowSnap[0], "La balle part de la raquette et monte de un à chaque image. À chaque image, le jeu vérifie : la balle est-elle dans une brique ?"],
+    [K.hit, "À l'image dix, la balle est en y égale onze virgule cinq : dans la brique ! Choc détecté."],
+    [K.brk, "La brique se casse, et la balle rebondit."],
+    [K.bonus, "Regardons ce qu'il se passe si la balle est plus rapide, en utilisant la même méthode…"],
+    [K.pass0[0] + .5, "La balle traverse les briques sans les toucher ! Pourquoi ?"],
+    [K.same, "Rejouons image par image. La balle monte maintenant de six à chaque image, et le jeu vérifie toujours : la balle est-elle dans une brique ?"],
+    [K.fastSnap[0], "Image zéro : la balle est sur la raquette. Pas de brique."],
+    [K.fastSnap[1], "Image un : cinq virgule six, sept virgule cinq, sous les briques. Pas de brique."],
+    [K.fastSnap[2], "Image deux : huit, treize virgule cinq… déjà au-dessus des briques. Pas de brique non plus !"],
+    [K.pass[0], "Voilà pourquoi, dans le jeu, la balle traverse les briques sans les casser !"],
+    [K.tunnel, "Aucune image ne l'a vue dans une brique : le choc n'est jamais détecté. C'est l'effet tunnel, un vrai bug bien connu des programmeurs de jeux."],
+    [K.between, "La solution : entre deux images, la balle avance en ligne droite, à vitesse constante. On peut donc calculer sa position à tout instant."],
+    [K.yt, "Entre l'image un et l'image deux : x de t égale cinq virgule six plus cent quarante-quatre t, et y de t égale sept virgule cinq plus trois cent soixante t."],
+    [K.eq[0], "Elle touche le bas des briques quand y égale onze : sept virgule cinq plus trois cent soixante t égale onze. Une équation du premier degré !"],
+    [K.eq[1], "On trouve t égale trois virgule cinq sur trois cent soixante, environ zéro virgule zéro zéro neuf sept seconde."],
+    [K.cmp, "C'est moins que la durée d'une image : le choc a lieu entre les deux images."],
+    [K.xt, "Et où exactement ? On remplace t dans x de t : x vaut environ sept. Le choc a lieu en sept, onze."],
+    [K.impact, "Le jeu connaît l'instant et le point exacts du choc : il casse la bonne brique et fait rebondir la balle."],
+    [K.fix[0], "Avec ce calcul, même la balle rapide casse les briques."],
+    [K.real, "Les moteurs de jeu proposent cette détection de collision continue pour les objets rapides. En trois dimensions, le calcul est plus riche, mais l'idée est la même."],
+    [K.concl[0], "Une équation du premier degré, avec le temps comme inconnue, évite que la balle traverse les briques…"],
+    [K.concl[1], "Les moteurs de jeu résolvent ce genre d'équation des milliers de fois par seconde."]
+  ];
+
+  // ---------- canevas ----------
+  const stage = $('stage'), cv = $('c'), ctx = cv.getContext('2d');
+  let W = 1, H = 1, DPR = 1;
+  function resize(){ DPR = REC ? 1 : Math.min(devicePixelRatio || 1, 2); W = stage.clientWidth; H = stage.clientHeight; cv.width = W*DPR; cv.height = H*DPR; ctx.setTransform(DPR, 0, 0, DPR, 0, 0); }
+  new ResizeObserver(resize).observe(stage); resize();
+  const portrait = () => W/H < 1;
+  function area(){ return portrait() ? {x0:W*.04, x1:W*.96, y0:H*.3, y1:H*.72} : {x0:W*.03, x1:W*.6, y0:H*.05, y1:H*.72}; }
+  function glowOn(color, b){ ctx.shadowColor = color; ctx.shadowBlur = b; } function glowOff(){ ctx.shadowBlur = 0; }
+  function roundRect(x, y, w, h, r){ ctx.beginPath(); ctx.moveTo(x+r, y); ctx.arcTo(x+w, y, x+w, y+h, r); ctx.arcTo(x+w, y+h, x, y+h, r); ctx.arcTo(x, y+h, x, y, r); ctx.arcTo(x, y, x+w, y, r); ctx.closePath(); }
+  function text(t, x, y, size, color, align, weight){ ctx.font = (weight || 700) + ' ' + size + 'px Manrope, system-ui, sans-serif'; ctx.fillStyle = color; ctx.textAlign = align || 'center'; ctx.textBaseline = 'middle'; ctx.fillText(t, x, y); }
+  function dot(x, y, r, color, glow){ r = Math.max(0, r); if (glow) glowOn(color, r*3); ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2); ctx.fill(); glowOff(); }
+  function grid(){ ctx.strokeStyle = 'rgba(90,120,255,.07)'; ctx.lineWidth = 1; const s = Math.max(28, W/40); for (let x = (W % s)/2; x < W; x += s){ ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); } for (let y = (H % s)/2; y < H; y += s){ ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); } }
+  const pix = (sz) => sz + 'px "Press Start 2P", ui-monospace, monospace';
+  function ptext(t, x, y, sz, col, al){ ctx.font = pix(sz); ctx.fillStyle = col; ctx.textAlign = al || 'center'; ctx.textBaseline = 'middle'; ctx.fillText(t, x, y); }
+  function label(x, y, t, col, sz){ ctx.font = '800 ' + sz + 'px Manrope'; const w = ctx.measureText(t).width + 14; ctx.fillStyle = 'rgba(10,14,40,.9)'; roundRect(x - w/2, y - sz*.8, w, sz*1.6, 8); ctx.fill(); text(t, x, y, sz, col, 'center', 800); }
+
+  // ---------- le terrain de jeu ----------
+  function field(a){ const ah = a.y1 - a.y0, fh = ah*.94, fw = fh*FW/FH, x0 = a.x0 + (a.x1 - a.x0)*.06, y0 = a.y0 + ah*.03; return { x0, y0, fw, fh, X: x => x0 + x/FW*fw, Y: y => y0 + fh - y/FH*fh, u: fw/FW }; }
+  function drawField(F, T, bricks, px, al, score){ ctx.save(); ctx.globalAlpha = al; ctx.fillStyle = '#070b22'; roundRect(F.x0 - 6, F.y0 - 6, F.fw + 12, F.fh + 12, 12); ctx.fill(); ctx.strokeStyle = 'rgba(62,230,255,.6)'; ctx.lineWidth = 2; glowOn('#3ee6ff', 12); roundRect(F.x0 - 6, F.y0 - 6, F.fw + 12, F.fh + 12, 12); ctx.stroke(); glowOff();
+    ctx.strokeStyle = 'rgba(62,230,255,.05)'; ctx.lineWidth = 1; for (let i=1;i<FW;i++){ ctx.beginPath(); ctx.moveTo(F.X(i), F.y0); ctx.lineTo(F.X(i), F.y0 + F.fh); ctx.stroke(); }
+    for (let r=0;r<5;r++) for (let c=0;c<COLS;c++){ if (!bricks[r*COLS + c]) continue; const x = F.X(c*BW) + 2, y = F.Y(ROWY[r] + BH), w = BW*F.u - 4, h = BH*F.u; glowOn(RCOL[r], 8); ctx.fillStyle = RCOL[r]; roundRect(x, y, w, h, 3); ctx.fill(); glowOff(); ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.fillRect(x + 2, y + 2, w - 4, h*.22); }
+    glowOn('#3ee6ff', 14); ctx.fillStyle = '#3ee6ff'; roundRect(F.X(px - 1.1), F.Y(1), 2.2*F.u, .35*F.u, 5); ctx.fill(); glowOff();
+    if (score !== undefined) ptext('SCORE ' + String(score).padStart(4, '0'), F.X(.3), F.Y(15.4), Math.max(8, F.u*.38), '#fff', 'left');
+    ctx.restore(); }
+  function axes(F, al){ ctx.save(); ctx.globalAlpha = al; ctx.strokeStyle = 'rgba(255,255,255,.13)'; ctx.lineWidth = 1; for (let i=1;i<FW;i++){ ctx.beginPath(); ctx.moveTo(F.X(i), F.Y(0)); ctx.lineTo(F.X(i), F.Y(FH)); ctx.stroke(); } for (let j=1;j<FH;j++){ ctx.beginPath(); ctx.moveTo(F.X(0), F.Y(j)); ctx.lineTo(F.X(FW), F.Y(j)); ctx.stroke(); }
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(F.X(0), F.Y(FH)); ctx.lineTo(F.X(0), F.Y(0)); ctx.lineTo(F.X(FW), F.Y(0)); ctx.stroke();
+    for (let i=0;i<=FW;i+=2) text(String(i), F.X(i), F.Y(0) + 13, 11, '#cfd6ff', 'center', 700); for (let j=0;j<=FH;j+=2) text(String(j), F.X(0) - 12, F.Y(j), 11, '#cfd6ff', 'right', 700);
+    text('x', F.X(FW) + 12, F.Y(0), 13, '#fff', 'left', 800); text('y', F.X(0), F.Y(FH) - 12, 13, '#fff', 'center', 800); ctx.restore(); }
+  function coordPt(F, x, y, col, lbl, side){ ctx.setLineDash([4, 4]); ctx.strokeStyle = col; ctx.globalAlpha *= .8; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(F.X(x), F.Y(y)); ctx.lineTo(F.X(x), F.Y(0)); ctx.moveTo(F.X(x), F.Y(y)); ctx.lineTo(F.X(0), F.Y(y)); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha /= .8;
+    dot(F.X(x), F.Y(y), F.u*.24, col, true); if (lbl) label(F.X(x) + (side || 1)*F.u*1.9, F.Y(y) - F.u*.4, lbl, col, 12); }
+  function ball(F, x, y, col, al, trail){ ctx.globalAlpha = al; if (trail){ ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = F.u*.3; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(F.X(trail[0]), F.Y(trail[1])); ctx.lineTo(F.X(x), F.Y(y)); ctx.stroke(); ctx.lineCap = 'butt'; } dot(F.X(x), F.Y(y), F.u*.25, col || '#fff', true); ctx.globalAlpha = 1; }
+  function shards(F, x, y, k, col){ for (let i=0;i<12;i++){ const an = i/12*Math.PI*2, d = k*F.u*1.4; ctx.fillStyle = col; ctx.globalAlpha = 1 - k; ctx.fillRect(F.X(x) + Math.cos(an)*d, F.Y(y) + Math.sin(an)*d, F.u*.18, F.u*.18); } ctx.globalAlpha = 1; }
+
+  // ---------- rendu ----------
+  const titleEl = $('title'), card = $('card'), captxt = $('captxt'), capEl = $('caption');
+  let capIdx = -2;
+  function renderAt(T){
+    ctx.clearRect(0, 0, W, H); grid();
+    titleEl.style.opacity = clamp((T-.2)/.6)*(1 - clamp((T-3.4)/.6));
+    const a = area(), aw = a.x1 - a.x0, F = field(a), rx = F.x0 + F.fw + (a.x1 - F.x0 - F.fw)/2 + 6;
+    if (T < K.play[0] - .8) return panel(T);
+    const al = clamp((T - K.play[0] + .8)/.8);
+    // 1. la partie
+    if (T < K.detect + .8){ const f = Math.min(PLAY.length - 1, Math.max(0, Math.floor((T - K.play[0])*60))), [x, y, px, br, sc] = PLAY[f]; drawField(F, T, br, px, al, sc); if (T >= K.play[0]) ball(F, x, y, '#fff', al); return panel(T); }
+    // 2. comment le jeu détecte un choc (vitesse normale)
+    const photosStrip = (from, to) => { if (T < from || T >= to) return; const kp = clamp((T - from)/.6); ctx.globalAlpha = kp; for (let i=0;i<4;i++){ const fy = F.Y(14 - i*2.2); ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = 1.5; roundRect(rx - 26, fy - 18, 52, 36, 4); ctx.stroke(); text('📷', rx, fy, 15, '#fff', 'center', 800); } text('60 / s', rx, F.Y(14 - 4*2.2), 13, '#fff', 'center', 800); ctx.globalAlpha = 1; };
+    if (T < K.bonus){ const broken = T >= K.brk; const br = DEMO.slice(); if (broken) br[3] = 0; drawField(F, T, br, 3.2, 1, 1240); if (T >= K.axes) axes(F, clamp((T - K.axes)/.8)); 
+      if (T >= K.slowSnap[0]){ const n = Math.min(10, Math.floor(clamp((T - K.slowSnap[0])/(K.slowSnap[1] - K.slowSnap[0]))*10.999));
+        if (!broken){ for (let i=0;i<=n;i++){ const y = 1.5 + i, x = 3.2 + .38*i, inB = y >= 11 && y <= 12.3; ctx.globalAlpha = i === n ? 1 : .3; dot(F.X(x), F.Y(y), F.u*.2, inB ? '#6dff94' : '#ff7eb6', i === n);
+            if (i === n){ ctx.globalAlpha = 1; coordPt(F, x, y, inB ? '#6dff94' : '#ff7eb6', 'image ' + i + ' : y = ' + y.toFixed(1).replace('.', ',') + (inB ? '  ✓' : '  ✗'), x > 7 ? -1 : 1); } } ctx.globalAlpha = 1; }
+        else { const kb = clamp((T - K.brk)/1.4); ball(F, lerp(7, 9, kb), lerp(11.3, 6, kb), '#fff', 1); shards(F, 7, 11.3, clamp((T - K.brk)/.8), '#ff5a6e'); } }
+      return panel(T); }
+    // 3. balle rapide, même méthode
+    if (T < K.between){ const br = DEMO.slice(); drawField(F, T, br, 3.2, 1, 1240); axes(F, 1); 
+      if (T >= K.pass0[0] && T < K.pass0[1] + .1){ const kp = clamp((T - K.pass0[0])/(K.pass0[1] - K.pass0[0])), x = lerp(3.2, 9.6, kp), y = lerp(1.5, 15.5, kp); if (kp < 1) ball(F, x, y, '#ffd23f', 1, [lerp(3.2, 9.6, Math.max(0, kp - .25)), lerp(1.5, 15.5, Math.max(0, kp - .25))]); }
+      else if (T < K.fastSnap[0]) ball(F, 3.2, 1.5, '#ffd23f', 1);
+      if (T >= K.pass0[1] && T < K.same){ const kb = back(clamp((T - K.pass0[1])/.5)); ctx.save(); ctx.translate(rx, F.Y(12)); ctx.scale(kb, kb); ptext('?!', 0, 0, Math.max(18, F.u*1.2), '#ff5a6e'); ctx.restore(); }
+      const P = [[3.2, 1.5, 'image 0 : (3,2 ; 1,5)  ✗'], [5.6, 7.5, 'image 1 : (5,6 ; 7,5)  ✗'], [8, 13.5, 'image 2 : (8 ; 13,5)  ✗']];
+      if (T >= K.fastSnap[0] && T < K.pass[0]){ ctx.setLineDash([3, 6]); ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(F.X(3.2), F.Y(1.5)); ctx.lineTo(F.X(8), F.Y(13.5)); ctx.stroke(); ctx.setLineDash([]);
+        P.forEach(([x, y, l], i) => { const k = back(clamp((T - K.fastSnap[i])/.5)); if (k <= 0) return; ctx.globalAlpha = Math.min(1, k); coordPt(F, x, y, '#ffd23f', l, i === 2 ? -1 : 1); ctx.globalAlpha = 1; }); }
+      if (T >= K.pass[0]){ const kp = clamp((T - K.pass[0])/(K.pass[1] - K.pass[0])), x = lerp(3.2, 9.6, kp), y = lerp(1.5, 15.5, kp); if (kp < 1) ball(F, x, y, '#ffd23f', 1, [lerp(3.2, 9.6, Math.max(0, kp - .25)), lerp(1.5, 15.5, Math.max(0, kp - .25))]);
+        P.forEach(([x2, y2], i) => { ctx.globalAlpha = .35; dot(F.X(x2), F.Y(y2), F.u*.2, '#ffd23f', false); ctx.globalAlpha = 1; });
+        if (T >= K.bug){ const kb = back(clamp((T - K.bug)/.5)); ctx.save(); ctx.translate(rx, F.Y(12)); ctx.scale(kb, kb); ptext('?!', 0, 0, Math.max(18, F.u*1.2), '#ff5a6e'); ctx.restore(); }
+        if (T >= K.tunnel){ const kt = clamp((T - K.tunnel)/.6); ctx.globalAlpha = kt; ptext('EFFET', rx, F.Y(6), Math.max(9, F.u*.42), '#ff5a6e'); ptext('TUNNEL', rx, F.Y(5.2), Math.max(9, F.u*.42), '#ff5a6e'); ctx.globalAlpha = 1; } }
+      return panel(T); }
+    drawField(F, T, (() => { const b = DEMO.slice(); b[3] = 0; b[4] = T >= K.fix[0] + .55 ? 0 : 1; b[3] = T >= K.fix[0] + .55 ? 0 : 1; return b; })(), 3.2, 1, 1240); axes(F, 1);
+    // 4. entre l'image 1 et l'image 2
+    if (T < K.fix[0]){ const kb = clamp((T - K.between)/1.2); coordPt(F, 5.6, 7.5, '#ffd23f', 't = 0', 1); ctx.globalAlpha = .5; dot(F.X(8), F.Y(13.5), F.u*.22, '#ffd23f', false); ctx.globalAlpha = 1; label(F.X(8) - F.u*1.8, F.Y(13.5) - F.u*.4, 't = 1/60 s', css('--tt'), 12);
+      ctx.strokeStyle = '#ffd23f'; ctx.lineWidth = 3; glowOn('#ffd23f', 8); ctx.beginPath(); ctx.moveTo(F.X(5.6), F.Y(7.5)); ctx.lineTo(F.X(lerp(5.6, 8, kb)), F.Y(lerp(7.5, 13.5, kb))); ctx.stroke(); glowOff();
+      if (T >= K.yt && T < K.eq[0]){ const tv = (.5 - .5*Math.cos((T - K.yt)*1.3))/60, yy = 7.5 + 360*tv, xx = 5.6 + 144*tv; coordPt(F, xx, yy, '#fff', '(' + xx.toFixed(1).replace('.', ',') + ' ; ' + yy.toFixed(1).replace('.', ',') + ')', -1); }
+      if (T >= K.eq[0]){ ctx.setLineDash([5, 5]); ctx.strokeStyle = '#ff5a6e'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(F.X(0), F.Y(11)); ctx.lineTo(F.X(FW), F.Y(11)); ctx.stroke(); ctx.setLineDash([]); label(rx, F.Y(11), 'y = 11', '#ff5a6e', 12); }
+      if (T >= K.xt){ const ki = back(clamp((T - K.xt)/.6)); ctx.globalAlpha = Math.min(1, ki); coordPt(F, 7, 11, '#6dff94', T >= K.impact ? 'choc en (7 ; 11)' : '', -1); ctx.globalAlpha = 1; } }
+    // 5. corrigé : la balle rapide casse la brique
+    else { const k = clamp((T - K.fix[0])/1.2);
+      if (k < .45){ const kk = k/.45; ball(F, lerp(3.2, 7, kk), lerp(1.5, 11, kk), '#ffd23f', 1); } else { const kk = (k - .45)/.55; ball(F, lerp(7, 9.4, kk), lerp(11, 5, kk), '#ffd23f', 1); shards(F, 7, 11.3, clamp((k - .45)*3), '#ff5a6e'); }
+      if (k >= .45){ const kc = back(clamp((T - K.fix[0] - .6)/.5)); ctx.save(); ctx.translate(rx, F.Y(11)); ctx.scale(kc, kc); ptext('+10', 0, 0, Math.max(10, F.u*.5), '#6dff94'); ctx.restore(); }
+      if (T >= K.real){ const kr = clamp((T - K.real)/.6); ctx.globalAlpha = kr; label((a.x0 + a.x1)/2 + aw*.18, F.Y(4), 'détection de collision continue', '#3ee6ff', 13); ctx.globalAlpha = 1; } }
+    panel(T);
+  }
+  function panel(T){
+    const part = T < K.photos ? null : T < K.bonus ? 'A' : T < K.between ? 'A2' : 'B';
+    const cOp = part ? clamp((T - K.photos)/.6) : 0; card.style.opacity = cOp; card.style.transform = 'translateY(' + (1-cOp)*10 + 'px)';
+    ['A', 'A2', 'B'].forEach(p => $('s' + p).style.display = part === p ? '' : 'none');
+    if (part === 'A'){ $('a0').style.opacity = clamp((T - K.slowSnap[0])/.5); $('a1').style.opacity = clamp((T - K.hit)/.5); }
+    if (part === 'A2'){ for (let i=0;i<3;i++) $('f' + i).style.opacity = clamp((T - K.fastSnap[i])/.5); $('f3').style.opacity = clamp((T - K.tunnel)/.5); }
+    if (part === 'B'){ [['b0', K.yt], ['b0b', K.yt], ['b1', K.eq[0]], ['b2', K.eq[1]], ['b3', K.xt], ['b4', K.impact]].forEach(([id, t0]) => $(id).style.opacity = clamp((T - t0)/.5)); }
+    let ci = -1; caps.forEach((c,i) => { if (T >= c[0]) ci = i; });
+    if (ci !== capIdx){ capIdx = ci; captxt.innerHTML = ci >= 0 ? caps[ci][1] : ''; }
+    capEl.style.opacity = (ci >= 0 && caps[ci][1]) ? clamp((T - caps[ci][0])/.35) : 0;
+  }
+  if (REC){ window.renderAt = T => { resize(); renderAt(T); }; window.END = END; return; }
+
+  // ---------- son (style « puce » rétro) ----------
+  const AU = { ctx:null, on:false, master:null, noise:null };
+  function auInit(){ const C = new (window.AudioContext || window.webkitAudioContext)(); const comp = C.createDynamicsCompressor(); comp.connect(C.destination);
+    const m = C.createGain(); m.gain.value = 0; m.connect(comp); AU.ctx = C; AU.master = m; }
+  function tone(f, vol, dur, type, delay){ const C = AU.ctx, t = C.currentTime + (delay||0), o = C.createOscillator(), g = C.createGain(); o.type = type || 'square'; o.frequency.value = f;
+    g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(Math.max(vol, .0002), t+.005); g.gain.exponentialRampToValueAtTime(.0001, t+dur); o.connect(g); g.connect(AU.master); o.start(t); o.stop(t+dur+.05); return o; }
+  const midi = mm => 440*Math.pow(2,(mm-69)/12);
+  const blip = (n, v) => tone(midi(n), v || .06, .09, 'square');
+  const jingle = (ns, v) => ns.forEach((n, i) => tone(midi(n), v || .06, .14, 'square', i*.09));
+  const FX = [[.3, () => jingle([72, 76, 79, 84])], [K.bonus, () => jingle([79, 84, 88, 91], .05)], [K.pass0[0], () => { const o = tone(300, .06, .5, 'square'); o.frequency.exponentialRampToValueAtTime(1600, AU.ctx.currentTime + .45); }], [K.pass0[1], () => jingle([79, 74, 70], .07)], [K.pass[0], () => { const o = tone(300, .06, .5, 'square'); o.frequency.exponentialRampToValueAtTime(1600, AU.ctx.currentTime + .45); }], [K.bug, () => jingle([79, 74, 70], .07)], [K.photos, () => blip(84)], [K.hit, () => jingle([72, 79], .05)], [K.brk, () => jingle([84, 91], .04)], [K.fastSnap[0], () => blip(55)],
+    [K.fastSnap[0], () => blip(79)], [K.fastSnap[1], () => blip(79)], [K.tunnel, () => jingle([60, 55, 50], .07)], [K.eq[0], () => blip(76)], [K.eq[1], () => jingle([72, 79, 84])], [K.impact, () => jingle([72, 76, 79, 84, 88], .06)], [K.fix[0] + .55, () => jingle([84, 91], .04)], [K.axes, () => blip(72)], [K.fastSnap[2], () => blip(79)], [K.concl[0], () => jingle([60, 64, 67, 72])]];
+  // bruits de rebond pendant la partie
+  (() => { let prev = PLAY[0][3].reduce((s, b) => s + b, 0); for (let f=1; f<PLAY.length; f++){ const n = PLAY[f][3].reduce((s, b) => s + b, 0); if (n < prev) FX.push([K.play[0] + f/60, () => blip(76 + (f % 5)*2, .04)]); prev = n; } })();
+  function audioTick(a, b){ if (!AU.on || b <= a) return; FX.forEach(([tm, fn]) => { if (tm > a && tm <= b) fn(); });
+    if (b > 4 && b < END - 2){ for (let i=Math.floor(a/.25)+1;i<=Math.floor(b/.25);i++){ const seq = [60, 67, 64, 67, 62, 69, 65, 69]; tone(midi(seq[i%8]), .012, .1, 'square'); } } }
+  function masterTo(v){ if (!AU.ctx) return; const t = AU.ctx.currentTime; AU.master.gain.cancelScheduledValues(t); AU.master.gain.setTargetAtTime(v, t, .15); }
+
+  // ---------- voix off ----------
+  const VO = { on:false, busy:false, until:0, voice:null, supported:'speechSynthesis' in window };
+  function pickVoice(){ if (!VO.supported) return; const vs = speechSynthesis.getVoices().filter(v => /^fr/i.test(v.lang)); if (!vs.length) return;
+    const score = v => (/natural|online|neural/i.test(v.name) ? 8 : 0) + (/google/i.test(v.name) ? 4 : 0) + (/fr-CH/i.test(v.lang) ? 2 : 0) + (/fr-FR/i.test(v.lang) ? 1 : 0) + (v.localService ? 0 : 1);
+    VO.voice = vs.sort((a,b) => score(b) - score(a))[0]; }
+  if (VO.supported){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+  function say(text){ if (!VO.supported) return; speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = VO.voice ? VO.voice.lang : 'fr-FR'; if (VO.voice) u.voice = VO.voice; u.rate = .97;
+    u.onstart = () => { VO.busy = true; if (AU.on) masterTo(.45); }; u.onend = u.onerror = () => { VO.busy = false; if (AU.on && playing) masterTo(.9); };
+    VO.busy = true; VO.until = performance.now() + (text.length*.085/.97 + 2)*1000; speechSynthesis.speak(u); }
+  function hush(){ if (VO.supported) speechSynthesis.cancel(); VO.busy = false; }
+  function voiceTick(a, b){ if (!VO.on || b <= a) return; for (const [tm, txt] of VOICE){ if (tm > a && tm <= b) say(txt); } }
+  function holdForVoice(prev, next){ if (!VO.on || !VO.busy || performance.now() > VO.until) return next; for (const [tm] of VOICE){ if (tm > prev && tm <= next) return Math.max(prev, tm - .001); } return next; }
+
+  // ---------- commandes ----------
+  let T = 0, playing = true, last = performance.now();
+  const pauseBtn = $('pause'), replayBtn = $('replay'), soundBtn = $('sound'), voiceBtn = $('voice'), seekEl = $('seek'), clockEl = $('clock');
+  pauseBtn.addEventListener('click', () => { if (T >= END){ T = 0; playing = true; hush(); } else playing = !playing; pauseBtn.textContent = playing ? 'Pause' : 'Lecture';
+    if (VO.supported){ if (playing) speechSynthesis.resume(); else speechSynthesis.pause(); } if (AU.on) masterTo(playing ? .9 : 0); });
+  replayBtn.addEventListener('click', () => { hush(); T = -0.001; playing = true; pauseBtn.textContent = 'Pause'; if (AU.on) masterTo(.9); });
+  soundBtn.addEventListener('click', () => { if (!AU.ctx) auInit(); AU.ctx.resume(); AU.on = !AU.on; soundBtn.textContent = AU.on ? 'Couper le son' : 'Activer le son'; soundBtn.setAttribute('aria-pressed', AU.on); masterTo(AU.on && playing ? .9 : 0); });
+  voiceBtn.addEventListener('click', () => { if (!VO.supported){ voiceBtn.textContent = 'Voix indisponible'; return; }
+    VO.on = !VO.on; voiceBtn.textContent = VO.on ? 'Couper la voix' : 'Activer la voix'; voiceBtn.setAttribute('aria-pressed', VO.on);
+    if (!VO.on){ hush(); if (AU.on && playing) masterTo(.9); return; } pickVoice();
+    if (T < .3){ say(VOICE[0][1]); T = .301; } else { let cur = null; for (const v of VOICE){ if (v[0] <= T) cur = v; } if (cur && T - cur[0] < 3) say(cur[1]); } });
+  seekEl.max = END;
+  let skipAudio = false, dragging = false;
+  const mmss = x => { x = Math.max(0, Math.round(x)); return Math.floor(x/60) + ':' + String(x%60).padStart(2,'0'); };
+  function jump(sec){ T = Math.max(0, Math.min(END, sec)); skipAudio = true; hush(); if (T >= END){ playing = false; pauseBtn.textContent = 'Lecture'; } }
+  const seekBox = seekEl.parentElement;
+  seekEl.addEventListener('pointerdown', () => { dragging = true; seekBox.classList.add('drag'); });
+  window.addEventListener('pointerup', () => { if (dragging) seekEl.blur(); dragging = false; seekBox.classList.remove('drag'); });
+  seekEl.addEventListener('input', () => jump(parseFloat(seekEl.value)));
+  document.addEventListener('keydown', e => { if (e.target.tagName === 'BUTTON' && (e.key === ' ' || e.key === 'Enter')) return; if (e.target === seekEl && e.key.startsWith('Arrow')) return;
+    if (e.key === ' '){ e.preventDefault(); pauseBtn.click(); } else if (e.key === 'ArrowLeft') jump(T - 5); else if (e.key === 'ArrowRight') jump(T + 5); });
+  function loop(now){
+    const dt = Math.min(.1, (now-last)/1000); last = now; const prevT = T;
+    if (playing){ T = holdForVoice(prevT, Math.min(END, T + dt)); if (T >= END){ playing = false; pauseBtn.textContent = 'Lecture'; } }
+    if (skipAudio) skipAudio = false; else { audioTick(prevT, T); voiceTick(prevT, T); }
+    if (!dragging) seekEl.value = T.toFixed(1); clockEl.textContent = mmss(T) + ' / ' + mmss(END);
+    renderAt(Math.max(0, T)); requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
+</script>
+<script>if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js');</script>
+</body>
+</html>

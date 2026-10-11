@@ -115,6 +115,20 @@ if (/Edg\//.test(navigator.userAgent)) document.getElementById('voiceHint').styl
    ============================================================ */
 const ANNEES = [
   {
+    titre: "1ʳᵉ année",
+    chapitres: [
+      {
+        titre: "Équations du 1er degré",
+        description: "Résoudre une équation, et à quoi ça sert vraiment : jeux vidéo et industrie.",
+        videos: [
+          { titre: "Résoudre une équation", texte: "La balance : faire la même opération des deux côtés, x des deux côtés, cas particuliers et solutions négatives.", lien: "equation-balance.html", image: "thumb-balance.jpg", duree: "2 min 35", tag: "theorie" },
+          { titre: "Application : le casse-briques", texte: "Pourquoi une balle rapide traverse les briques, et comment une équation du 1er degré corrige ce bug.", lien: "casse-briques.html", image: "thumb-casse.jpg", duree: "1 min 50", tag: "application" },
+          { titre: "Application : la boucle 4–20 mA", texte: "Le langage des usines : retrouver la pression à partir du courant envoyé par le capteur.", lien: "boucle-4-20.html", image: "thumb-boucle.jpg", duree: "1 min 36", tag: "application" }
+        ]
+      }
+    ]
+  },
+  {
     titre: "2ᵉ année",
     chapitres: [
       {
@@ -189,7 +203,7 @@ ANNEES.forEach((an, ai) => {
   ys.innerHTML = '<div class="year-head"><span class="pill"></span><h2 id="an' + ai + '">' + esc(an.titre) + '</h2><span class="line"></span></div>';
   an.chapitres.forEach((ch, ci) => {
     const sec = document.createElement('div'); sec.className = 'chapter';
-    sec.innerHTML = '<div class="chap-head"><div><div class="chap-num">Chapitre ' + (ci + 1) + '</div><h3>' + esc(ch.titre) + '</h3><p>' + esc(ch.description) + '</p></div>'
+    sec.innerHTML = '<div class="chap-head"><div><h3>' + esc(ch.titre) + '</h3><p>' + esc(ch.description) + '</p></div>'
       + '<div style="display:flex; flex-wrap:wrap; gap:8px">' + (ch.series || []).map(x => '<a class="series" href="' + x.lien + '">' + esc(x.texte) + '</a>').join('') + '</div></div>';
     const grid = document.createElement('div'); grid.className = 'grid';
     ch.videos.forEach((v, i) => {

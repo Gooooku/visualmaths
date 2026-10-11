@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icone.svg">
+<link rel="apple-touch-icon" href="icone.svg">
+<meta name="theme-color" content="#0b1024">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Résoudre une équation du 1er degré</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link id="gf" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&family=STIX+Two+Text:ital,wght@0,500;1,500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg1:#070b1c; --bg2:#151b46; --ink:#eef1ff; --muted:#8e97c4; --glass:rgba(255,255,255,.06); --stroke:rgba(255,255,255,.14);
+  --bip:#3ee6ff; --zap:#ff4f6d; --zip:#c77dff; --xb:#c77dff; --un:#ffd23f; --err:#ff5a6e; --star:#ffd23f; --x:#ff7a85; --y:#5ee3a1; --wall:#2f5bff; --ok:#6dff94;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light){ :root:not([data-theme="dark"]){ --glass:rgba(255,255,255,.08); } }
+:root[data-theme="light"]{ --glass:rgba(255,255,255,.08); }
+:root{ box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); }
+*,*::before,*::after{ box-sizing:inherit; }
+html{ height:100%; scroll-padding-top:env(safe-area-inset-top,0px); }
+body{ height:100%; margin:0; background:var(--bg1); color:var(--ink); overflow:hidden; font-family:"Manrope", system-ui, -apple-system, "Segoe UI", sans-serif; }
+.m{ font-family:"STIX Two Text","Cambria Math","Times New Roman",serif; font-style:italic; font-weight:500; }
+.cB{ color:var(--bip); } .cZ{ color:var(--zap); } .cI{ color:var(--zip); } .cS{ color:var(--star); } .cx{ color:var(--x); } .cy{ color:var(--y); } .cOk{ color:var(--ok); } .mu{ color:var(--muted); }
+.stage{ position:relative; width:100%; height:100%; overflow:hidden; background:radial-gradient(120% 90% at 70% 15%, var(--bg2) 0%, var(--bg1) 62%); --u:min(1vw, 1.78vh); }
+canvas{ position:absolute; inset:0; width:100%; height:100%; display:block; }
+.title{ position:absolute; inset:0; display:grid; place-content:center; text-align:center; pointer-events:none; }
+.title h1{ margin:0; font-weight:800; font-size:calc(var(--u)*5.4); letter-spacing:-.02em; line-height:1.05; }
+.title p{ margin:calc(var(--u)*1.4) 0 0; font-size:calc(var(--u)*2.2); color:var(--muted); font-weight:600; }
+.caption{ position:absolute; left:calc(var(--u)*4); bottom:calc(var(--u)*4.5 + 20px); max-width:min(46%, 30em); pointer-events:none; font-size:calc(var(--u)*2.1); font-weight:700; line-height:1.25; }
+.caption > span{ display:block; }
+.caption .bar{ display:block; width:calc(var(--u)*6); height:calc(var(--u)*.5); border-radius:99px; margin-bottom:calc(var(--u)*1.2); background:linear-gradient(90deg, var(--bip), var(--zip), var(--zap)); }
+.card{ position:absolute; right:calc(var(--u)*3.5); bottom:calc(var(--u)*3.5 + 20px); width:21em; padding:calc(var(--u)*1.8) calc(var(--u)*2.2); font-size:calc(var(--u)*1.7);
+  background:var(--glass); border:1px solid var(--stroke); border-radius:calc(var(--u)*1.8); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); }
+.card h3{ margin:0 0 .5em; font-size:.8em; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:800; }
+.sec{ display:grid; gap:.35em; }
+.line{ white-space:nowrap; font-variant-numeric:tabular-nums; }
+.big{ font-size:1.25em; }
+.hr{ height:1px; background:var(--stroke); margin:.6em 0; }
+.num{ display:inline-block; min-width:1.6em; text-align:right; }
+table.cmp{ border-collapse:collapse; width:100%; font-variant-numeric:tabular-nums; }
+table.cmp td, table.cmp th{ padding:.25em .3em; text-align:left; white-space:nowrap; }
+table.cmp th{ font-size:.82em; color:var(--muted); font-weight:700; }
+.ctrl{ position:absolute; right:calc(var(--u)*3.5); top:calc(var(--u)*3); display:flex; gap:8px; }
+.ctrl button, .ctrl a.home{ font:inherit; font-weight:700; font-size:14px; padding:9px 15px; border-radius:99px; border:1px solid var(--stroke); background:var(--glass); color:var(--ink); cursor:pointer; backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); }
+.ctrl button:focus-visible{ outline:3px solid var(--bip); outline-offset:2px; }
+.seek{ position:absolute; left:0; right:0; bottom:0; padding:28px calc(var(--u)*3.5) calc(var(--u)*1.2) calc(var(--u)*4); display:flex; align-items:center; gap:14px; transition:opacity .25s; }
+.seek input{ flex:1; accent-color:var(--bip); height:22px; cursor:pointer; }
+.seek span{ font-size:14px; font-weight:600; color:var(--muted); font-variant-numeric:tabular-nums; min-width:6.5em; text-align:right; }
+@media (hover: hover){ .seek{ opacity:0; } .seek:hover, .seek:has(input:focus-visible), .seek.drag{ opacity:1; } }
+.rec .ctrl, .rec .seek{ display:none; } .rec *{ transition:none !important; }
+@media (max-aspect-ratio: 1/1){
+  .stage{ --u:min(1.9vw, 1.2vh); }
+  .card{ left:calc(var(--u)*2.5); right:calc(var(--u)*2.5); top:calc(var(--u)*2.5); bottom:auto; width:auto; font-size:calc(var(--u)*1.7); }
+  .ctrl{ left:calc(var(--u)*2.5); right:calc(var(--u)*2.5); top:auto; bottom:calc(var(--u)*2 + 34px); flex-wrap:wrap; gap:6px; }
+  .ctrl button, .ctrl a.home{ padding:7px 11px; font-size:13px; }
+  .caption{ left:calc(var(--u)*2.5); right:calc(var(--u)*2.5); max-width:none; bottom:calc(var(--u)*2 + 90px); font-size:calc(var(--u)*2.6); }
+  .seek{ padding:10px calc(var(--u)*3) calc(var(--u)*2); }
+}
+.cX{ color:var(--xb); } .cU{ color:var(--un); } .cE{ color:var(--err); }
+.card .line.big{ font-size:1.2em; }
+.eq{ display:grid; grid-template-columns:1fr auto; gap:.1em .8em; align-items:baseline; font-variant-numeric:tabular-nums; } .eq .op{ color:var(--muted); font-size:.86em; border-left:1.5px solid rgba(255,255,255,.3); padding-left:.5em; }
+.ctrl a.home{ text-decoration:none; display:inline-flex; align-items:center; }
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <canvas id="c" aria-label="Animation : résoudre une équation du premier degré avec une balance à plateaux, en faisant la même opération des deux côtés"></canvas>
+  <div class="title" id="title"><div><h1>Résoudre une équation</h1><p>Équations du 1<sup>er</sup> degré · la balance</p></div></div>
+  <div class="card" id="card" style="opacity:0">
+    <div class="sec" id="sA" style="display:none">
+      <h3>Résoudre 3x + 5 = 17</h3>
+      <div class="eq">
+        <div id="A0" style="display:contents"><span>3<span class="m cX">x</span> + 5 = 17</span><span class="op">− 5</span></div>
+        <div id="A1" style="display:contents"><span>3<span class="m cX">x</span> = 12</span><span class="op">: 3</span></div>
+        <div id="A2" style="display:contents"><span><b><span class="m cX">x</span> = 4</b></span><span class="op"></span></div>
+      </div>
+      <div class="hr"></div>
+      <div class="line" id="Av">vérification : 3 · 4 + 5 = 17 ✓</div>
+    </div>
+    <div class="sec" id="sB" style="display:none">
+      <h3>x des deux côtés</h3>
+      <div class="eq">
+        <div id="B0" style="display:contents"><span>5<span class="m cX">x</span> + 2 = 2<span class="m cX">x</span> + 14</span><span class="op">− 2x</span></div>
+        <div id="B1" style="display:contents"><span>3<span class="m cX">x</span> + 2 = 14</span><span class="op">− 2</span></div>
+        <div id="B2" style="display:contents"><span>3<span class="m cX">x</span> = 12</span><span class="op">: 3</span></div>
+        <div id="B3" style="display:contents"><span><b><span class="m cX">x</span> = 4</b></span><span class="op"></span></div>
+      </div>
+    </div>
+    <div class="sec" id="sC" style="display:none">
+      <h3>« Passer de l’autre côté »</h3>
+      <div class="eq">
+        <div id="C0" style="display:contents"><span>3<span class="m cX">x</span> + 2 = 14</span><span class="op"></span></div>
+        <div id="C1" style="display:contents"><span>3<span class="m cX">x</span> + 2 − 2 = 14 − 2</span><span class="op">− 2</span></div>
+        <div id="C2" style="display:contents"><span>3<span class="m cX">x</span> = 14 − 2</span><span class="op"></span></div>
+      </div>
+      <div class="line mu" id="Cn" style="white-space:normal; margin-top:.4em">Le +2 « passe » en −2 parce qu’on a retiré 2 des deux côtés.</div>
+    </div>
+    <div class="sec" id="sD" style="display:none">
+      <h3>Cas particuliers</h3>
+      <div class="eq">
+        <div id="D0" style="display:contents"><span><span class="m cX">x</span> + 3 = <span class="m cX">x</span> + 5</span><span class="op">− x</span></div>
+        <div id="D1" style="display:contents"><span>3 = 5</span><span class="op"><span class="cE">faux</span></span></div>
+        <div id="D2" style="display:contents"><span>2<span class="m cX">x</span> + 4 = 2(<span class="m cX">x</span> + 2)</span><span class="op"></span></div>
+        <div id="D3" style="display:contents"><span>2<span class="m cX">x</span> + 4 = 2<span class="m cX">x</span> + 4</span><span class="op">− 2x</span></div>
+        <div id="D4" style="display:contents"><span>4 = 4</span><span class="op"><span style="color:var(--ok)">vrai</span></span></div>
+      </div>
+      <div class="line mu" id="Dn" style="white-space:normal">pas de solution · tous les nombres sont solutions</div>
+    </div>
+    <div class="sec" id="sE" style="display:none">
+      <h3>Avec un résultat négatif</h3>
+      <div class="eq">
+        <div id="E0" style="display:contents"><span>2<span class="m cX">x</span> + 7 = 1</span><span class="op">− 7</span></div>
+        <div id="E1" style="display:contents"><span>2<span class="m cX">x</span> = −6</span><span class="op">: 2</span></div>
+        <div id="E2" style="display:contents"><span><b><span class="m cX">x</span> = −3</b></span><span class="op"></span></div>
+      </div>
+      <div class="hr"></div>
+      <div class="line" id="Ev">vérification : 2 · (−3) + 7 = 1 ✓</div>
+    </div>
+  </div>
+  <div class="caption" id="caption" style="opacity:0"><i class="bar"></i><span id="captxt"></span></div>
+  <div class="ctrl"><a class="home" href="index.html" aria-label="Retour à l'accueil">← Accueil</a><button id="voice" aria-pressed="false">Activer la voix</button><button id="sound" aria-pressed="false">Activer le son</button><button id="pause">Pause</button><button id="replay">Rejouer</button></div>
+  <div class="seek"><input type="range" id="seek" min="0" max="160" step="0.1" value="0" aria-label="Position dans l'animation"><span id="clock">0:00 / 2:40</span></div>
+</div>
+<script>
+(function(){
+  const REC = /[?&]record/.test(location.search); if (REC) document.body.classList.add('rec');
+  const $ = id => document.getElementById(id);
+  const clamp = x => Math.max(0, Math.min(1, x));
+  const ease = x => x<.5 ? 4*x*x*x : 1-Math.pow(-2*x+2,3)/2;
+  const lerp = (a,b,k) => a + (b-a)*k;
+  const back = x => { const c=1.7, c3=c+1; return 1 + c3*Math.pow(x-1,3) + c*Math.pow(x-1,2); };
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+  // ---------- chronologie ----------
+  const K = { riddle:4, eq:9, bal:13.5, tilt:19, untilt:22.5, rule:25, s1:[32, 37, 41, 45.5, 49.5], both:[54, 58, 62.5, 67, 71], pass:[76, 80, 84.5, 88.5], sp1:[93.5, 97.5, 101], sp2:[106, 110, 114, 118], neg:[123, 127, 131, 135, 139], concl:[143.5, 148] };
+  const END = 155;
+  // contenu des plateaux pour chaque instant : [boîtes, cubes] à gauche et à droite, plus l'animation en cours
+  const XV = 4;
+  function plates(T){
+    if (T < K.s1[0]) return { L:[3, 5], R:[0, 17], xv:XV };
+    if (T < K.s1[1]) return { L:[3, 0], R:[0, 12], rem:{ L:[0, 5], R:[0, 5], t:clamp((T - K.s1[0] - .3)/1.2) }, xv:XV };
+    if (T < K.s1[2]) return { L:[3, 0], R:[0, 12], xv:XV };
+    if (T < K.s1[3]) return { L:[3, 0], R:[0, 12], div:{ n:3, t:clamp((T - K.s1[2] - .4)/1.4) }, xv:XV };
+    if (T < K.both[0]) return { L:[1, 0], R:[0, 4], xv:XV };
+    if (T < K.both[1]) return { L:[5, 2], R:[2, 14], xv:XV };
+    if (T < K.both[2]) return { L:[3, 2], R:[0, 14], rem:{ L:[2, 0], R:[2, 0], t:clamp((T - K.both[1] - .3)/1.2) }, xv:XV };
+    if (T < K.both[3]) return { L:[3, 0], R:[0, 12], rem:{ L:[0, 2], R:[0, 2], t:clamp((T - K.both[2] - .3)/1.2) }, xv:XV };
+    if (T < K.both[4]) return { L:[3, 0], R:[0, 12], div:{ n:3, t:clamp((T - K.both[3] - .4)/1.4) }, xv:XV };
+    if (T < K.pass[0]) return { L:[1, 0], R:[0, 4], xv:XV };
+    if (T < K.sp1[0]) return null;
+    if (T < K.sp1[1]) return { L:[1, 3], R:[1, 5], xv:XV + Math.sin(T*1.5)*2.5 };
+    if (T < K.sp2[0]) return { L:[0, 3], R:[0, 5], rem:{ L:[1, 0], R:[1, 0], t:clamp((T - K.sp1[1] - .3)/1.2) }, xv:XV };
+    return { L:[2, 4], R:[2, 4], xv:3.5 + 2.5*Math.sin((T - K.sp2[0])*1.2) };
+  }
+  const caps = [
+    [0.3, ''],
+    [K.riddle, '«\u00a0Je pense à un nombre. Je le multiplie par 3, j’ajoute 5… et je trouve 17. Quel est ce nombre\u00a0?\u00a0»'],
+    [K.eq, 'C’est une <b>équation</b>\u00a0: 3<span class="m cX">x</span> + 5 = 17. Résoudre, c’est trouver la valeur de <span class="m cX">x</span> qui rend l’égalité vraie.'],
+    [K.bal, 'Imaginons une <b>balance</b>. À gauche\u00a0: 3 boîtes <span class="m cX">x</span> et 5 cubes. À droite\u00a0: 17 cubes. Elle est en équilibre.'],
+    [K.tilt, 'Si on ajoute un cube d’un seul côté, la balance penche\u00a0: l’égalité n’est plus vraie\u00a0!'],
+    [K.rule, '<b>La règle d’or</b>\u00a0: on peut faire la même opération des deux côtés. Ajouter, retirer, multiplier ou diviser par le même nombre (non nul).'],
+    [K.s1[0], 'On retire 5 cubes de chaque côté\u00a0: la balance reste en équilibre.'],
+    [K.s1[1], 'Il reste\u00a0: 3<span class="m cX">x</span> = 12.'],
+    [K.s1[2], 'On partage chaque plateau en 3 parts égales, et on en garde une\u00a0: on divise par 3.'],
+    [K.s1[3], 'Une boîte pèse autant que 4 cubes\u00a0: <b><span class="m cX">x</span> = 4</b>.'],
+    [K.s1[4], 'On vérifie toujours\u00a0: 3 · 4 + 5 = 17 ✓'],
+    [K.both[0], 'Et si <span class="m cX">x</span> est des deux côtés\u00a0? 5<span class="m cX">x</span> + 2 = 2<span class="m cX">x</span> + 14.'],
+    [K.both[1], 'On retire 2 boîtes de chaque côté\u00a0: 3<span class="m cX">x</span> + 2 = 14.'],
+    [K.both[2], 'On retire 2 cubes de chaque côté\u00a0: 3<span class="m cX">x</span> = 12.'],
+    [K.both[3], 'On divise par 3\u00a0: <b><span class="m cX">x</span> = 4</b>.'],
+    [K.pass[0], 'On entend souvent\u00a0: «\u00a0le +2 passe de l’autre côté et devient −2\u00a0». Pourquoi\u00a0?'],
+    [K.pass[1], 'En réalité, on retire 2 des <b>deux</b> côtés…'],
+    [K.pass[2], '… à gauche, +2 − 2 s’annulent. Il ne reste que −2 à droite\u00a0: d’où l’impression que le 2 a «\u00a0changé de côté\u00a0».'],
+    [K.pass[3], 'Ce n’est pas une nouvelle règle\u00a0: c’est la règle d’or, écrite en raccourci.'],
+    [K.sp1[0], 'Cas particulier\u00a0: <span class="m cX">x</span> + 3 = <span class="m cX">x</span> + 5. Quelle que soit la valeur de <span class="m cX">x</span>, la balance penche.'],
+    [K.sp1[1], 'On retire <span class="m cX">x</span> des deux côtés\u00a0: 3 = 5. C’est faux\u00a0!'],
+    [K.sp1[2], 'Cette équation n’a <b>aucune solution</b>.'],
+    [K.sp2[0], 'Autre cas\u00a0: 2<span class="m cX">x</span> + 4 = 2(<span class="m cX">x</span> + 2). Quelle que soit la valeur de <span class="m cX">x</span>, la balance reste en équilibre.'],
+    [K.sp2[1], 'En développant\u00a0: 2<span class="m cX">x</span> + 4 = 2<span class="m cX">x</span> + 4. On retire 2<span class="m cX">x</span>\u00a0: 4 = 4. Toujours vrai\u00a0!'],
+    [K.sp2[2], '<b>Tous les nombres</b> sont solutions.'],
+    [K.neg[0], 'Et 2<span class="m cX">x</span> + 7 = 1\u00a0? Ici, la solution est négative\u00a0: une balance ne peut pas peser −3 kg…'],
+    [K.neg[1], '… mais l’écriture, elle, fonctionne toujours, avec exactement la même règle. On retire 7\u00a0: 2<span class="m cX">x</span> = −6.'],
+    [K.neg[2], 'On divise par 2\u00a0: <b><span class="m cX">x</span> = −3</b>.'],
+    [K.neg[3], 'Vérification\u00a0: 2 · (−3) + 7 = −6 + 7 = 1 ✓'],
+    [K.concl[0], 'Pour résoudre\u00a0: on isole <span class="m cX">x</span> en faisant <b>la même opération des deux côtés</b>, étape par étape.'],
+    [K.concl[1], 'Et on vérifie toujours la solution en la remplaçant dans l’équation de départ.']
+  ];
+  const VOICE = [
+    [0.3, "Résoudre une équation."],
+    [K.riddle, "Je pense à un nombre. Je le multiplie par trois, j'ajoute cinq… et je trouve dix-sept. Quel est ce nombre ?"],
+    [K.eq, "C'est une équation : trois x plus cinq égale dix-sept. Résoudre, c'est trouver la valeur de x qui rend l'égalité vraie."],
+    [K.bal, "Imaginons une balance. À gauche : trois boîtes x et cinq cubes. À droite : dix-sept cubes. Elle est en équilibre."],
+    [K.tilt, "Si on ajoute un cube d'un seul côté, la balance penche : l'égalité n'est plus vraie !"],
+    [K.rule, "La règle d'or : on peut faire la même opération des deux côtés. Ajouter, retirer, multiplier ou diviser par le même nombre, non nul."],
+    [K.s1[0], "On retire cinq cubes de chaque côté : la balance reste en équilibre."],
+    [K.s1[1], "Il reste : trois x égale douze."],
+    [K.s1[2], "On partage chaque plateau en trois parts égales, et on en garde une : on divise par trois."],
+    [K.s1[3], "Une boîte pèse autant que quatre cubes : x égale quatre."],
+    [K.s1[4], "On vérifie toujours : trois fois quatre plus cinq égale dix-sept."],
+    [K.both[0], "Et si x est des deux côtés ? Cinq x plus deux égale deux x plus quatorze."],
+    [K.both[1], "On retire deux boîtes de chaque côté : trois x plus deux égale quatorze."],
+    [K.both[2], "On retire deux cubes de chaque côté : trois x égale douze."],
+    [K.both[3], "On divise par trois : x égale quatre."],
+    [K.pass[0], "On entend souvent : le plus deux passe de l'autre côté et devient moins deux. Pourquoi ?"],
+    [K.pass[1], "En réalité, on retire deux des deux côtés…"],
+    [K.pass[2], "… à gauche, plus deux moins deux s'annulent. Il ne reste que moins deux à droite : d'où l'impression que le deux a changé de côté."],
+    [K.pass[3], "Ce n'est pas une nouvelle règle : c'est la règle d'or, écrite en raccourci."],
+    [K.sp1[0], "Cas particulier : x plus trois égale x plus cinq. Quelle que soit la valeur de x, la balance penche."],
+    [K.sp1[1], "On retire x des deux côtés : trois égale cinq. C'est faux !"],
+    [K.sp1[2], "Cette équation n'a aucune solution."],
+    [K.sp2[0], "Autre cas : deux x plus quatre égale deux fois, x plus deux. Quelle que soit la valeur de x, la balance reste en équilibre."],
+    [K.sp2[1], "En développant : deux x plus quatre égale deux x plus quatre. On retire deux x : quatre égale quatre. Toujours vrai !"],
+    [K.sp2[2], "Tous les nombres sont solutions."],
+    [K.neg[0], "Et deux x plus sept égale un ? Ici, la solution est négative : une balance ne peut pas peser moins trois kilos…"],
+    [K.neg[1], "… mais l'écriture, elle, fonctionne toujours, avec exactement la même règle. On retire sept : deux x égale moins six."],
+    [K.neg[2], "On divise par deux : x égale moins trois."],
+    [K.neg[3], "Vérification : deux fois moins trois, plus sept, égale un."],
+    [K.concl[0], "Pour résoudre : on isole x en faisant la même opération des deux côtés, étape par étape."],
+    [K.concl[1], "Et on vérifie toujours la solution en la remplaçant dans l'équation de départ."]
+  ];
+
+  // ---------- canevas ----------
+  const stage = $('stage'), cv = $('c'), ctx = cv.getContext('2d');
+  let W = 1, H = 1, DPR = 1;
+  function resize(){ DPR = REC ? 1 : Math.min(devicePixelRatio || 1, 2); W = stage.clientWidth; H = stage.clientHeight; cv.width = W*DPR; cv.height = H*DPR; ctx.setTransform(DPR, 0, 0, DPR, 0, 0); }
+  new ResizeObserver(resize).observe(stage); resize();
+  const portrait = () => W/H < 1;
+  function area(){ return portrait() ? {x0:W*.04, x1:W*.96, y0:H*.3, y1:H*.72} : {x0:W*.03, x1:W*.6, y0:H*.05, y1:H*.72}; }
+  function glowOn(color, b){ ctx.shadowColor = color; ctx.shadowBlur = b; } function glowOff(){ ctx.shadowBlur = 0; }
+  function roundRect(x, y, w, h, r){ ctx.beginPath(); ctx.moveTo(x+r, y); ctx.arcTo(x+w, y, x+w, y+h, r); ctx.arcTo(x+w, y+h, x, y+h, r); ctx.arcTo(x, y+h, x, y, r); ctx.arcTo(x, y, x+w, y, r); ctx.closePath(); }
+  function text(t, x, y, size, color, align, weight){ ctx.font = (weight || 700) + ' ' + size + 'px Manrope, system-ui, sans-serif'; ctx.fillStyle = color; ctx.textAlign = align || 'center'; ctx.textBaseline = 'middle'; ctx.fillText(t, x, y); }
+  function dot(x, y, r, color, glow){ r = Math.max(0, r); if (glow) glowOn(color, r*3); ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2); ctx.fill(); glowOff(); }
+  function grid(){ ctx.strokeStyle = 'rgba(90,120,255,.07)'; ctx.lineWidth = 1; const s = Math.max(28, W/40); for (let x = (W % s)/2; x < W; x += s){ ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); } for (let y = (H % s)/2; y < H; y += s){ ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); } }
+  const serif = sz => '500 ' + sz + 'px "STIX Two Text", "Cambria Math", "Times New Roman", serif';
+  function xBox(x, y, s, al, lbl){ ctx.save(); ctx.globalAlpha *= al; glowOn('#c77dff', 8); ctx.fillStyle = '#6a3fb0'; roundRect(x - s/2, y - s, s, s, s*.14); ctx.fill(); glowOff(); ctx.fillStyle = '#8a5fd0'; ctx.fillRect(x - s/2, y - s - s*.1, s, s*.14);
+    ctx.font = 'italic ' + serif(s*.55); ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(lbl || 'x', x, y - s*.46); ctx.restore(); }
+  function cube(x, y, s, al){ ctx.save(); ctx.globalAlpha *= al; glowOn('#ffd23f', 5); ctx.fillStyle = '#ffd23f'; roundRect(x - s/2, y - s, s, s, s*.15); ctx.fill(); glowOff(); ctx.fillStyle = 'rgba(255,255,255,.45)'; ctx.fillRect(x - s/2 + 2, y - s + 2, s - 4, s*.18); ctx.restore(); }
+
+  // ---------- la balance ----------
+  function balance(a, T, P, al){ const aw = a.x1 - a.x0, ah = a.y1 - a.y0, cx = (a.x0 + a.x1)/2, top = a.y0 + ah*.2, L = aw*.31, cs = Math.min(aw/28, ah/14), bs = cs*1.3;
+    let wl = P.L[0]*P.xv + P.L[1], wr = P.R[0]*P.xv + P.R[1]; if (P.extra) wl += P.extra; const ang = Math.max(-.22, Math.min(.22, (wr - wl)*.05));
+    ctx.save(); ctx.globalAlpha = al;
+    // pied
+    ctx.fillStyle = '#3a4268'; ctx.beginPath(); ctx.moveTo(cx - aw*.12, a.y1 - 8); ctx.lineTo(cx + aw*.12, a.y1 - 8); ctx.lineTo(cx + aw*.03, top + 8); ctx.lineTo(cx - aw*.03, top + 8); ctx.closePath(); ctx.fill(); ctx.fillStyle = '#5a648f'; roundRect(cx - aw*.14, a.y1 - 14, aw*.28, 10, 5); ctx.fill();
+    // fléau
+    const ex = [cx - Math.cos(ang)*L, top - Math.sin(ang)*L], ey = [cx + Math.cos(ang)*L, top + Math.sin(ang)*L];
+    ctx.strokeStyle = '#c9d2ff'; ctx.lineWidth = 6; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(ex[0], ex[1]); ctx.lineTo(ey[0], ey[1]); ctx.stroke(); ctx.lineCap = 'butt'; dot(cx, top, 9, '#ffd23f', true);
+    // aiguille d'équilibre
+    ctx.strokeStyle = Math.abs(ang) < .005 ? '#6dff94' : '#ff5a6e'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(cx, top); ctx.lineTo(cx + Math.sin(ang)*ah*.12, top - Math.cos(ang)*ah*.12); ctx.stroke();
+    // plateaux
+    const plate = (p, side, items) => { const px = p[0], py = p[1] + ah*.3; ctx.strokeStyle = 'rgba(201,210,255,.6)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(p[0], p[1]); ctx.lineTo(px - L*.42, py); ctx.moveTo(p[0], p[1]); ctx.lineTo(px + L*.42, py); ctx.stroke();
+      ctx.fillStyle = '#5a648f'; ctx.beginPath(); ctx.ellipse(px, py + 4, L*.46, 8, 0, 0, 7); ctx.fill(); ctx.fillStyle = '#8a95c4'; ctx.fillRect(px - L*.46, py - 1, L*.92, 4);
+      // objets : boîtes puis cubes, en rangées
+      const [nb, nc] = items, rem = P.rem ? (side ? P.rem.R : P.rem.L) : [0, 0], rt = P.rem ? P.rem.t : 0;
+      const totB = nb + rem[0], totC = nc + rem[1], perRow = 6; let idx = 0; const all = [];
+      for (let i=0;i<totB;i++) all.push(['b', i >= nb]); for (let i=0;i<totC;i++) all.push(['c', i >= nc]);
+      // les cubes retirés sont pris sur le dessus de la pile (fin de liste) : ordre déjà correct
+      const div = P.div;
+      all.forEach(([kind, gone], i) => { const row = Math.floor(i/perRow), col = i % perRow, nRow = Math.min(perRow, all.length - row*perRow), w = (kind === 'b' ? bs : cs)*1.12;
+        let x = px + (col - (nRow - 1)/2)*bs*1.08, y = py - 2 - row*bs*1.05, al2 = 1;
+        if (gone){ x += (side ? 1 : -1)*rt*L*.3; y -= rt*ah*.25; al2 = 1 - rt; }
+        if (div){ const n = all.length, g = Math.floor(i*div.n/n); if (g > 0) { al2 *= 1 - clamp((div.t - .5)*2); } }
+        if (al2 <= 0) return; if (kind === 'b') xBox(x, y, bs, al2, P.lbl); else cube(x, y, cs, al2); });
+      if (div && div.t > 0 && div.t < 1){ ctx.globalAlpha = al*Math.sin(div.t*Math.PI); ctx.setLineDash([4, 4]); ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; for (let g=1; g<div.n; g++){ const xx = px - L*.46 + g*L*.92/div.n; ctx.beginPath(); ctx.moveTo(xx, py + 6); ctx.lineTo(xx, py - bs*2.4); ctx.stroke(); } ctx.setLineDash([]); ctx.globalAlpha = al; } };
+    plate(ex, 0, P.L); plate(ey, 1, P.R);
+    ctx.restore(); return { ang }; }
+  function eqText(a, y, s, col, al, sz){ ctx.globalAlpha = al; ctx.font = 'italic ' + serif(sz); const w = ctx.measureText(s).width; ctx.fillStyle = 'rgba(12,18,48,.82)'; roundRect((a.x0 + a.x1)/2 - w/2 - 18, y - sz*.75, w + 36, sz*1.5, 12); ctx.fill(); ctx.fillStyle = col; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(s, (a.x0 + a.x1)/2, y); ctx.globalAlpha = 1; }
+
+  // ---------- rendu ----------
+  const titleEl = $('title'), card = $('card'), captxt = $('captxt'), capEl = $('caption');
+  let capIdx = -2;
+  function renderAt(T){
+    ctx.clearRect(0, 0, W, H); grid();
+    titleEl.style.opacity = clamp((T-.2)/.6)*(1 - clamp((T-3.4)/.6));
+    const a = area(), aw = a.x1 - a.x0, ah = a.y1 - a.y0, cx = (a.x0 + a.x1)/2, sz = Math.max(22, aw*.05);
+    // énigme puis équation
+    if (T >= K.riddle && T < K.bal){ const k = clamp((T - K.riddle)/.6)*(1 - clamp((T - K.bal + .5)/.5)); ctx.globalAlpha = k;
+      ['× 3', '+ 5', '= 17'].forEach((t, i) => { const kk = back(clamp((T - K.riddle - .8 - i*.8)/.5)); ctx.save(); ctx.translate(a.x0 + aw*(.25 + i*.25), a.y0 + ah*.3); ctx.scale(kk, kk); text(i === 0 ? '?  ' + t : t, 0, 0, sz, i === 2 ? '#ffd23f' : '#fff', 'center', 800); ctx.restore(); });
+      if (T >= K.eq) eqText(a, a.y0 + ah*.62, '3x + 5 = 17', '#fff', k*clamp((T - K.eq)/.6), sz*1.3); ctx.globalAlpha = 1; }
+    // balance
+    let P = plates(T); const wB = T >= K.bal ? clamp((T - K.bal)/.8)*(1 - (T >= K.pass[0] - .5 && T < K.sp1[0] ? clamp((T - K.pass[0] + .5)/.5)*(1 - clamp((T - K.sp1[0] + .6)/.6)) : 0))*(1 - clamp((T - K.neg[0] + .5)/.6)) : 0;
+    if (P && wB > 0){ if (T >= K.tilt && T < K.untilt + .8) P.extra = T < K.untilt ? ease(clamp((T - K.tilt)/.8))*1.8 : (1 - ease(clamp((T - K.untilt)/.8)))*1.8;
+      if (T >= K.sp2[0]) P.lbl = 'x'; balance(a, T, P, wB);
+      if (T >= K.tilt && T < K.untilt + .8){ ctx.globalAlpha = wB*(T < K.untilt ? 1 : 1 - clamp((T - K.untilt)/.8)); cube(a.x0 + aw*.14, a.y0 + ah*.12 + ease(clamp((T - K.tilt)/.6))*ah*.05, Math.min(aw/26, ah/14), 1); text('+1 d’un seul côté', a.x0 + aw*.14, a.y0 + ah*.06, 13, css('--err'), 'center', 800); ctx.globalAlpha = 1; }
+      // équation courante sous la balance
+      let eq = ''; if (T >= K.bal && T < K.s1[0]) eq = '3x + 5 = 17'; else if (T < K.s1[2]) eq = T < K.s1[1] ? '3x + 5 − 5 = 17 − 5' : '3x = 12'; else if (T < K.both[0]) eq = T < K.s1[3] ? '3x : 3 = 12 : 3' : (T < K.s1[4] ? 'x = 4' : '3 · 4 + 5 = 17 ✓');
+      else if (T < K.pass[0]) eq = T < K.both[1] ? '5x + 2 = 2x + 14' : T < K.both[2] ? '3x + 2 = 14' : T < K.both[3] ? '3x = 12' : 'x = 4';
+      else if (T < K.sp2[0]) eq = T < K.sp1[1] ? 'x + 3 = x + 5' : '3 = 5   faux !'; else eq = T < K.sp2[1] ? '2x + 4 = 2(x + 2)' : '4 = 4   vrai !';
+      eqText(a, a.y1 - ah*.06, eq, eq.indexOf('faux') >= 0 ? css('--err') : (eq.indexOf('vrai') >= 0 || eq.indexOf('✓') >= 0 || eq === 'x = 4') ? '#6dff94' : '#fff', wB, sz*.9);
+      if (T >= K.sp2[0] && T < K.neg[0]) text('x = ' + P.xv.toFixed(1).replace('.', ',') + ' ?', a.x0 + aw*.85, a.y0 + ah*.08, 15, '#c77dff', 'center', 800);
+      if (T >= K.sp1[0] && T < K.sp2[0]) text('x = ' + (T < K.sp1[1] ? P.xv.toFixed(1).replace('.', ',') : '…') + ' ?', a.x0 + aw*.85, a.y0 + ah*.08, 15, '#c77dff', 'center', 800); }
+    // la règle d'or
+    if (T >= K.rule && T < K.s1[0]){ const k = back(clamp((T - K.rule)/.6))*(1 - clamp((T - K.s1[0] + .5)/.5)); ctx.save(); ctx.globalAlpha = Math.min(1, k); ctx.translate(cx, a.y0 + ah*.1); ctx.scale(k, k); ctx.fillStyle = 'rgba(12,18,48,.92)'; ctx.strokeStyle = '#ffd23f'; ctx.lineWidth = 2; roundRect(-aw*.36, -ah*.075, aw*.72, ah*.15, 14); ctx.fill(); ctx.stroke();
+      text('⚖️  Même opération des deux côtés', 0, 0, Math.max(14, aw*.03), '#ffd23f', 'center', 800); ctx.restore(); }
+    // « passer de l'autre côté » : écriture seule
+    if (T >= K.pass[0] && T < K.sp1[0]){ const k = clamp((T - K.pass[0])/.6)*(1 - clamp((T - K.sp1[0] + .6)/.6)); const y0 = a.y0 + ah*.2;
+      eqText(a, y0, '3x + 2 = 14', '#fff', k, sz);
+      if (T >= K.pass[1]){ eqText(a, y0 + ah*.24, '3x + 2 − 2 = 14 − 2', '#fff', k*clamp((T - K.pass[1])/.6), sz); }
+      if (T >= K.pass[2]){ const kk = clamp((T - K.pass[2])/.8); ctx.globalAlpha = k*kk; ctx.strokeStyle = css('--err'); ctx.lineWidth = 3; ctx.font = 'italic ' + serif(sz); const full = ctx.measureText('3x + 2 − 2 = 14 − 2').width, pre = ctx.measureText('3x ').width, mid = ctx.measureText('+ 2 − 2').width, x0 = cx - full/2 + pre;
+        ctx.beginPath(); ctx.moveTo(x0, y0 + ah*.24 + 6); ctx.lineTo(x0 + mid*kk, y0 + ah*.24 - 10); ctx.stroke(); ctx.globalAlpha = 1;
+        eqText(a, y0 + ah*.48, '3x = 14 − 2', '#6dff94', k*kk, sz); } }
+    // nombres négatifs : écriture seule
+    if (T >= K.neg[0]){ const k = clamp((T - K.neg[0])/.6); const y0 = a.y0 + ah*.15; eqText(a, y0, '2x + 7 = 1', '#fff', k, sz);
+      if (T >= K.neg[0] && T < K.neg[1]){ ctx.globalAlpha = k; text('⚖️ ?  une balance ne pèse pas −3 kg', cx, y0 + ah*.2, Math.max(13, aw*.026), css('--err'), 'center', 800); ctx.globalAlpha = 1; }
+      if (T >= K.neg[1]) eqText(a, y0 + ah*.2, '2x = −6', '#fff', clamp((T - K.neg[1])/.6), sz);
+      if (T >= K.neg[2]) eqText(a, y0 + ah*.4, 'x = −3', '#6dff94', clamp((T - K.neg[2])/.6), sz*1.1);
+      if (T >= K.neg[3]) eqText(a, y0 + ah*.62, '2 · (−3) + 7 = 1 ✓', '#6dff94', clamp((T - K.neg[3])/.6), sz*.85);
+      if (T >= K.concl[0]){ const kc = clamp((T - K.concl[0])/.6); ctx.globalAlpha = kc; ctx.fillStyle = 'rgb(12,18,48)'; roundRect(a.x0 + aw*.06, a.y0 + ah*.08, aw*.88, ah*.84, 16); ctx.fill(); ctx.strokeStyle = '#ffd23f'; ctx.lineWidth = 2; ctx.stroke();
+        ['1. Faire la même opération des deux côtés', '2. Isoler x étape par étape', '3. Vérifier la solution'].forEach((t, i) => { const kk = clamp((T - K.concl[0] - .4 - i*.7)/.5); ctx.globalAlpha = kc*kk; text(t, a.x0 + aw*.12, a.y0 + ah*(.3 + i*.2), Math.max(15, aw*.032), i === 2 ? '#6dff94' : '#fff', 'left', 800); }); ctx.globalAlpha = 1; } }
+    // ---------- panneau ----------
+    const part = T < K.bal ? null : T < K.both[0] ? 'A' : T < K.pass[0] ? 'B' : T < K.sp1[0] ? 'C' : T < K.neg[0] ? 'D' : 'E';
+    const cOp = part ? clamp((T - K.bal)/.6) : 0; card.style.opacity = cOp; card.style.transform = 'translateY(' + (1-cOp)*10 + 'px)';
+    ['A','B','C','D','E'].forEach(p => $('s' + p).style.display = part === p ? '' : 'none');
+    const show = (pre, times) => times.forEach((t, i) => { const el = $(pre + i); if (el) Array.from(el.children).forEach(c => c.style.opacity = clamp((T - t)/.5)); });
+    if (part === 'A'){ show('A', [K.bal, K.s1[1], K.s1[3]]); $('Av').style.opacity = clamp((T - K.s1[4])/.5); }
+    if (part === 'B') show('B', [K.both[0], K.both[1], K.both[2], K.both[3]]);
+    if (part === 'C'){ show('C', [K.pass[0], K.pass[1], K.pass[2]]); $('Cn').style.opacity = clamp((T - K.pass[3])/.5); }
+    if (part === 'D'){ show('D', [K.sp1[0], K.sp1[1], K.sp2[0], K.sp2[1], K.sp2[1] + 1]); $('Dn').style.opacity = clamp((T - K.sp2[2])/.5); }
+    if (part === 'E'){ show('E', [K.neg[0], K.neg[1], K.neg[2]]); $('Ev').style.opacity = clamp((T - K.neg[3])/.5); }
+    let ci = -1; caps.forEach((c,i) => { if (T >= c[0]) ci = i; });
+    if (ci !== capIdx){ capIdx = ci; captxt.innerHTML = ci >= 0 ? caps[ci][1] : ''; }
+    capEl.style.opacity = (ci >= 0 && caps[ci][1]) ? clamp((T - caps[ci][0])/.35) : 0;
+  }
+  if (REC){ window.renderAt = T => { resize(); renderAt(T); }; window.END = END; return; }
+
+  // ---------- son (style « puce » rétro) ----------
+  const AU = { ctx:null, on:false, master:null, noise:null };
+  function auInit(){ const C = new (window.AudioContext || window.webkitAudioContext)(); const comp = C.createDynamicsCompressor(); comp.connect(C.destination);
+    const m = C.createGain(); m.gain.value = 0; m.connect(comp); AU.ctx = C; AU.master = m; }
+  function tone(f, vol, dur, type, delay){ const C = AU.ctx, t = C.currentTime + (delay||0), o = C.createOscillator(), g = C.createGain(); o.type = type || 'square'; o.frequency.value = f;
+    g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(Math.max(vol, .0002), t+.005); g.gain.exponentialRampToValueAtTime(.0001, t+dur); o.connect(g); g.connect(AU.master); o.start(t); o.stop(t+dur+.05); return o; }
+  const midi = mm => 440*Math.pow(2,(mm-69)/12);
+  const blip = (n, v) => tone(midi(n), v || .06, .09, 'square');
+  const jingle = (ns, v) => ns.forEach((n, i) => tone(midi(n), v || .06, .14, 'square', i*.09));
+  const FX = [[.3, () => jingle([72, 76, 79, 84])], [K.eq, () => blip(79)], [K.bal, () => jingle([67, 72], .06)], [K.tilt, () => jingle([60, 55], .07)], [K.rule, () => jingle([72, 76, 79], .05)], [K.s1[3], () => jingle([72, 79, 84])], [K.s1[4], () => blip(84)], [K.both[3], () => jingle([72, 79, 84])],
+    [K.pass[2], () => blip(76)], [K.sp1[1], () => jingle([60, 55, 50], .07)], [K.sp2[1], () => jingle([72, 76, 79], .05)], [K.neg[2], () => jingle([72, 79, 84])], [K.neg[3], () => blip(84)], [K.concl[0], () => jingle([60, 64, 67, 72])]];
+  [K.s1[0], K.s1[2], K.both[1], K.both[2], K.both[3]].forEach(t => FX.push([t + .6, () => blip(70, .04)]));
+  function audioTick(a, b){ if (!AU.on || b <= a) return; FX.forEach(([tm, fn]) => { if (tm > a && tm <= b) fn(); });
+    if (b > 4 && b < END - 2){ for (let i=Math.floor(a/.5)+1;i<=Math.floor(b/.5);i++){ const seq = [48, 55, 52, 55, 45, 52, 50, 55]; tone(midi(seq[i%8]), .018, .2, 'triangle'); } } }
+  function masterTo(v){ if (!AU.ctx) return; const t = AU.ctx.currentTime; AU.master.gain.cancelScheduledValues(t); AU.master.gain.setTargetAtTime(v, t, .15); }
+
+  // ---------- voix off ----------
+  const VO = { on:false, busy:false, until:0, voice:null, supported:'speechSynthesis' in window };
+  function pickVoice(){ if (!VO.supported) return; const vs = speechSynthesis.getVoices().filter(v => /^fr/i.test(v.lang)); if (!vs.length) return;
+    const score = v => (/natural|online|neural/i.test(v.name) ? 8 : 0) + (/google/i.test(v.name) ? 4 : 0) + (/fr-CH/i.test(v.lang) ? 2 : 0) + (/fr-FR/i.test(v.lang) ? 1 : 0) + (v.localService ? 0 : 1);
+    VO.voice = vs.sort((a,b) => score(b) - score(a))[0]; }
+  if (VO.supported){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+  function say(text){ if (!VO.supported) return; speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = VO.voice ? VO.voice.lang : 'fr-FR'; if (VO.voice) u.voice = VO.voice; u.rate = .97;
+    u.onstart = () => { VO.busy = true; if (AU.on) masterTo(.45); }; u.onend = u.onerror = () => { VO.busy = false; if (AU.on && playing) masterTo(.9); };
+    VO.busy = true; VO.until = performance.now() + (text.length*.085/.97 + 2)*1000; speechSynthesis.speak(u); }
+  function hush(){ if (VO.supported) speechSynthesis.cancel(); VO.busy = false; }
+  function voiceTick(a, b){ if (!VO.on || b <= a) return; for (const [tm, txt] of VOICE){ if (tm > a && tm <= b) say(txt); } }
+  function holdForVoice(prev, next){ if (!VO.on || !VO.busy || performance.now() > VO.until) return next; for (const [tm] of VOICE){ if (tm > prev && tm <= next) return Math.max(prev, tm - .001); } return next; }
+
+  // ---------- commandes ----------
+  let T = 0, playing = true, last = performance.now();
+  const pauseBtn = $('pause'), replayBtn = $('replay'), soundBtn = $('sound'), voiceBtn = $('voice'), seekEl = $('seek'), clockEl = $('clock');
+  pauseBtn.addEventListener('click', () => { if (T >= END){ T = 0; playing = true; hush(); } else playing = !playing; pauseBtn.textContent = playing ? 'Pause' : 'Lecture';
+    if (VO.supported){ if (playing) speechSynthesis.resume(); else speechSynthesis.pause(); } if (AU.on) masterTo(playing ? .9 : 0); });
+  replayBtn.addEventListener('click', () => { hush(); T = -0.001; playing = true; pauseBtn.textContent = 'Pause'; if (AU.on) masterTo(.9); });
+  soundBtn.addEventListener('click', () => { if (!AU.ctx) auInit(); AU.ctx.resume(); AU.on = !AU.on; soundBtn.textContent = AU.on ? 'Couper le son' : 'Activer le son'; soundBtn.setAttribute('aria-pressed', AU.on); masterTo(AU.on && playing ? .9 : 0); });
+  voiceBtn.addEventListener('click', () => { if (!VO.supported){ voiceBtn.textContent = 'Voix indisponible'; return; }
+    VO.on = !VO.on; voiceBtn.textContent = VO.on ? 'Couper la voix' : 'Activer la voix'; voiceBtn.setAttribute('aria-pressed', VO.on);
+    if (!VO.on){ hush(); if (AU.on && playing) masterTo(.9); return; } pickVoice();
+    if (T < .3){ say(VOICE[0][1]); T = .301; } else { let cur = null; for (const v of VOICE){ if (v[0] <= T) cur = v; } if (cur && T - cur[0] < 3) say(cur[1]); } });
+  seekEl.max = END;
+  let skipAudio = false, dragging = false;
+  const mmss = x => { x = Math.max(0, Math.round(x)); return Math.floor(x/60) + ':' + String(x%60).padStart(2,'0'); };
+  function jump(sec){ T = Math.max(0, Math.min(END, sec)); skipAudio = true; hush(); if (T >= END){ playing = false; pauseBtn.textContent = 'Lecture'; } }
+  const seekBox = seekEl.parentElement;
+  seekEl.addEventListener('pointerdown', () => { dragging = true; seekBox.classList.add('drag'); });
+  window.addEventListener('pointerup', () => { if (dragging) seekEl.blur(); dragging = false; seekBox.classList.remove('drag'); });
+  seekEl.addEventListener('input', () => jump(parseFloat(seekEl.value)));
+  document.addEventListener('keydown', e => { if (e.target.tagName === 'BUTTON' && (e.key === ' ' || e.key === 'Enter')) return; if (e.target === seekEl && e.key.startsWith('Arrow')) return;
+    if (e.key === ' '){ e.preventDefault(); pauseBtn.click(); } else if (e.key === 'ArrowLeft') jump(T - 5); else if (e.key === 'ArrowRight') jump(T + 5); });
+  function loop(now){
+    const dt = Math.min(.1, (now-last)/1000); last = now; const prevT = T;
+    if (playing){ T = holdForVoice(prevT, Math.min(END, T + dt)); if (T >= END){ playing = false; pauseBtn.textContent = 'Lecture'; } }
+    if (skipAudio) skipAudio = false; else { audioTick(prevT, T); voiceTick(prevT, T); }
+    if (!dragging) seekEl.value = T.toFixed(1); clockEl.textContent = mmss(T) + ' / ' + mmss(END);
+    renderAt(Math.max(0, T)); requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
+</script>
+<script>if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js');</script>
+</body>
+</html>
