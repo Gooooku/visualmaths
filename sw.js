@@ -1,8 +1,8 @@
 // Mise en cache : le site fonctionne aussi hors connexion.
 // À la première visite, seule la page d'accueil (et ses images) est mise en cache ;
 // chaque vidéo est gardée pour le hors-connexion au moment où on l'ouvre.
-const CACHE = 'visualmaths-v21';
-const FILES = ['./', 'index.html', 'manifest.webmanifest', 'icone.svg', 'hero.jpg', 'thumb-balance.jpg', 'thumb-casse.jpg', 'thumb-boucle.jpg', 'thumb-parametre.jpg', 'thumb-rayon.jpg', 'thumb-shamir.jpg', 'thumb-saut.jpg', 'thumb-arret.jpg', 'thumb-fusee.jpg', 'thumb-bezier.jpg', 'thumb-thermocouple.jpg', 'thumb-valeur-absolue.jpg', 'thumb-exponentielle.jpg', 'thumb-log-intro.jpg', 'thumb-log-niveaux.jpg', 'thumb-log-son.jpg', 'thumb-manhattan.jpg', 'thumb-respawn.jpg', 'thumb-plans.jpg', 'thumb-obelisque.jpg', 'thumb-robot.jpg', 'thumb-points.jpg', 'thumb-droite.jpg', 'thumb-drones.jpg', 'thumb-rayon.jpg', 'thumb-amortisseurs.jpg'];
+const CACHE = 'visualmaths-v22';
+const FILES = ['./', 'index.html', 'manifest.webmanifest', 'icone.svg', 'hero.jpg', 'thumb-balance.jpg', 'thumb-casse.jpg', 'thumb-boucle.jpg', 'thumb-parametre.jpg', 'thumb-rayon.jpg', 'thumb-shamir.jpg', 'thumb-saut.jpg', 'thumb-arret.jpg', 'thumb-fusee.jpg', 'thumb-bezier.jpg', 'thumb-thermocouple.jpg', 'thumb-valeur-absolue.jpg', 'thumb-exponentielle.jpg', 'thumb-log-intro.jpg', 'thumb-log-niveaux.jpg', 'thumb-log-son.jpg', 'thumb-manhattan.jpg', 'thumb-respawn.jpg', 'thumb-plans.jpg', 'thumb-obelisque.jpg', 'thumb-robot.jpg', 'thumb-points.jpg', 'thumb-droite.jpg', 'thumb-drones.jpg', 'thumb-rayon.jpg', 'thumb-amortisseurs.jpg', 'thumb-jet-eau.jpg'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener('fetch', e => {
