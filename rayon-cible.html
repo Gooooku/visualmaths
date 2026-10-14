@@ -99,6 +99,7 @@ table.cmp th{ font-size:.82em; color:var(--muted); font-weight:700; }
   .card{ bottom:calc(var(--u)*1.2 + 54px) !important; }/*LCAP*/
 }
 .ctrl a.home{ text-decoration:none; display:inline-flex; align-items:center; }
+@media (max-aspect-ratio: 1/1){ .card{ min-height:0 !important; } }
 </style>
 </head>
 <body>
@@ -254,7 +255,15 @@ table.cmp th{ font-size:.82em; color:var(--muted); font-weight:700; }
   function resize(){ DPR = REC ? 1 : Math.min(devicePixelRatio || 1, 2); W = stage.clientWidth; H = stage.clientHeight; cv.width = W*DPR; cv.height = H*DPR; ctx.setTransform(DPR, 0, 0, DPR, 0, 0); }
   new ResizeObserver(resize).observe(stage); resize();
   const portrait = () => W/H < 1;
-  function area(){ return portrait() ? {x0:W*.04, x1:W*.96, y0:H*.38, y1:H*.77} : {x0:W*.03, x1:W*.6, y0:H*.05, y1:H*.73}; }
+  const __card = document.getElementById('card'); let __cB = 0, __cW = -1, __cH = -1;
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { __cB = 0; __cW = -1; });
+  function cardBottom(){ if (!__card || !__card.offsetParent) return 0; if (__cW === W && __cH === H) return __cB;
+    const secs = [...__card.querySelectorAll('.sec')], sv = secs.map(s => s.style.display), tr = __card.style.transform, par = __card.offsetParent.getBoundingClientRect(); __card.style.transform = 'none'; let mx = 0;
+    const m = () => { mx = Math.max(mx, __card.getBoundingClientRect().bottom - par.top); };
+    if (secs.length) secs.forEach((s, i) => { secs.forEach((t, j) => t.style.display = i === j ? '' : 'none'); m(); }); else m();
+    secs.forEach((s, i) => s.style.display = sv[i]); __card.style.transform = tr; __cW = W; __cH = H; __cB = mx; return mx; }
+  function __y0(a, y1){ return Math.min(Math.max(a, cardBottom() + 10), y1 - H*.2); }
+  function area(){ return portrait() ? {x0:W*.04, x1:W*.96, y0:__y0(H*.38, H*.77), y1:H*.77} : {x0:W*.03, x1:W*.6, y0:H*.05, y1:H*.73}; }
   function glowOn(color, b){ ctx.shadowColor = color; ctx.shadowBlur = b; } function glowOff(){ ctx.shadowBlur = 0; }
   function roundRect(x, y, w, h, r){ ctx.beginPath(); ctx.moveTo(x+r, y); ctx.arcTo(x+w, y, x+w, y+h, r); ctx.arcTo(x+w, y+h, x, y+h, r); ctx.arcTo(x, y+h, x, y, r); ctx.arcTo(x, y, x+w, y, r); ctx.closePath(); }
   function text(t, x, y, size, color, align, weight){ ctx.font = (weight || 700) + ' ' + size + 'px Manrope, system-ui, sans-serif'; ctx.fillStyle = color; ctx.textAlign = align || 'center'; ctx.textBaseline = 'middle'; ctx.fillText(t, x, y); }
