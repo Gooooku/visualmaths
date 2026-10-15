@@ -145,6 +145,13 @@ const ANNEES = [
           { titre: "Application : les amortisseurs", texte: "Quatre voitures passent le même dos-d’âne : le signe de Δ dit si elles rebondissent, se posent… ou secouent les passagers.", lien: "amortisseurs.html", image: "thumb-amortisseurs.jpg", duree: "2 min 45", tag: "application" },
           { titre: "Exercice : le Jet d’eau", texte: "À quel moment une goutte est-elle à 100 m ? Deux solutions… et les deux sont justes : elle monte, puis redescend.", lien: "jet-eau.html", image: "thumb-jet-eau.jpg", duree: "2 min 30", tag: "exercice" }
         ]
+      },
+      {
+        titre: "Géométrie",
+        description: "Pythagore et Thalès : des théorèmes au cœur des jeux vidéo, des chantiers et des appareils.",
+        videos: [
+          { titre: "Application : repéré ?", texte: "Dans un jeu d’infiltration, le garde vous voit-il ? Le jeu calcule la distance avec Pythagore, des milliers de fois par seconde.", lien: "repere.html", image: "thumb-garde.jpg", duree: "2 min 25", tag: "application" }
+        ]
       }
     ]
   },
@@ -232,7 +239,6 @@ ANNEES.forEach((an, ai) => {
         + '<h3>' + esc(v.titre) + '</h3><p>' + esc(v.texte) + '</p></div>';
       grid.appendChild(a);
     });
-    const soon = document.createElement('div'); soon.className = 'soon'; soon.textContent = 'D’autres vidéos arrivent bientôt…'; grid.appendChild(soon);
     sec.appendChild(grid); ys.appendChild(sec);
   });
   ys.id = 'annee-' + (ai + 1); ys.setAttribute('role', 'tabpanel');
@@ -243,7 +249,7 @@ const tabsEl = document.getElementById('tabs'), panels = [...root.querySelectorA
 const tabs = ANNEES.map((an, ai) => {
   const n = an.chapitres.reduce((s, ch) => s + ch.videos.length, 0);
   const b = document.createElement('button'); b.className = 'tab'; b.type = 'button'; b.setAttribute('role', 'tab'); b.id = 'tab' + ai; b.setAttribute('aria-controls', 'annee-' + (ai + 1));
-  b.innerHTML = esc(an.titre) + '<span class="n">' + n + '</span>'; b.addEventListener('click', () => choisir(ai, true)); tabsEl.appendChild(b); return b; });
+  b.innerHTML = esc(an.titre); b.addEventListener('click', () => choisir(ai, true)); tabsEl.appendChild(b); return b; });
 panels.forEach((p, ai) => p.setAttribute('aria-labelledby', 'tab' + ai));
 function choisir(ai, clic){
   tabs.forEach((b, i) => { b.setAttribute('aria-selected', i === ai); b.tabIndex = i === ai ? 0 : -1; });
