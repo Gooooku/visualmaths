@@ -109,7 +109,6 @@ footer{ margin-top:56px; color:var(--muted); font-size:13px; text-align:center; 
       <div class="kicker"><i></i>Animations interactives</div>
       <h1>Visual<span>Maths</span></h1>
       <p class="lead">Des vidéos animées pour comprendre les maths en les voyant&nbsp;: chaque notion est reliée à une situation réelle, des jeux vidéo aux capteurs industriels. Conçues pour le programme de maturité professionnelle du CFPT, elles s’adressent aussi à toutes celles et ceux que les mathématiques passionnent.</p>
-      <p class="hint" id="voiceHint"><span aria-hidden="true">🔊</span><span>Pour écouter les vidéos avec la voix, nous conseillons <b>Microsoft Edge</b>&nbsp;: ses voix sont beaucoup plus naturelles.</span></p>
     </div>
     <figure class="hero"><img src="hero.jpg" alt="Un élève lance une vidéo parmi des écrans d’animations de mathématiques" width="559" height="317"></figure>
   </header>
@@ -117,10 +116,6 @@ footer{ margin-top:56px; color:var(--muted); font-size:13px; text-align:center; 
   <main id="chapters"></main>
   <footer>VisualMaths</footer>
 </div>
-<script>
-/* Le conseil « Microsoft Edge » est masqué si la page est déjà ouverte dans Edge. */
-if (/Edg\//.test(navigator.userAgent)) document.getElementById('voiceHint').style.display = 'none';
-</script>
 <script>
 /* ============================================================
    LISTE DES VIDÉOS — années > chapitres > vidéos.
