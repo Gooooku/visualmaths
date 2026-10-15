@@ -84,6 +84,20 @@ footer{ margin-top:56px; color:var(--muted); font-size:13px; text-align:center; 
 .lead::first-line{ color:inherit; }
 .hint{ display:inline-flex; gap:.5em; align-items:center; margin:16px 0 0; padding:.55em .9em; border-radius:12px; font-size:14px; line-height:1.45; color:var(--muted); background:color-mix(in srgb, var(--app) 9%, transparent); }
 .hint b{ color:inherit; font-weight:800; }
+.tabs{ position:sticky; top:0; z-index:20; margin:8px -24px 0; padding:12px 24px; padding-top:calc(12px + env(safe-area-inset-top,0px));
+  background:color-mix(in srgb, var(--bg1) 82%, transparent); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border-bottom:1px solid var(--stroke); }
+.tabs-in{ display:flex; gap:8px; overflow-x:auto; scrollbar-width:none; }
+.tabs-in::-webkit-scrollbar{ display:none; }
+.tab{ flex:1 0 auto; display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:11px 18px; border-radius:99px; border:1px solid var(--stroke);
+  background:var(--card); color:var(--muted); font:800 15px Manrope, system-ui, sans-serif; cursor:pointer; transition:background .2s, color .2s, border-color .2s; white-space:nowrap; }
+.tab:hover{ background:var(--cardHover); color:var(--ink); }
+.tab[aria-selected="true"]{ color:#0a0f22; background:linear-gradient(90deg, var(--acc), var(--theo)); border-color:transparent; }
+.tab .n{ font-size:12px; font-weight:800; padding:2px 7px; border-radius:99px; background:color-mix(in srgb, currentColor 14%, transparent); }
+.tab:focus-visible{ outline:3px solid var(--acc); outline-offset:2px; }
+.year{ scroll-margin-top:84px; }
+.year[hidden]{ display:none; }
+.year:first-of-type{ margin-top:28px; }
+@media (max-width: 560px){ .tabs{ margin:8px -24px 0; padding-left:12px; padding-right:12px; } .tabs-in{ gap:6px; } .tab{ flex:1 1 0; min-width:0; padding:10px 4px; font-size:13.5px; gap:0; } .tab .n{ display:none; } }
 @media (max-width: 820px){ header{ grid-template-columns:1fr; gap:22px; padding-top:32px; } }
 @media (prefers-reduced-motion: reduce){ .card, .thumb img, .series{ transition:none; } }
 </style>
@@ -99,6 +113,7 @@ footer{ margin-top:56px; color:var(--muted); font-size:13px; text-align:center; 
     </div>
     <figure class="hero"><img src="hero.jpg" alt="Un élève lance une vidéo parmi des écrans d’animations de mathématiques" width="559" height="317"></figure>
   </header>
+  <nav class="tabs" aria-label="Années"><div class="tabs-in" role="tablist" id="tabs"></div></nav>
   <main id="chapters"></main>
   <footer>VisualMaths</footer>
 </div>
@@ -225,8 +240,29 @@ ANNEES.forEach((an, ai) => {
     const soon = document.createElement('div'); soon.className = 'soon'; soon.textContent = 'D’autres vidéos arrivent bientôt…'; grid.appendChild(soon);
     sec.appendChild(grid); ys.appendChild(sec);
   });
+  ys.id = 'annee-' + (ai + 1); ys.setAttribute('role', 'tabpanel');
   root.appendChild(ys);
 });
+/* ---------- onglets par année ---------- */
+const tabsEl = document.getElementById('tabs'), panels = [...root.querySelectorAll('.year')];
+const tabs = ANNEES.map((an, ai) => {
+  const n = an.chapitres.reduce((s, ch) => s + ch.videos.length, 0);
+  const b = document.createElement('button'); b.className = 'tab'; b.type = 'button'; b.setAttribute('role', 'tab'); b.id = 'tab' + ai; b.setAttribute('aria-controls', 'annee-' + (ai + 1));
+  b.innerHTML = esc(an.titre) + '<span class="n">' + n + '</span>'; b.addEventListener('click', () => choisir(ai, true)); tabsEl.appendChild(b); return b; });
+panels.forEach((p, ai) => p.setAttribute('aria-labelledby', 'tab' + ai));
+function choisir(ai, clic){
+  tabs.forEach((b, i) => { b.setAttribute('aria-selected', i === ai); b.tabIndex = i === ai ? 0 : -1; });
+  panels.forEach((p, i) => p.hidden = i !== ai);
+  try { localStorage.setItem('vm-annee', ai); } catch(e){}
+  if (clic){ history.replaceState(null, '', '#annee-' + (ai + 1)); const nav = tabsEl.parentElement; if (nav.getBoundingClientRect().top < 0) window.scrollTo({ top: window.scrollY + nav.getBoundingClientRect().top - 1 }); }
+}
+tabsEl.addEventListener('keydown', e => { const i = tabs.indexOf(document.activeElement); if (i < 0) return;
+  const j = e.key === 'ArrowRight' ? (i + 1) % tabs.length : e.key === 'ArrowLeft' ? (i - 1 + tabs.length) % tabs.length : -1;
+  if (j >= 0){ e.preventDefault(); choisir(j, true); tabs[j].focus(); } });
+let depart = 0; const h = /^#annee-(\d)$/.exec(location.hash);
+if (h && +h[1] >= 1 && +h[1] <= ANNEES.length) depart = +h[1] - 1;
+else { try { const m = parseInt(localStorage.getItem('vm-annee'), 10); if (m >= 0 && m < ANNEES.length) depart = m; } catch(e){} }
+choisir(depart, false);
 if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js');
 </script>
 </body>
