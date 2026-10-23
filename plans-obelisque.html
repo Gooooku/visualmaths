@@ -613,7 +613,14 @@ canvas{ position:absolute; inset:0; width:100%; height:100%; display:block; }
   seekEl.max = (END*SLOW).toFixed(1);
   let skipAudio = false, dragging = false;
   const mmss = x => { x = Math.max(0, Math.round(x)); return Math.floor(x/60) + ':' + String(x%60).padStart(2,'0'); };
-  function jump(sec){ T = Math.max(0, Math.min(END, sec/SLOW)); skipAudio = true; hush(); if (T >= END){ playing = false; pauseBtn.textContent = 'Lecture'; } }
+  function resumeAt(t){ if (!VO.on || t >= END) return; let i = -1; VOICE.forEach((v, j) => { if (v[0] <= t) i = j; }); if (i < 0 || (VO.busy && VO.idx === i && !VO.el.paused && Math.abs(VO.el.currentTime - (t - VOICE[i][0])*(typeof SLOW === 'number' ? SLOW : 1)*VO.rate) < .4)) return;
+    const k = CLIPT.indexOf(VOICE[i][1]); if (k < 0 || !CLIPS[k]) return; const off = (t - VOICE[i][0])*(typeof SLOW === 'number' ? SLOW : 1)*VO.rate;
+    VO.el.pause(); VO.idx = i; VO.el.src = CLIPS[k];
+    const go = () => { if (!VO.on || VO.idx !== i) return; const off = Math.max(0, (T - VOICE[i][0])*(typeof SLOW === 'number' ? SLOW : 1)*VO.rate); if (!(off < VO.el.duration - .25)){ VO.busy = false; VO.endAt = performance.now(); return; }
+      VO.el.currentTime = off; VO.el.playbackRate = VO.rate; VO.el.preservesPitch = true; VO.busy = true; VO.until = performance.now() + 30000;
+      if (playing){ const q = VO.el.play(); if (q) q.catch(() => { VO.busy = false; }); } };
+    if (VO.el.readyState >= 1) go(); else VO.el.addEventListener('loadedmetadata', go, { once:true }); }
+  function jump(sec){ T = Math.max(0, Math.min(END, sec/SLOW)); skipAudio = true; hush(); clearTimeout(VO.rt); VO.rt = setTimeout(() => resumeAt(T), 220); if (T >= END){ playing = false; pauseBtn.textContent = 'Lecture'; } }
   const seekBox = seekEl.parentElement;
   seekEl.addEventListener('pointerdown', () => { dragging = true; seekBox.classList.add('drag'); });
   window.addEventListener('pointerup', () => { if (dragging) seekEl.blur(); dragging = false; seekBox.classList.remove('drag'); });
