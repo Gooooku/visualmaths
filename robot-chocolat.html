@@ -117,6 +117,18 @@ table.cmp td:not(:first-child), table.cmp th:not(:first-child){ text-align:right
 #startOv .startT{ font:800 clamp(24px, 4.2vw, 54px)/1.1 Inter, system-ui, sans-serif; letter-spacing:-.02em; color:#fff; max-width:18ch; text-wrap:balance; }
 #startBtn:hover{ background:#7ff0ff; }
 @keyframes startPulse{ 0%{ box-shadow:0 0 0 0 rgba(62,230,255,.55); } 70%{ box-shadow:0 0 0 24px rgba(62,230,255,0); } 100%{ box-shadow:0 0 0 0 rgba(62,230,255,0); } }
+/*bulle*/
+@media (max-aspect-ratio: 1/1){
+  .card.bulle{ right:auto !important; bottom:auto !important; width:max-content !important; max-width:min(80%, 24em) !important; min-height:0 !important;
+    padding:7px 11px !important; font-size:clamp(13px, calc(var(--u)*2.4), 17px) !important; background:rgba(8,11,32,.86) !important; -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px);
+    border-radius:12px !important; transform:none !important; transition:left .4s ease, top .4s ease, opacity .3s; cursor:pointer; z-index:6; }
+  .card.bulle h3, .card.bulle .hr, .card.bulle .bh{ display:none !important; }
+  .card.bulle .line, .card.bulle .row{ white-space:normal !important; margin:2px 0 !important; }
+  .card.bulle .row:not(.bh):not(.grow){ display:flex !important; gap:.8em; justify-content:space-between; } .card.bulle .row > span:first-child{ white-space:nowrap; }
+  .card.bulle.open{ max-width:94% !important; }
+  .card.bulle.open h3{ display:block !important; }
+  .card.bulle.bvide{ visibility:hidden !important; }
+}
 </style>
 </head>
 <body>
@@ -135,7 +147,7 @@ table.cmp td:not(:first-child), table.cmp th:not(:first-child){ text-align:right
       <h3>Barre en (30 ; 40)</h3>
       <div class="row" id="c1"><span>vue par la caméra</span><span><span class="m cP">x</span> = 30 · <span class="m cX">y</span> = 40</span></div>
       <div class="hr"></div>
-      <div class="line" id="c2">tan <span class="m cO">θ</span> = <span class="cX">40</span> ÷ <span class="cP">30</span> ≈ 1,333</div>
+      <div class="line" id="c2">tan <span class="m cO">θ</span> = <span class="fr"><span><span class="cX">40</span></span><span><span class="cP">30</span></span></span> ≈ 1,333</div>
       <div class="line" id="c3"><span class="m cO">θ</span> = tan⁻¹(1,333) ≈ <b class="cO">53,1°</b></div>
       <div class="line" id="c4"><span class="m cC">r</span> = √(<span class="cP">30</span>² + <span class="cX">40</span>²) = <b class="cC">50 cm</b></div>
       <div class="row on" id="c5"><span>commande envoyée</span><span><b class="cO">53,1°</b> · <b class="cC">50 cm</b> ✓</span></div>
@@ -144,7 +156,7 @@ table.cmp td:not(:first-child), table.cmp th:not(:first-child){ text-align:right
       <h3>Barre en (−30 ; 40)</h3>
       <div class="row" id="d1"><span>vue par la caméra</span><span><span class="m cP">x</span> = −30 · <span class="m cX">y</span> = 40</span></div>
       <div class="hr"></div>
-      <div class="row bad" id="d2"><span>tan⁻¹(40 ÷ (−30))</span><span>≈ −53,1° ✗</span></div>
+      <div class="row bad" id="d2"><span>tan⁻¹(<span class="fr"><span>40</span><span>−30</span></span>)</span><span>≈ −53,1° ✗</span></div>
       <div class="row on" id="d3"><span>−53,1° + 180°</span><span>= <b class="cO">126,9°</b> ✓</span></div>
       <div class="hr"></div>
       <div class="row on" id="d4"><span><b>atan2</b>(<span class="m cX">y</span>, <span class="m cP">x</span>)</span><span>= <b class="cO">126,9°</b> ✓</span></div>
@@ -190,11 +202,11 @@ table.cmp td:not(:first-child), table.cmp th:not(:first-child){ text-align:right
     [0.3, ''],
     [K.sc, 'Dans une chocolaterie, les barres arrivent en vrac sur un tapis. Une <b>caméra</b> les mesure : le robot envoie les bonnes vers l’<b class="cG">emballage</b>, les cassées finissent dans un <b class="cR">bac</b>.'],
     [K.q, 'Pour chaque bonne barre, la caméra donne sa position en <b class="cP">x</b> et <b class="cX">y</b>. Mais les moteurs du robot attendent un <b class="cO">angle θ</b> et une <b class="cC">longueur r</b>. Comment passer de l’un à l’autre ?'],
-    [K.tan, 'Cette barre est en <b class="cP">x = 30 cm</b>, <b class="cX">y = 40 cm</b>. Dans le triangle : tan θ = <b class="cX">opposé</b> ÷ <b class="cP">adjacent</b> = 40 ÷ 30, donc θ = tan⁻¹(40 ÷ 30) ≈ <b class="cO">53,1°</b>.'],
+    [K.tan, 'Cette barre est en <b class="cP">x = 30 cm</b>, <b class="cX">y = 40 cm</b>. Dans le triangle : tan θ = <span class="fr"><span><b class="cX">opposé</b></span><span><b class="cP">adjacent</b></span></span> = <span class="fr"><span>40</span><span>30</span></span>, donc θ = tan⁻¹(<span class="fr"><span>40</span><span>30</span></span>) ≈ <b class="cO">53,1°</b>.'],
     [K.r, 'Et la longueur du bras ? Pythagore : r = √(30² + 40²) = <b class="cC">50 cm</b>.'],
     [K.go, 'Le robot reçoit <b class="cO">53,1°</b> et <b class="cC">50 cm</b> : il attrape la barre et la pose sur le tapis de l’emballage.'],
-    [K.trap, 'Barre suivante, à gauche : <b class="cP">x = −30 cm</b>, <b class="cX">y = 40 cm</b>. La calculatrice donne tan⁻¹(40 ÷ (−30)) ≈ <b class="cR">−53,1°</b>…'],
-    [K.wrong, '…et le bras part du <b class="cR">mauvais côté</b> ! La tangente ne voit que le rapport y ÷ x : elle ne sait pas de quel côté est la barre.'],
+    [K.trap, 'Barre suivante, à gauche : <b class="cP">x = −30 cm</b>, <b class="cX">y = 40 cm</b>. La calculatrice donne tan⁻¹(<span class="fr"><span>40</span><span>−30</span></span>) ≈ <b class="cR">−53,1°</b>…'],
+    [K.wrong, '…et le bras part du <b class="cR">mauvais côté</b> ! La tangente ne voit que le rapport <span class="fr"><span>y</span><span>x</span></span> : elle ne sait pas de quel côté est la barre.'],
     [K.fix, 'Il faut faire demi-tour : on ajoute 180°. −53,1° + 180° = <b class="cO">126,9°</b>. Cette fois, le robot attrape la barre.'],
     [K.code, 'Les programmeurs ne font pas cette correction à la main : presque tous les langages ont la fonction <b>atan2(y, x)</b>. On lui donne y et x <b>séparément</b> : elle voit les signes, donc le bon côté.'],
     [K.code2, 'Python, JavaScript, C, C++ : avec <b>atan2(40, −30)</b>, on obtient <b class="cO">126,9°</b>.'],
@@ -233,7 +245,11 @@ table.cmp td:not(:first-child), table.cmp th:not(:first-child){ text-align:right
     if (secs.length) secs.forEach((s, i) => { secs.forEach((t, j) => t.style.display = i === j ? '' : 'none'); m(); }); else m();
     secs.forEach((s, i) => s.style.display = sv[i]); __card.style.transform = tr; __cW = W; __cH = H; __cB = mx; return mx; }
   function __y0(a, y1){ return Math.min(Math.max(a, cardBottom() + 10), y1 - H*.2); }
-  function area(){ return portrait() ? {x0:W*.03, x1:W*.97, y0:__y0(H*.33, H*.72), y1:H*.72} : {x0:W*.02, x1:W*.61, y0:H*.04, y1:H*.74}; }
+  function __bOn(){ return portrait(); }
+  function __bY1(d){ const v = document.getElementById('voice'); if (!v || v.getAttribute('aria-pressed') !== 'true') return d; const c = document.querySelector('.ctrl'); if (!c) return d;
+    const r = c.getBoundingClientRect(), q = stage.getBoundingClientRect(); return Math.max(d, r.top - q.top - 12); }
+  window.__area = () => area(); window.__bOn = () => __bOn();
+  function area(){ return portrait() ? {x0:W*.03, x1:W*.97, y0:(__bOn() ? H*.05 : __y0(H*.33, H*.72)), y1:(__bOn() ? __bY1(H*.72) : H*.72)} : {x0:W*.02, x1:W*.61, y0:H*.04, y1:H*.74}; }
   function glowOn(color, b){ ctx.shadowColor = color; ctx.shadowBlur = b; } function glowOff(){ ctx.shadowBlur = 0; }
   function roundRect(x, y, w, h, r){ ctx.beginPath(); ctx.moveTo(x+r, y); ctx.arcTo(x+w, y, x+w, y+h, r); ctx.arcTo(x+w, y+h, x, y+h, r); ctx.arcTo(x, y+h, x, y, r); ctx.arcTo(x, y, x+w, y, r); ctx.closePath(); }
   function text(t, x, y, size, color, align, weight){ ctx.font = (weight || 700) + ' ' + size + 'px Manrope, system-ui, sans-serif'; ctx.fillStyle = color; ctx.textAlign = align || 'center'; ctx.textBaseline = 'middle'; ctx.fillText(t, x, y); }
@@ -450,7 +466,14 @@ table.cmp td:not(:first-child), table.cmp th:not(:first-child){ text-align:right
   seekEl.max = END;
   let skipAudio = false, dragging = false;
   const mmss = x => { x = Math.max(0, Math.round(x)); return Math.floor(x/60) + ':' + String(x%60).padStart(2,'0'); };
-  function jump(sec){ T = Math.max(0, Math.min(END, sec)); skipAudio = true; hush(); if (T >= END){ playing = false; pauseBtn.textContent = 'Lecture'; } }
+  function resumeAt(t){ if (!VO.on || t >= END) return; let i = -1; VOICE.forEach((v, j) => { if (v[0] <= t) i = j; }); if (i < 0 || (VO.busy && VO.idx === i && !VO.el.paused && Math.abs(VO.el.currentTime - (t - VOICE[i][0])*(typeof SLOW === 'number' ? SLOW : 1)*VO.rate) < .4)) return;
+    const k = CLIPT.indexOf(VOICE[i][1]); if (k < 0 || !CLIPS[k]) return; const off = (t - VOICE[i][0])*(typeof SLOW === 'number' ? SLOW : 1)*VO.rate;
+    VO.el.pause(); VO.idx = i; VO.el.src = CLIPS[k];
+    const go = () => { if (!VO.on || VO.idx !== i) return; const off = Math.max(0, (T - VOICE[i][0])*(typeof SLOW === 'number' ? SLOW : 1)*VO.rate); if (!(off < VO.el.duration - .25)){ VO.busy = false; VO.endAt = performance.now(); return; }
+      VO.el.currentTime = off; VO.el.playbackRate = VO.rate; VO.el.preservesPitch = true; VO.busy = true; VO.until = performance.now() + 30000;
+      if (playing){ const q = VO.el.play(); if (q) q.catch(() => { VO.busy = false; }); } };
+    if (VO.el.readyState >= 1) go(); else VO.el.addEventListener('loadedmetadata', go, { once:true }); }
+  function jump(sec){ T = Math.max(0, Math.min(END, sec)); skipAudio = true; hush(); clearTimeout(VO.rt); VO.rt = setTimeout(() => resumeAt(T), 220); if (T >= END){ playing = false; pauseBtn.textContent = 'Lecture'; } }
   const seekBox = seekEl.parentElement;
   seekEl.addEventListener('pointerdown', () => { dragging = true; seekBox.classList.add('drag'); });
   window.addEventListener('pointerup', () => { if (dragging) seekEl.blur(); dragging = false; seekBox.classList.remove('drag'); });
@@ -484,5 +507,49 @@ table.cmp td:not(:first-child), table.cmp th:not(:first-child){ text-align:right
   bx.insertAdjacentHTML('beforeend', '<button type="button" id="startBtn">\u25B6 Lancer la vid\u00e9o</button>'); ov.appendChild(bx); st.appendChild(ov);
   document.getElementById('startBtn').addEventListener('click', function(e){ e.stopPropagation(); go(); if (P) P.__vmStarted = true;
     if (v && !on(v)) v.click(); if (pz && !playingNow()) pz.click(); ov.remove(); }); })();</script>
+<script>/*bulle*/(function(){ var card = document.getElementById('card'), cv = document.getElementById('c'); if (!card || !cv || !window.__area) return;
+  var ctx = cv.getContext('2d'), open = false, last = 0, pos = null, seen = new Map();
+  card.addEventListener('click', function(e){ if (!card.classList.contains('bulle')) return; open = !open; card.classList.toggle('open', open); last = 0; e.stopPropagation(); });
+  function ink(x, y, w, h){ try { var k = cv.width/cv.clientWidth, X = Math.max(0, Math.round(x*k)), Y = Math.max(0, Math.round(y*k)), Wd = Math.max(8, Math.round(w*k)), Hd = Math.max(8, Math.round(h*k));
+      var d = ctx.getImageData(X, Y, Wd, Hd).data, n = 0, t = 0, st = Math.max(2, Math.round(2*k)), L = function(i){ return d[i + 3] < 30 ? 0 : d[i]*.3 + d[i + 1]*.59 + d[i + 2]*.11; };
+      for (var yy = 0; yy + st < Hd; yy += st) for (var xx = 0; xx + st < Wd; xx += st){ var i = (yy*Wd + xx)*4, a = L(i); t++; if (Math.abs(a - L(i + st*4)) > 28 || Math.abs(a - L(i + st*Wd*4)) > 28) n++; }
+      return t ? n/t : 0; } catch(e){ return 0; } }
+  function place(){ var A = window.__area(), bw = card.offsetWidth, bh = card.offsetHeight, m = 8, par = card.offsetParent; if (!par) return;
+    var cx = function(x){ return Math.max(A.x0 + m, Math.min(A.x1 - bw - m, x)); }, cy = function(y){ return Math.max(A.y0 + m, Math.min(A.y1 - bh - m, y)); };
+    var C = []; if (open) C.push([A.x0 + m, A.y0 + m, 0]); else [0, .25, .5, .75, 1].forEach(function(fy){ [0, .5, 1].forEach(function(fx){ C.push([A.x0 + m + (A.x1 - A.x0 - bw - 2*m)*fx, A.y0 + m + (A.y1 - A.y0 - bh - 2*m)*fy, (fy === 0 || fy === 1) ? 0 : .03]); }); });
+    var o0 = cv.getBoundingClientRect(), stg = card.parentElement, R = [];
+    [].forEach.call(stg.querySelectorAll('*'), function(el){ if (el === card || card.contains(el) || el === cv || el.closest('.ctrl, .seek, .caption, #startOv, #title, #credit')) return; var cs = getComputedStyle(el);
+      if (cs.position !== 'absolute' && cs.position !== 'fixed') return; if (cs.visibility === 'hidden' || cs.display === 'none' || parseFloat(cs.opacity) < .1) return; var r = el.getBoundingClientRect(); if (r.width < 4 || r.height < 4) return;
+      R.push([r.left - o0.left, r.top - o0.top, r.right - o0.left, r.bottom - o0.top]); });
+    var sc = function(x, y){ var v = ink(x, y, bw, bh); R.forEach(function(r){ if (x < r[2] && x + bw > r[0] && y < r[3] && y + bh > r[1]) v += 1; }); return v; };
+    var best = null, bs = 99, cur = 99;
+    C.forEach(function(p){ var x = cx(p[0]), y = cy(p[1]), s = sc(x, y) + p[2]; if (s < bs){ bs = s; best = [x, y]; } });
+    if (pos && !open){ var px = cx(pos[0]), py = cy(pos[1]); cur = sc(px, py); if (cur <= bs + .015){ best = [px, py]; } }
+    pos = best; var o = cv.getBoundingClientRect(), q = par.getBoundingClientRect();
+    card.style.left = (best[0] + o.left - q.left) + 'px'; card.style.top = (best[1] + o.top - q.top) + 'px'; }
+  function tick(){ var on = window.__bOn(); card.classList.toggle('bulle', on);
+    if (!on){ if (card.style.left){ card.style.left = ''; card.style.top = ''; } open = false; card.classList.remove('open', 'bvide'); requestAnimationFrame(tick); return; }
+    var secs = card.querySelectorAll('.sec'), sec = secs.length ? null : card; for (var i = 0; i < secs.length; i++){ secs[i].classList.remove('bh'); if (!sec && secs[i].style.display !== 'none') sec = secs[i]; }
+    if (!sec){ card.classList.add('bvide'); requestAnimationFrame(tick); return; }
+    var items = []; [].forEach.call(sec.children, function(x){ if (x.matches('h3, .hr')) return; if (x.tagName === 'TABLE') [].push.apply(items, x.querySelectorAll('tr'));
+      else if (x.children.length && [].every.call(x.children, function(c){ return c.style.display === 'contents'; })) [].push.apply(items, x.children); else items.push(x); });
+    var op = function(x){ if (x.style.opacity !== '') return x.style.opacity; if (x.style.display === 'contents' && x.firstElementChild) return x.firstElementChild.style.opacity; return ''; };
+    var vis = items.filter(function(x){ var o = op(x); return o === '' || parseFloat(o) > .05; });
+    // pause d'exercice (« À vous de chercher… ») : on montre toutes les données de l'énoncé
+    var pb = document.getElementById('pauseBox'), ex = false; if (pb){ var pcs = getComputedStyle(pb); ex = pcs.display !== 'none' && pcs.visibility !== 'hidden' && parseFloat(pcs.opacity) > .3; }
+    var openNow = open || ex; if (card.classList.contains('open') !== openNow) card.classList.toggle('open', openNow);
+    var now = performance.now(); items.forEach(function(x){ if (vis.indexOf(x) < 0) seen.delete(x); else if (!seen.has(x)) seen.set(x, now); });
+    var keep = vis;
+    if (!openNow && vis.length > 2){
+      // le dernier groupe apparu (les lignes apparues ensemble) ; s'il ne contient que des lignes fixes (début de partie), on montre les 3 premières
+      var tmax = Math.max.apply(null, vis.map(function(x){ return seen.get(x); })), grp = vis.filter(function(x){ return seen.get(x) > tmax - 300; });
+      var dyn = grp.filter(function(x){ return op(x) !== ''; });
+      if (dyn.length) keep = dyn.length >= 2 ? dyn.slice(-2) : vis.slice(-2);
+      else keep = grp.slice(0, 4);
+    }
+    keep = keep.slice(); keep.forEach(function(x){ if (x.tagName === 'TR'){ var t = x.closest('table'), f = t && t.rows[0]; if (f && keep.indexOf(f) < 0 && f.style.opacity === '') keep.push(f); } }); keep.forEach(function(x){ if (x.classList && x.classList.contains('grow') && !x.classList.contains('hd')){ var h = x.parentElement.querySelector('.grow.hd'); if (h && keep.indexOf(h) < 0) keep.push(h); } });
+    items.forEach(function(x){ x.classList.toggle('bh', keep.indexOf(x) < 0); }); card.classList.toggle('bvide', !keep.length);
+    if (now - last > 450){ last = now; place(); } requestAnimationFrame(tick); }
+  requestAnimationFrame(tick); })();</script>
 </body>
 </html>
