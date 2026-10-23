@@ -120,6 +120,18 @@ table.cmp th{ font-size:.82em; color:var(--muted); font-weight:700; }
 #startOv .startT{ font:800 clamp(24px, 4.2vw, 54px)/1.1 Inter, system-ui, sans-serif; letter-spacing:-.02em; color:#fff; max-width:18ch; text-wrap:balance; }
 #startBtn:hover{ background:#7ff0ff; }
 @keyframes startPulse{ 0%{ box-shadow:0 0 0 0 rgba(62,230,255,.55); } 70%{ box-shadow:0 0 0 24px rgba(62,230,255,0); } 100%{ box-shadow:0 0 0 0 rgba(62,230,255,0); } }
+/*bulle*/
+@media (max-aspect-ratio: 1/1){
+  .card.bulle{ right:auto !important; bottom:auto !important; width:max-content !important; max-width:min(80%, 24em) !important; min-height:0 !important;
+    padding:7px 11px !important; font-size:clamp(13px, calc(var(--u)*2.4), 17px) !important; background:rgba(8,11,32,.86) !important; -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px);
+    border-radius:12px !important; transform:none !important; transition:left .4s ease, top .4s ease, opacity .3s; cursor:pointer; z-index:6; }
+  .card.bulle h3, .card.bulle .hr, .card.bulle .bh{ display:none !important; }
+  .card.bulle .line, .card.bulle .row{ white-space:normal !important; margin:2px 0 !important; }
+  .card.bulle .row:not(.bh):not(.grow){ display:flex !important; gap:.8em; justify-content:space-between; } .card.bulle .row > span:first-child{ white-space:nowrap; }
+  .card.bulle.open{ max-width:94% !important; }
+  .card.bulle.open h3{ display:block !important; }
+  .card.bulle.bvide{ visibility:hidden !important; }
+}
 </style>
 </head>
 <body>
@@ -140,13 +152,13 @@ table.cmp th{ font-size:.82em; color:var(--muted); font-weight:700; }
       <h3>Le pas en diagonale</h3>
       <div class="line" id="b1">→ + ↑ : (<span class="cP">4</span> ; 0) + (0 ; <span class="cX">4</span>) = <b>(4 ; 4)</b></div>
       <div class="line" id="b2" style="white-space:normal">longueur = √(<span class="cP">4</span>² + <span class="cX">4</span>²) ≈ <b class="cC">5,66 px</b>, jamais vérifiée</div>
-      <div class="row bad" id="b3"><span>5,66 ÷ 4 ≈ 1,41</span><span><b>+41 %</b> ✗</span></div>
+      <div class="row bad" id="b3"><span><span class="fr"><span>5,66</span><span>4</span></span> ≈ 1,41</span><span><b>+41 %</b> ✗</span></div>
     </div>
     <div class="sec" id="s3" style="display:none">
       <h3>Doom (1993)</h3>
       <div class="row" id="c1"><span>avancer · pas de côté</span><span><span class="cX">50</span> · <span class="cP">40</span></span></div>
       <div class="line" id="c2">√(<span class="cX">50</span>² + <span class="cP">40</span>²) ≈ <b class="cC">64</b> au lieu de 50</div>
-      <div class="row bad" id="c3"><span>64 ÷ 50 ≈ 1,28</span><span><b>+28 %</b></span></div>
+      <div class="row bad" id="c3"><span><span class="fr"><span>64</span><span>50</span></span> ≈ 1,28</span><span><b>+28 %</b></span></div>
       <div class="line tag" id="c5" style="white-space:normal">les joueurs avaient découvert l’astuce : le <b>straferunning</b></div>
     </div>
     <div class="sec" id="s4" style="display:none">
@@ -164,7 +176,7 @@ table.cmp th{ font-size:.82em; color:var(--muted); font-weight:700; }
       <h3>Quake (1996) : toute diagonale</h3>
       <div class="row" id="q1"><span>avancer · pas de côté</span><span><span class="cX">50</span> · <span class="cP">40</span></span></div>
       <div class="row bad" id="q2"><span>longueur √(50² + 40²)</span><span>≈ 64 ✗</span></div>
-      <div class="line" id="q3">× <b class="cO">vitesse max ÷ longueur</b> = 50 ÷ 64 ≈ <b class="cO">0,78</b></div>
+      <div class="line" id="q3">× <span class="fr"><span><b class="cO">vitesse max</b></span><span><b class="cO">longueur</b></span></span> = <span class="fr"><span>50</span><span>64</span></span> ≈ <b class="cO">0,78</b></div>
       <div class="line" id="q4">(50 ; 40) → (<b>39</b> ; <b>31,2</b>)</div>
       <div class="row on" id="q5"><span>√(39² + 31,2²)</span><span>≈ <b class="cC">50</b> ✓</span></div>
     </div>
@@ -204,7 +216,7 @@ table.cmp th{ font-size:.82em; color:var(--muted); font-weight:700; }
     [K.fix2, 'Le jeu corrigé fait l’inverse : il fixe d’abord l’<b class="cC">hypoténuse</b> à 4. Les deux côtés sont égaux, appelons-les <b>a</b> : a² + a² = 4², donc a² = 8 et a = √8 ≈ <b class="cG">2,83</b>.'],
     [K.race2 + 1.2, 'On refait la course… <b class="cG">égalité</b> !'],
     [K.bilan, 'En résumé. <b class="cR">Avant</b> : le jeu fixait les deux côtés (4 et 4), et l’hypoténuse devenait trop longue. <b class="cG">Après</b> : il fixe l’hypoténuse (4) et calcule les côtés avec Pythagore.'],
-    [K.quake, 'Dans <b>Quake</b> (1996), autre jeu célèbre des années 90, c’est corrigé pour <b>n’importe quelle diagonale</b>. Exemple (<b class="cX">50</b> ; <b class="cP">40</b>) : Pythagore donne ≈ 64, trop long. On multiplie les deux côtés par <b>vitesse max ÷ longueur</b> = 50 ÷ 64 ≈ 0,78 → (39 ; 31,2), et le pas fait bien <b class="cC">50</b>.'],
+    [K.quake, 'Dans <b>Quake</b> (1996), autre jeu célèbre des années 90, c’est corrigé pour <b>n’importe quelle diagonale</b>. Exemple (<b class="cX">50</b> ; <b class="cP">40</b>) : Pythagore donne ≈ 64, trop long. On multiplie les deux côtés par <b><span class="fr"><span>vitesse max</span><span>longueur</span></span></b> = <span class="fr"><span>50</span><span>64</span></span> ≈ 0,78 → (39 ; 31,2), et le pas fait bien <b class="cC">50</b>.'],
     [K.play, 'À toi de jouer ! Essaie avec et sans la correction, et regarde ta vitesse.']
   ];
   const VOICE = [
@@ -240,7 +252,11 @@ table.cmp th{ font-size:.82em; color:var(--muted); font-weight:700; }
     if (secs.length) secs.forEach((s, i) => { secs.forEach((t, j) => t.style.display = i === j ? '' : 'none'); m(); }); else m();
     secs.forEach((s, i) => s.style.display = sv[i]); __card.style.transform = tr; __cW = W; __cH = H; __cB = mx; return mx; }
   function __y0(a, y1){ return Math.min(Math.max(a, cardBottom() + 10), y1 - H*.2); }
-  function area(){ return portrait() ? {x0:W*.03, x1:W*.97, y0:__y0(H*.33, H*.72), y1:H*.72} : {x0:W*.02, x1:W*.61, y0:H*.04, y1:H*.74}; }
+  function __bOn(){ return portrait(); }
+  function __bY1(d){ const v = document.getElementById('voice'); if (!v || v.getAttribute('aria-pressed') !== 'true') return d; const c = document.querySelector('.ctrl'); if (!c) return d;
+    const r = c.getBoundingClientRect(), q = stage.getBoundingClientRect(); return Math.max(d, r.top - q.top - 12); }
+  window.__area = () => area(); window.__bOn = () => __bOn();
+  function area(){ return portrait() ? {x0:W*.03, x1:W*.97, y0:(__bOn() ? H*.05 : __y0(H*.33, H*.72)), y1:(__bOn() ? __bY1(H*.72) : H*.72)} : {x0:W*.02, x1:W*.61, y0:H*.04, y1:H*.74}; }
   function gameArea(){ return portrait() ? {x0:W*.02, x1:W*.98, y0:H*.02, y1:H*.80} : {x0:W*.015, x1:W*.985, y0:H*.03 + 46, y1:H*.93}; }
   function glowOn(color, b){ ctx.shadowColor = color; ctx.shadowBlur = b; } function glowOff(){ ctx.shadowBlur = 0; }
   function roundRect(x, y, w, h, r){ ctx.beginPath(); ctx.moveTo(x+r, y); ctx.arcTo(x+w, y, x+w, y+h, r); ctx.arcTo(x+w, y+h, x, y+h, r); ctx.arcTo(x, y+h, x, y, r); ctx.arcTo(x, y, x+w, y, r); ctx.closePath(); }
@@ -414,7 +430,7 @@ table.cmp th{ font-size:.82em; color:var(--muted); font-weight:700; }
       const v = Math.hypot(50, side); label(D[0] + sz*3.4, D[1] - sz*.2, '≈ ' + fr(v, side > 49.9 ? 1 : 0) + '  (+' + Math.round((v/50 - 1)*100) + ' %)', CY, sz*.9); ctx.restore(); }
     if (T >= K.doom + 21){ ctx.save(); ctx.globalAlpha = al*clamp((T - K.doom - 21)/.6); label(x0 + w*.36, y0 + sz*5, 'le « straferunning »', GRN, sz*.9); ctx.restore(); }
     if (T >= K.doom + 1){ ctx.save(); ctx.globalAlpha = al*clamp((T - K.doom - 1)/.6); label(x0 + w*.36, y0 + sz*2.9, 'Doom (1993) : jeu célèbre des années 90', '#cfd6ff', sz*.8); ctx.restore(); }
-    ctx.save(); ctx.globalAlpha = al*clamp((T - K.doom - 1)/.8); drawCover(COVER.doom, x0 + w*.69, y0 + h*.08, w*.28, h*.8, 'Doom (1993) © id Software', sz); ctx.restore();
+    ctx.save(); ctx.globalAlpha = al*clamp((T - K.doom - 1)/.8); drawCover(COVER.doom, x0 + w*.69, portrait() ? y0 + sz*6.5 : y0 + h*.08, w*.28, h*.8, 'Doom (1993) © id Software', sz); ctx.restore();
     ctx.restore(); }
   function stepDiagram(R, T, al){ if (al <= 0) return; const { x0, y0, w, h } = R, sz = Math.max(11, Math.min(w*.026, 16));
     const rr = Math.min(w*.26, h*.28), u = rr/4, O = [x0 + w*.34, y0 + h*.44], X = p => [O[0] + p[0]*u, O[1] - p[1]*u], k = t => clamp((T - t)/.6);
@@ -640,7 +656,7 @@ table.cmp th{ font-size:.82em; color:var(--muted); font-weight:700; }
       if (T >= K.quake){ const kq = k*clamp((T - K.quake - .5)/.6), lw = portrait() ? R.w*.56 : R.w*.6; ctx.save(); ctx.globalAlpha = kq;
         drawCover(COVER.quake, R.x0 + lw + sz*.5, R.y0 + R.h*.06, R.w - lw - sz, R.h*.7, 'Quake (1996) © id Software', sz); ctx.restore(); }
       if (T >= K.bilan - .3 && T < K.quake + .3){ const kb = k*clamp((T - K.bilan + .3)/.5)*(1 - clamp((T - K.quake + .2)/.5)); ctx.save(); ctx.globalAlpha = kb;
-        ctx.fillStyle = 'rgba(5,8,22,.6)'; ctx.fillRect(R.x0, R.y0, R.w, R.h); const cw = Math.min(R.w*.9, sz*34), ch = R.h*.66, cx = R.x0 + (R.w - cw)/2, cy = R.y0 + R.h*.05;
+        ctx.fillStyle = 'rgba(5,8,22,.6)'; ctx.fillRect(R.x0, R.y0, R.w, R.h); const cw = Math.min(R.w*.9, sz*34), ch = Math.min(R.h*.66, sz*14), cx = R.x0 + (R.w - cw)/2, cy = R.y0 + R.h*.05;
         const box = (yy, col, t1, l1, l2, t0) => { ctx.globalAlpha = kb*clamp((T - t0)/.5); ctx.fillStyle = rgba(col, .12); roundRect(cx, yy, cw, ch*.46, 12); ctx.fill(); ctx.strokeStyle = rgba(col, .6); ctx.lineWidth = 1.5; ctx.stroke();
           text(t1, cx + sz, yy + sz*1.4, sz*1.05, col, 'left', 800); text(l1, cx + sz, yy + sz*3.1, sz*.85, '#e8ecff', 'left', 700); text(l2, cx + sz, yy + sz*4.6, sz*.85, col, 'left', 800); };
         box(cy, RED, 'AVANT', 'le jeu fixe les deux côtés : 4 et 4', 'hypoténuse ≈ 5,66 : trop long ✗', K.bilan + 1.5);
@@ -778,5 +794,49 @@ table.cmp th{ font-size:.82em; color:var(--muted); font-weight:700; }
   bx.insertAdjacentHTML('beforeend', '<button type="button" id="startBtn">\u25B6 Lancer la vid\u00e9o</button>'); ov.appendChild(bx); st.appendChild(ov);
   document.getElementById('startBtn').addEventListener('click', function(e){ e.stopPropagation(); go(); if (P) P.__vmStarted = true;
     if (v && !on(v)) v.click(); if (pz && !playingNow()) pz.click(); ov.remove(); }); })();</script>
+<script>/*bulle*/(function(){ var card = document.getElementById('card'), cv = document.getElementById('c'); if (!card || !cv || !window.__area) return;
+  var ctx = cv.getContext('2d'), open = false, last = 0, pos = null, seen = new Map();
+  card.addEventListener('click', function(e){ if (!card.classList.contains('bulle')) return; open = !open; card.classList.toggle('open', open); last = 0; e.stopPropagation(); });
+  function ink(x, y, w, h){ try { var k = cv.width/cv.clientWidth, X = Math.max(0, Math.round(x*k)), Y = Math.max(0, Math.round(y*k)), Wd = Math.max(8, Math.round(w*k)), Hd = Math.max(8, Math.round(h*k));
+      var d = ctx.getImageData(X, Y, Wd, Hd).data, n = 0, t = 0, st = Math.max(2, Math.round(2*k)), L = function(i){ return d[i + 3] < 30 ? 0 : d[i]*.3 + d[i + 1]*.59 + d[i + 2]*.11; };
+      for (var yy = 0; yy + st < Hd; yy += st) for (var xx = 0; xx + st < Wd; xx += st){ var i = (yy*Wd + xx)*4, a = L(i); t++; if (Math.abs(a - L(i + st*4)) > 28 || Math.abs(a - L(i + st*Wd*4)) > 28) n++; }
+      return t ? n/t : 0; } catch(e){ return 0; } }
+  function place(){ var A = window.__area(), bw = card.offsetWidth, bh = card.offsetHeight, m = 8, par = card.offsetParent; if (!par) return;
+    var cx = function(x){ return Math.max(A.x0 + m, Math.min(A.x1 - bw - m, x)); }, cy = function(y){ return Math.max(A.y0 + m, Math.min(A.y1 - bh - m, y)); };
+    var C = []; if (open) C.push([A.x0 + m, A.y0 + m, 0]); else [0, .25, .5, .75, 1].forEach(function(fy){ [0, .5, 1].forEach(function(fx){ C.push([A.x0 + m + (A.x1 - A.x0 - bw - 2*m)*fx, A.y0 + m + (A.y1 - A.y0 - bh - 2*m)*fy, (fy === 0 || fy === 1) ? 0 : .03]); }); });
+    var o0 = cv.getBoundingClientRect(), stg = card.parentElement, R = [];
+    [].forEach.call(stg.querySelectorAll('*'), function(el){ if (el === card || card.contains(el) || el === cv || el.closest('.ctrl, .seek, .caption, #startOv, #title, #credit')) return; var cs = getComputedStyle(el);
+      if (cs.position !== 'absolute' && cs.position !== 'fixed') return; if (cs.visibility === 'hidden' || cs.display === 'none' || parseFloat(cs.opacity) < .1) return; var r = el.getBoundingClientRect(); if (r.width < 4 || r.height < 4) return;
+      R.push([r.left - o0.left, r.top - o0.top, r.right - o0.left, r.bottom - o0.top]); });
+    var sc = function(x, y){ var v = ink(x, y, bw, bh); R.forEach(function(r){ if (x < r[2] && x + bw > r[0] && y < r[3] && y + bh > r[1]) v += 1; }); return v; };
+    var best = null, bs = 99, cur = 99;
+    C.forEach(function(p){ var x = cx(p[0]), y = cy(p[1]), s = sc(x, y) + p[2]; if (s < bs){ bs = s; best = [x, y]; } });
+    if (pos && !open){ var px = cx(pos[0]), py = cy(pos[1]); cur = sc(px, py); if (cur <= bs + .015){ best = [px, py]; } }
+    pos = best; var o = cv.getBoundingClientRect(), q = par.getBoundingClientRect();
+    card.style.left = (best[0] + o.left - q.left) + 'px'; card.style.top = (best[1] + o.top - q.top) + 'px'; }
+  function tick(){ var on = window.__bOn(); card.classList.toggle('bulle', on);
+    if (!on){ if (card.style.left){ card.style.left = ''; card.style.top = ''; } open = false; card.classList.remove('open', 'bvide'); requestAnimationFrame(tick); return; }
+    var secs = card.querySelectorAll('.sec'), sec = secs.length ? null : card; for (var i = 0; i < secs.length; i++){ secs[i].classList.remove('bh'); if (!sec && secs[i].style.display !== 'none') sec = secs[i]; }
+    if (!sec){ card.classList.add('bvide'); requestAnimationFrame(tick); return; }
+    var items = []; [].forEach.call(sec.children, function(x){ if (x.matches('h3, .hr')) return; if (x.tagName === 'TABLE') [].push.apply(items, x.querySelectorAll('tr'));
+      else if (x.children.length && [].every.call(x.children, function(c){ return c.style.display === 'contents'; })) [].push.apply(items, x.children); else items.push(x); });
+    var op = function(x){ if (x.style.opacity !== '') return x.style.opacity; if (x.style.display === 'contents' && x.firstElementChild) return x.firstElementChild.style.opacity; return ''; };
+    var vis = items.filter(function(x){ var o = op(x); return o === '' || parseFloat(o) > .05; });
+    // pause d'exercice (« À vous de chercher… ») : on montre toutes les données de l'énoncé
+    var pb = document.getElementById('pauseBox'), ex = false; if (pb){ var pcs = getComputedStyle(pb); ex = pcs.display !== 'none' && pcs.visibility !== 'hidden' && parseFloat(pcs.opacity) > .3; }
+    var openNow = open || ex; if (card.classList.contains('open') !== openNow) card.classList.toggle('open', openNow);
+    var now = performance.now(); items.forEach(function(x){ if (vis.indexOf(x) < 0) seen.delete(x); else if (!seen.has(x)) seen.set(x, now); });
+    var keep = vis;
+    if (!openNow && vis.length > 2){
+      // le dernier groupe apparu (les lignes apparues ensemble) ; s'il ne contient que des lignes fixes (début de partie), on montre les 3 premières
+      var tmax = Math.max.apply(null, vis.map(function(x){ return seen.get(x); })), grp = vis.filter(function(x){ return seen.get(x) > tmax - 300; });
+      var dyn = grp.filter(function(x){ return op(x) !== ''; });
+      if (dyn.length) keep = dyn.length >= 2 ? dyn.slice(-2) : vis.slice(-2);
+      else keep = grp.slice(0, 4);
+    }
+    keep = keep.slice(); keep.forEach(function(x){ if (x.tagName === 'TR'){ var t = x.closest('table'), f = t && t.rows[0]; if (f && keep.indexOf(f) < 0 && f.style.opacity === '') keep.push(f); } }); keep.forEach(function(x){ if (x.classList && x.classList.contains('grow') && !x.classList.contains('hd')){ var h = x.parentElement.querySelector('.grow.hd'); if (h && keep.indexOf(h) < 0) keep.push(h); } });
+    items.forEach(function(x){ x.classList.toggle('bh', keep.indexOf(x) < 0); }); card.classList.toggle('bvide', !keep.length);
+    if (now - last > 450){ last = now; place(); } requestAnimationFrame(tick); }
+  requestAnimationFrame(tick); })();</script>
 </body>
 </html>
