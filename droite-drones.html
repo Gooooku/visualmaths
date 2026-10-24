@@ -148,6 +148,13 @@ canvas{ position:absolute; inset:0; display:block; width:100%; height:100%; }
 #startOv .startT{ font:800 clamp(24px, 4.2vw, 54px)/1.1 Inter, system-ui, sans-serif; letter-spacing:-.02em; color:#fff; max-width:18ch; text-wrap:balance; }
 #startBtn:hover{ background:#7ff0ff; }
 @keyframes startPulse{ 0%{ box-shadow:0 0 0 0 rgba(62,230,255,.55); } 70%{ box-shadow:0 0 0 24px rgba(62,230,255,0); } 100%{ box-shadow:0 0 0 0 rgba(62,230,255,0); } }
+@media (max-aspect-ratio: 1/1){
+  #card{ display:grid !important; grid-template-columns:1fr 1fr; gap:0 .9em; font-size:13px !important; padding:10px 12px !important; }
+  #card .blk + .blk{ margin-top:0 !important; padding-top:0 !important; border-top:0 !important; padding-left:.9em !important; border-left:1px solid var(--stroke); }
+  #card h2{ font-size:.85em !important; margin:0 0 .25em !important; } #card .data{ flex-direction:column; gap:.1em; font-size:1em; }
+  #card .lbl{ display:none; } #card .live{ white-space:nowrap; font-size:.9em; }
+  .counter{ top:auto !important; bottom:calc(var(--u)*2 + 96px) !important; right:calc(var(--u)*3) !important; }
+}
 </style>
 </head>
 <body>
@@ -588,8 +595,8 @@ canvas{ position:absolute; inset:0; display:block; width:100%; height:100%; }
     grow($('eqB'), clamp((T-K.blueEq[0]+0.4)/0.7));
     K.blueEq.forEach((s0,i) => $('B'+i).style.opacity = clamp((T-s0)/0.5));
     if (T >= K.ready){ const r = red(ft), b = blue(ft);
-      $('liveR').innerHTML = 'position à l’instant <span class="m ct">t</span>&nbsp;: <b>(' + num(r[0]) + ' ; ' + num(r[1]) + ' ; ' + num(r[2]) + ')</b>';
-      $('liveB').innerHTML = 'position à l’instant <span class="m ct">t</span>&nbsp;: <b>(' + num(b[0]) + ' ; ' + num(b[1]) + ' ; ' + num(b[2]) + ')</b>';
+      $('liveR').innerHTML = '<span class="lbl">position à l’instant <span class="m ct">t</span>&nbsp;: </span><b>(' + num(r[0]) + ' ; ' + num(r[1]) + ' ; ' + num(r[2]) + ')</b>';
+      $('liveB').innerHTML = '<span class="lbl">position à l’instant <span class="m ct">t</span>&nbsp;: </span><b>(' + num(b[0]) + ' ; ' + num(b[1]) + ' ; ' + num(b[2]) + ')</b>';
       $('liveR').style.opacity = $('liveB').style.opacity = clamp((T-K.ready)/0.5);
       $('liveR').classList.toggle('hit', crashed); $('liveB').classList.toggle('hit', crashed);
     } else { $('liveR').innerHTML = $('liveB').innerHTML = '&nbsp;'; }
@@ -700,7 +707,7 @@ canvas{ position:absolute; inset:0; display:block; width:100%; height:100%; }
       const f = h.f0*(0.35 + 0.65*spin)*(1 + 0.12*fly);
       h.s1.frequency.setTargetAtTime(f, now, .08); h.s2.frequency.setTargetAtTime(f*2.004, now, .08);
       h.outG.gain.setTargetAtTime(on ? 0.05*spin*(1 + 0.4*fly) : 0, now, on ? .15 : .03);
-      if (h.pan){ tmp.copy(d.position).project(camera); h.pan.pan.setTargetAtTime(Math.max(-.8, Math.min(.8, tmp.x*.8)), now, .1); } });
+      if (h.pan){ tmp.copy(d.position).project(camera); h.pan.pan.setTargetAtTime(isFinite(tmp.x) ? Math.max(-.8, Math.min(.8, tmp.x*.8)) : 0, now, .1); } });
     const bedOn = live && T > 0.3 && T < HIT;
     AU.bed.gain.setTargetAtTime(bedOn ? 0.035 + (T > K.ready ? 0.02 : 0) : 0, now, bedOn ? .6 : .05);
     AU.bedF.frequency.setTargetAtTime(T > K.go ? 260 + 500*clamp((T-K.go)/(HIT-K.go)) : 240, now, .3);
@@ -791,7 +798,7 @@ canvas{ position:absolute; inset:0; display:block; width:100%; height:100%; }
     if (ROT.on) ROT.clock += dt;
     if (playing){ T = holdForVoice(prevT, Math.min(END, T + dt)); if (T >= END){ playing = false; pauseBtn.textContent = 'Lecture'; } }
     if (skipAudio) skipAudio = false; else { audioTick(prevT, T); voiceTick(prevT, T); }
-    audioFrame(T);
+    try { audioFrame(T); } catch(e){}
     if (!dragging) seekEl.value = T.toFixed(1);
     clockEl.textContent = mmss(T) + ' / ' + mmss(END);
     renderAt(Math.max(0, T));

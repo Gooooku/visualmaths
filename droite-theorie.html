@@ -152,6 +152,9 @@ body:not(.rec) .caption{ bottom:calc(var(--u)*4.5 + 26px); }
 #startOv .startT{ font:800 clamp(24px, 4.2vw, 54px)/1.1 Inter, system-ui, sans-serif; letter-spacing:-.02em; color:#fff; max-width:18ch; text-wrap:balance; }
 #startBtn:hover{ background:#7ff0ff; }
 @keyframes startPulse{ 0%{ box-shadow:0 0 0 0 rgba(62,230,255,.55); } 70%{ box-shadow:0 0 0 24px rgba(62,230,255,0); } 100%{ box-shadow:0 0 0 0 rgba(62,230,255,0); } }
+@media (max-aspect-ratio: 1/1){
+  .card{ font-size:15px !important; } .card .count{ font-size:.85em; }
+}
 </style>
 </head>
 <body>
@@ -599,8 +602,8 @@ body:not(.rec) .caption{ bottom:calc(var(--u)*4.5 + 26px); }
   }
 
   function resize(){ const w = stage.clientWidth, h = stage.clientHeight; if (!w || !h) return;
-    renderer.setSize(w, h, false); camera.aspect = w/h; camera.fov = w/h < 1 ? 52 : 31;
-    if (w/h >= 1) camera.setViewOffset(w, h, w*0.12, h*0.06, w, h); else camera.setViewOffset(w, h, 0, -h*0.04, w, h);
+    renderer.setSize(w, h, false); camera.aspect = w/h; camera.fov = w/h < 1 ? 56 : 31;
+    if (w/h >= 1) camera.setViewOffset(w, h, w*0.12, h*0.06, w, h); else camera.setViewOffset(w, h, -w*0.07, -h*0.1, w, h);
     camera.updateProjectionMatrix(); }
   new ResizeObserver(resize).observe(stage); resize();
   applyTheme();
@@ -750,8 +753,15 @@ body:not(.rec) .caption{ bottom:calc(var(--u)*4.5 + 26px); }
   seekEl.max = (END*SLOW).toFixed(1);
   let skipAudio = false, dragging = false;
   const mmss = x => { x = Math.max(0, Math.round(x)); return Math.floor(x/60) + ':' + String(x%60).padStart(2,'0'); };
+  function resumeAt(t){ if (!VO.on || t >= END) return; let i = -1; VOICE.forEach((v, j) => { if (v[0] <= t) i = j; }); if (i < 0 || (VO.busy && VO.idx === i && !VO.el.paused && Math.abs(VO.el.currentTime - (t - VOICE[i][0])*(typeof SLOW === 'number' ? SLOW : 1)*VO.rate) < .4)) return;
+    const k = CLIPT.indexOf(VOICE[i][1]); if (k < 0 || !CLIPS[k]) return; const off = (t - VOICE[i][0])*(typeof SLOW === 'number' ? SLOW : 1)*VO.rate;
+    VO.el.pause(); VO.idx = i; VO.el.src = CLIPS[k];
+    const go = () => { if (!VO.on || VO.idx !== i) return; const off = Math.max(0, (T - VOICE[i][0])*(typeof SLOW === 'number' ? SLOW : 1)*VO.rate); if (!(off < VO.el.duration - .25)){ VO.busy = false; VO.endAt = performance.now(); return; }
+      VO.el.currentTime = off; VO.el.playbackRate = VO.rate; VO.el.preservesPitch = true; VO.busy = true; VO.until = performance.now() + 30000;
+      if (playing){ const q = VO.el.play(); if (q) q.catch(() => { VO.busy = false; }); } };
+    if (VO.el.readyState >= 1) go(); else VO.el.addEventListener('loadedmetadata', go, { once:true }); }
   function jump(realSec){
-    T = Math.max(0, Math.min(END, realSec/SLOW)); skipAudio = true; hush();
+    T = Math.max(0, Math.min(END, realSec/SLOW)); skipAudio = true; hush(); clearTimeout(VO.rt); VO.rt = setTimeout(() => resumeAt(T), 220);
     if (T >= END){ playing = false; pauseBtn.textContent = 'Lecture'; }
     if (AU.on && playing && T < END - 1) pad(Math.floor(T/CHS));
   }
