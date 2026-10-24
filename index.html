@@ -67,6 +67,11 @@ h1 span{ background:linear-gradient(90deg, var(--acc), var(--theo)); -webkit-bac
 .play{ position:absolute; inset:0; display:grid; place-items:center; opacity:0; transition:opacity .25s; background:linear-gradient(180deg, rgba(10,15,34,0) 30%, rgba(10,15,34,.55)); }
 .play span{ width:58px; height:58px; border-radius:50%; display:grid; place-items:center; background:rgba(255,255,255,.92); color:#0a0f22; font-size:22px; padding-left:4px; box-shadow:0 8px 24px rgba(0,0,0,.35); }
 .card:hover .play, .card:focus-visible .play{ opacity:1; }
+.jeu{ display:inline-grid; place-items:center; width:24px; height:24px; margin:-2px 0; border-radius:50%; color:var(--acc); background:color-mix(in srgb, var(--acc) 14%, transparent); }
+.jeu svg{ width:16px; height:16px; }
+.lead.jeu-note{ display:flex; gap:10px; align-items:flex-start; margin-top:12px; font-size:15.5px; }
+.jeu-ico{ flex:none; display:grid; place-items:center; width:30px; height:30px; border-radius:50%; color:var(--acc); background:color-mix(in srgb, var(--acc) 14%, transparent); margin-top:1px; }
+.jeu-ico svg{ width:18px; height:18px; }
 .num{ position:absolute; left:12px; top:12px; width:30px; height:30px; border-radius:50%; display:grid; place-items:center; font-weight:800; font-size:14px;
   background:rgba(10,15,34,.7); color:#fff; border:1px solid rgba(255,255,255,.2); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); }
 .body{ padding:16px 18px 18px; display:flex; flex-direction:column; gap:8px; flex:1; }
@@ -108,7 +113,8 @@ footer{ margin-top:56px; color:var(--muted); font-size:13px; text-align:center; 
     <div class="intro">
       <div class="kicker"><i></i>Animations interactives</div>
       <h1>Visual<span>Maths</span></h1>
-      <p class="lead">Des vidéos animées pour comprendre les maths en les voyant&nbsp;: chaque notion est reliée à une situation réelle, des jeux vidéo aux capteurs industriels. Conçues pour le programme de maturité professionnelle du CFPT, elles s’adressent aussi à toutes celles et ceux que les mathématiques passionnent.</p>
+      <p class="lead">Des vidéos animées qui montrent à quoi servent les maths&nbsp;: chaque notion est reliée à une situation réelle, des jeux vidéo aux capteurs industriels. Conçues pour le programme de maturité professionnelle du CFPT (Genève, Suisse), elles s’adressent aussi à celles et ceux qui veulent découvrir les maths autrement.</p>
+      <p class="lead jeu-note"><span class="jeu-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 11h4M8 9v4M15 12h.01M18 10h.01"/><path d="M17.3 5H6.7a4 4 0 0 0-3.95 3.37l-.9 5.83A2.6 2.6 0 0 0 4.42 17.2c.83 0 1.6-.42 2.05-1.12L7.6 14.5h8.8l1.13 1.58c.45.7 1.22 1.12 2.05 1.12a2.6 2.6 0 0 0 2.57-3l-.9-5.83A4 4 0 0 0 17.3 5z"/></svg></span>Certaines vidéos se terminent par un mini-jeu&nbsp;: c’est à toi de jouer, en utilisant la notion que tu viens de découvrir.</p>
     </div>
     <figure class="hero"><img src="hero.jpg" alt="Un élève lance une vidéo parmi des écrans d’animations de mathématiques" width="559" height="317"></figure>
   </header>
@@ -139,7 +145,7 @@ const ANNEES = [
         description: "Résoudre une équation, et à quoi ça sert vraiment : jeux vidéo et industrie.",
         videos: [
           { titre: "Résoudre une équation", texte: "La balance : faire la même opération des deux côtés, x des deux côtés, cas particuliers et solutions négatives.", lien: "equation-balance.html", image: "thumb-balance.jpg", duree: "2 min 35", tag: "theorie" },
-          { titre: "Le casse-briques", texte: "Pourquoi une balle rapide traverse les briques, et comment une équation du 1er degré corrige ce bug.", lien: "casse-briques.html", image: "thumb-casse.jpg", duree: "1 min 50", tag: "application" },
+          { titre: "Le casse-briques", texte: "Pourquoi une balle rapide traverse les briques, et comment une équation du 1er degré corrige ce bug.", lien: "casse-briques.html", image: "thumb-casse.jpg", duree: "1 min 50", tag: "application", jeu: true },
           { titre: "La boucle 4–20 mA", texte: "Le langage des usines : retrouver la pression à partir du courant envoyé par le capteur.", lien: "boucle-4-20.html", image: "thumb-boucle.jpg", duree: "1 min 36", tag: "application" },
           { titre: "Équations avec paramètre", texte: "Seuil de rentabilité d’un atelier et résistance d’une LED : une seule résolution, valable pour tous les réglages.", lien: "equation-parametre.html", image: "thumb-parametre.jpg", duree: "2 min 13", tag: "application" }
         ]
@@ -159,10 +165,10 @@ const ANNEES = [
         videos: [
           { titre: "Pourquoi a² + b² = c² ?", texte: "La preuve en images : deux grands carrés identiques, quatre triangles déplacés un par un… et ce qui reste est forcément égal.", lien: "pythagore-demo.html", image: "thumb-pythagore-demo.jpg", duree: "1 min 45", tag: "theorie" },
           { titre: "Repéré ?", texte: "Dans un jeu d’infiltration, le garde vous voit-il ? Le jeu calcule la distance avec Pythagore, des milliers de fois par seconde.", lien: "repere.html", image: "thumb-garde.jpg", duree: "2 min 25", tag: "application" },
-          { titre: "Le bug de la diagonale", texte: "Dans un jeu vidéo, pourquoi va-t-on plus vite en diagonale ? Pythagore explique le bug de Doom… et comment le corriger. Puis à toi de jouer !", lien: "diagonale.html", image: "thumb-diagonale.jpg", duree: "3 min 10", tag: "application" },
+          { titre: "Le bug de la diagonale", texte: "Dans un jeu vidéo, pourquoi va-t-on plus vite en diagonale ? Pythagore explique le bug de Doom… et comment le corriger. Puis à toi de jouer !", lien: "diagonale.html", image: "thumb-diagonale.jpg", duree: "3 min 10", tag: "application", jeu: true },
           { titre: "Le trou au centième", texte: "Dans une montre, deux roues n’engrènent que si leurs axes sont à la bonne distance : Pythagore vérifie l’entraxe… et place un trou au millième près.", lien: "trou-centieme.html", image: "thumb-trou-centieme.jpg", duree: "2 min 15", tag: "application" },
           { titre: "Freinage automatique", texte: "Une voiture sans chauffeur voit l’image de la voiture arrêtée devant elle doubler : avec Thalès, elle calcule qu’il reste 1 seconde avant le choc… et freine.", lien: "freinage.html", image: "thumb-freinage.jpg", duree: "2 min 40", tag: "application" },
-          { titre: "Comment un jeu dessine la 3D", texte: "Ton écran est plat : le jeu divise chaque coordonnée par la profondeur, grâce à Thalès. Et à la fin, à toi de jouer !", lien: "jeu-3d.html", image: "thumb-jeu-3d.jpg", duree: "2 min 23", tag: "application" }
+          { titre: "Comment un jeu dessine la 3D", texte: "Ton écran est plat : le jeu divise chaque coordonnée par la profondeur, grâce à Thalès. Et à la fin, à toi de jouer !", lien: "jeu-3d.html", image: "thumb-jeu-3d.jpg", duree: "2 min 23", tag: "application", jeu: true }
         ]
       },
       {
@@ -170,7 +176,7 @@ const ANNEES = [
         description: "Sinus, cosinus et tangente : trouver un angle ou une longueur dans un triangle rectangle, au cœur des robots et des jeux.",
         videos: [
           { titre: "Le robot de la chocolaterie", texte: "Une caméra repère les barres de chocolat ; le robot calcule son angle avec la tangente et la longueur de son bras avec Pythagore… et attention au mauvais côté !", lien: "robot-chocolat.html", image: "thumb-robot-chocolat.jpg", duree: "2 min 10", tag: "application" },
-          { titre: "Le tir ennemi", texte: "Dans Doom, comment un monstre vise-t-il le joueur ? L’arctangente donne l’angle, cosinus et sinus lancent la boule de feu… puis le niveau 2 : les robots tirent !", lien: "tir-ennemi.html", image: "thumb-tir-ennemi.jpg", duree: "2 min 45", tag: "application" },
+          { titre: "Le tir ennemi", texte: "Dans Doom, comment un monstre vise-t-il le joueur ? L’arctangente donne l’angle, cosinus et sinus lancent la boule de feu… puis le niveau 2 : les robots tirent !", lien: "tir-ennemi.html", image: "thumb-tir-ennemi.jpg", duree: "2 min 45", tag: "application", jeu: true },
         ]
       }
     ]
@@ -192,8 +198,8 @@ const ANNEES = [
         titre: "Trigonométrie",
         description: "Le cercle trigonométrique : des angles de 0° à 360°, le cosinus et le sinus comme coordonnées, au cœur des jeux vidéo.",
         videos: [
-          { titre: "Viser dans toutes les directions", texte: "Dans Doom, le joueur passe à gauche du monstre… et l’arctangente se trompe de 180° ! Le cercle trigonométrique explique pourquoi, puis les robots te visent dans toutes les directions.", lien: "viser.html", image: "thumb-viser.jpg", duree: "4 min 05", tag: "application" },
-          { titre: "La barre de feu de Mario", texte: "Dans Super Mario Bros, Mario traverse une barre de feu sans se brûler ! La barre saute de 11,25° en 11,25°, et chaque boule est placée avec le cosinus et le sinus… lus dans une table de 1985.", lien: "barre-de-feu.html", image: "thumb-mario.jpg", duree: "3 min 03", tag: "application" }
+          { titre: "Viser dans toutes les directions", texte: "Dans Doom, le joueur passe à gauche du monstre… et l’arctangente se trompe de 180° ! Le cercle trigonométrique explique pourquoi, puis les robots te visent dans toutes les directions.", lien: "viser.html", image: "thumb-viser.jpg", duree: "4 min 05", tag: "application", jeu: true },
+          { titre: "La barre de feu de Mario", texte: "Dans Super Mario Bros, Mario traverse une barre de feu sans se brûler ! La barre saute de 11,25° en 11,25°, et chaque boule est placée avec le cosinus et le sinus… lus dans une table de 1985.", lien: "barre-de-feu.html", image: "thumb-mario.jpg", duree: "3 min 03", tag: "application", jeu: true }
         ]
       }
     ]
@@ -259,11 +265,12 @@ ANNEES.forEach((an, ai) => {
     const sec = document.createElement('div'); sec.className = 'chapter';
     sec.innerHTML = '<div class="chap-head"><div><h3>' + esc(ch.titre) + '</h3><p>' + esc(ch.description) + '</p></div>'
       + '<div style="display:flex; flex-wrap:wrap; gap:8px">' + (ch.series || []).map(x => '<a class="series" href="' + x.lien + '">' + esc(x.texte) + '</a>').join('') + '</div></div>';
+    const PAD = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 11h4M8 9v4M15 12h.01M18 10h.01"/><path d="M17.3 5H6.7a4 4 0 0 0-3.95 3.37l-.9 5.83A2.6 2.6 0 0 0 4.42 17.2c.83 0 1.6-.42 2.05-1.12L7.6 14.5h8.8l1.13 1.58c.45.7 1.22 1.12 2.05 1.12a2.6 2.6 0 0 0 2.57-3l-.9-5.83A4 4 0 0 0 17.3 5z"/></svg>';
     const grid = document.createElement('div'); grid.className = 'grid';
     ch.videos.forEach((v, i) => {
       const a = document.createElement('a'); a.className = 'card'; a.href = v.lien;
-      a.innerHTML = '<div class="thumb"><img src="' + v.image + '" alt="" loading="lazy"><div class="play"><span>▶</span></div><div class="num">' + (i + 1) + '</div></div>'
-        + '<div class="body"><div class="meta"><span class="tag ' + v.tag + '">' + (TAGS[v.tag] || v.tag) + '</span><span class="dur">' + esc(v.duree) + '</span></div>'
+      a.innerHTML = '<div class="thumb"><img src="' + v.image + '" alt="" loading="lazy"><div class="play"><span>▶</span></div><div class="num">' + (i + 1) + '</div>' + '</div>'
+        + '<div class="body"><div class="meta"><span class="tag ' + v.tag + '">' + (TAGS[v.tag] || v.tag) + '</span><span class="dur">' + esc(v.duree) + '</span>' + (v.jeu ? '<span class="jeu" title="Avec un mini-jeu à la fin" aria-label="Avec un mini-jeu à la fin">' + PAD + '</span>' : '') + '</div>'
         + '<h3>' + esc(v.titre) + '</h3><p>' + esc(v.texte) + '</p></div>';
       grid.appendChild(a);
     });
