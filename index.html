@@ -84,7 +84,8 @@ h1 span{ background:linear-gradient(90deg, var(--acc), var(--theo)); -webkit-bac
 .card h3{ margin:0; font-size:19px; line-height:1.25; letter-spacing:-.01em; }
 .card p{ margin:0; color:var(--muted); font-size:14.5px; line-height:1.45; }
 .soon{ border:1.5px dashed var(--stroke); border-radius:20px; display:grid; place-items:center; text-align:center; padding:28px; color:var(--muted); font-weight:600; min-height:160px; }
-footer{ margin-top:56px; color:var(--muted); font-size:13px; text-align:center; }
+footer{ margin-top:56px; padding:22px 16px 6px; border-top:1px solid color-mix(in srgb, var(--muted) 25%, transparent); color:var(--muted); font-size:13px; line-height:1.55; text-align:center; }
+footer p{ margin:0 0 6px; }
 .lead{ margin:18px 0 0; max-width:34em; font-size:17px; line-height:1.6; color:var(--muted); }
 .lead::first-line{ color:inherit; }
 .hint{ display:inline-flex; gap:.5em; align-items:center; margin:16px 0 0; padding:.55em .9em; border-radius:12px; font-size:14px; line-height:1.45; color:var(--muted); background:color-mix(in srgb, var(--app) 9%, transparent); }
@@ -120,7 +121,11 @@ footer{ margin-top:56px; color:var(--muted); font-size:13px; text-align:center; 
   </header>
   <nav class="tabs" aria-label="Années"><div class="tabs-in" role="tablist" id="tabs"></div></nav>
   <main id="chapters"></main>
-  <footer>VisualMaths</footer>
+  <footer>
+    <p class="f-sign">VisualMaths · conçu par D.R, enseignant de mathématiques</p>
+    <p>Réalisé avec l’aide de l’IA (Claude, Anthropic) · voix de synthèse VoxCPM</p>
+    <p>Musiques&nbsp;: Kevin MacLeod (incompetech.com), licence CC BY 4.0 · effets sonores&nbsp;: Pixabay<br>Images de jeux vidéo (Doom, Quake, Super Mario Bros.)&nbsp;: © leurs éditeurs, utilisées à titre d’illustration pédagogique</p>
+  </footer>
 </div>
 <script>
 /* ============================================================
