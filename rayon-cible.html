@@ -135,7 +135,7 @@ table.cmp th{ font-size:.82em; color:var(--muted); font-weight:700; }
 <div class="stage" id="stage">
   <canvas id="gl3" style="pointer-events:none"></canvas>
   <canvas id="c" aria-label="Animation : un tir de jeu vidéo touche-t-il une cible ronde ? Une équation du deuxième degré et le signe du discriminant décident ; en 3D, le même calcul sert au lancer de rayons."></canvas>
-  <div class="title" id="title"><div><h1>Touché ou raté ?</h1><p>Équations du 2<sup>e</sup> degré · le calcul au cœur des jeux vidéo</p></div></div>
+  <div class="title" id="title"><div><h1>Touché ou raté ?</h1><p>Équations du 2<sup>e</sup> degré – le calcul au cœur des jeux vidéo</p></div></div>
   <div class="card" id="card" style="opacity:0">
     <div class="sec" id="s1">
       <h3>Le tir touche-t-il la cible ?</h3>
@@ -147,17 +147,17 @@ table.cmp th{ font-size:.82em; color:var(--muted); font-weight:700; }
       <div class="line big" id="a3">1,25<span class="m cX">x</span><sup>2</sup> + 2,5<span class="m cX">x</span> − 18,75 = 0</div>
       <div class="line" id="a4">Δ = 2,5<sup>2</sup> − 4 · 1,25 · (−18,75) = <b>100</b> &gt; 0</div>
       <div class="line" id="a5"><span class="m cX">x</span> = <span class="fr"><span>−2,5 ± 10</span><span>2,5</span></span> → <span class="m cX">x</span> = 3 ou <span class="m cX">x</span> = −5</div>
-      <div class="line" id="a6">entrée (−5 ; 0) · sortie (3 ; 4)</div>
+      <div class="line" id="a6">entrée (−5 ; 0) et sortie (3 ; 4)</div>
     </div>
     <div class="sec" id="s2" style="display:none">
       <h3>D’autres tirs</h3>
-      <div class="row" id="b0"><span>tir 1</span><span>Δ = 100 &gt; 0 · <b class="cG">touché</b></span></div>
+      <div class="row" id="b0"><span>tir 1</span><span>Δ = 100 &gt; 0  <b class="cG">touché</b></span></div>
       <div class="line tag" id="b0e"><span class="m">y</span> = ½<span class="m cX">x</span> + 2,5 → 1,25<span class="m cX">x</span><sup>2</sup> + 2,5<span class="m cX">x</span> − 18,75 = 0</div>
       <div class="hr"></div>
-      <div class="row" id="b1"><span>tir 2</span><span>Δ = 0 · <b class="cO">frôlé</b></span></div>
+      <div class="row" id="b1"><span>tir 2</span><span>Δ = 0  <b class="cO">frôlé</b></span></div>
       <div class="line tag" id="b1e"><span class="m">y</span> = 5 → <span class="m cX">x</span><sup>2</sup> + 25 = 25 → <span class="m cX">x</span><sup>2</sup> = 0</div>
       <div class="hr"></div>
-      <div class="row" id="b2"><span>tir 3</span><span>Δ = −71 &lt; 0 · <b class="cR">raté</b></span></div>
+      <div class="row" id="b2"><span>tir 3</span><span>Δ = −71 &lt; 0  <b class="cR">raté</b></span></div>
       <div class="line tag" id="b2e"><span class="m">y</span> = ½<span class="m cX">x</span> + 7 → 1,25<span class="m cX">x</span><sup>2</sup> + 7<span class="m cX">x</span> + 24 = 0</div>
       <div class="hr"></div>
       <div class="line tag" id="b4" style="white-space:normal">le signe de Δ suffit : pas besoin de calculer les solutions</div>
@@ -168,9 +168,9 @@ table.cmp th{ font-size:.82em; color:var(--muted); font-weight:700; }
       <div class="line tag" id="c0">tir : une droite de l’espace, de paramètre <span class="m cX">t</span></div>
       <div class="line" id="c1">→ une équation du 2<sup>e</sup> degré en <span class="m cX">t</span></div>
       <div class="hr"></div>
-      <div class="row" id="d1"><span class="cG">tir vert</span><span>Δ &gt; 0 · 2 points · <b class="cG">touché</b></span></div>
-      <div class="row" id="d2"><span class="cO">tir orange</span><span>Δ = 0 · 1 point · <b class="cO">frôlé</b></span></div>
-      <div class="row" id="d3"><span class="cR">tir rouge</span><span>Δ &lt; 0 · 0 point · <b class="cR">raté</b></span></div>
+      <div class="row" id="d1"><span class="cG">tir vert</span><span>Δ &gt; 0  2 points  <b class="cG">touché</b></span></div>
+      <div class="row" id="d2"><span class="cO">tir orange</span><span>Δ = 0  1 point  <b class="cO">frôlé</b></span></div>
+      <div class="row" id="d3"><span class="cR">tir rouge</span><span>Δ &lt; 0  0 point  <b class="cR">raté</b></span></div>
       <div class="hr"></div>
       <div class="line tag" id="c5">le plus petit <span class="m cX">t</span> donne le point d’impact</div>
     </div>
@@ -181,7 +181,7 @@ table.cmp th{ font-size:.82em; color:var(--muted); font-weight:700; }
       <div class="row" id="e3"><span>3. Δ ≥ 0 → <b class="cB">couleur de l’objet</b></span><span></span></div>
       <div class="row" id="e4"><span>&nbsp;&nbsp;&nbsp;&nbsp;Δ &lt; 0 → couleur du fond</span><span></span></div>
       <div class="row" id="e6"><span>4. du point touché : rayon vers la lampe</span><span></span></div>
-      <div class="row" id="e7"><span>&nbsp;&nbsp;&nbsp;&nbsp;Δ &gt; 0 → <b class="cO">ombre</b> · Δ &lt; 0 → éclairé</span><span></span></div>
+      <div class="row" id="e7"><span>&nbsp;&nbsp;&nbsp;&nbsp;Δ &gt; 0 → <b class="cO">ombre</b> et Δ &lt; 0 → éclairé</span><span></span></div>
       <div class="hr"></div>
       <div class="line tag" id="e5" style="white-space:normal">c’est le <b>lancer de rayons</b> (ray tracing)</div>
     </div>
@@ -553,8 +553,8 @@ table.cmp th{ font-size:.82em; color:var(--muted); font-weight:700; }
     const flat = (L, nw, nh, t0, txt) => { const kk = clamp((T - t0)/.6), w = aw*(portrait() ? .44 : .3), h = w*nh/nw, x = a.x0 + 8, y = a.y0 + 8, pw = w/nw, ph = h/nh; ctx.globalAlpha = al*kk;
       ctx.fillStyle = 'rgba(6,8,22,.95)'; roundRect(x - 6, y - 6, w + 12, h + 30, 10); ctx.fill(); L.forEach(px => { ctx.fillStyle = 'rgb(' + px.col.map(Math.round).join(',') + ')'; ctx.fillRect(x + px.i*pw, y + px.j*ph, pw + .5, ph + .5); });
       text(txt, x + w/2, y + h + 13, Math.max(10, w*.05), css('--muted'), 'center', 700); ctx.globalAlpha = al; };
-    if (T >= K.sh3 + 5.6) flat(DPIX2, NW2, NH2, K.sh3 + 5.6, 'l’image avec l’ombre · ' + NW2 + ' × ' + NH2 + ' pixels');
-    else if (T >= K.rt3 + 5.6 && T < K.sh1) flat(DPIX, DG.NW, DG.NH, K.rt3 + 5.6, 'l’image obtenue · ' + DG.NW + ' × ' + DG.NH + ' pixels');
+    if (T >= K.sh3 + 5.6) flat(DPIX2, NW2, NH2, K.sh3 + 5.6, 'l’image avec l’ombre – ' + NW2 + ' × ' + NH2 + ' pixels');
+    else if (T >= K.rt3 + 5.6 && T < K.sh1) flat(DPIX, DG.NW, DG.NH, K.rt3 + 5.6, 'l’image obtenue – ' + DG.NW + ' × ' + DG.NH + ' pixels');
     ctx.restore(); }
 
   // ---------- image calculée par lancer de rayons ----------
@@ -578,7 +578,7 @@ table.cmp th{ font-size:.82em; color:var(--muted); font-weight:700; }
     ctx.save(); ctx.globalAlpha = al*clamp((T - K.rt4)/.6); ctx.fillStyle = 'rgba(6,8,22,.92)'; roundRect(x - 8, y - 8, w + 16, h + 40, 14); ctx.fill(); ctx.strokeStyle = 'rgba(255,255,255,.18)'; ctx.lineWidth = 1; ctx.stroke();
     ctx.imageSmoothingEnabled = true; ctx.drawImage(RT.off, x, y, w, h);
     if (rows < RH){ const ly = y + rows/RH*h; ctx.fillStyle = 'rgba(255,243,176,.9)'; glowOn('#fff3b0', 12); ctx.fillRect(x, ly, w, 2); glowOff(); text('rayon n° ' + (rows*RW).toLocaleString('fr-CH') + ' / ' + (RW*RH).toLocaleString('fr-CH'), x + w/2, y + h + 18, Math.max(10, w*.03), css('--muted'), 'center', 700); }
-    else text('image calculée par lancer de rayons · reflets et ombres', x + w/2, y + h + 18, Math.max(10, w*.03), css('--muted'), 'center', 700);
+    else text('image calculée par lancer de rayons – reflets et ombres', x + w/2, y + h + 18, Math.max(10, w*.03), css('--muted'), 'center', 700);
     ctx.restore(); }
 
   // ---------- rendu ----------
@@ -690,10 +690,10 @@ table.cmp th{ font-size:.82em; color:var(--muted); font-weight:700; }
     const msg = (t, col, sub) => { const w = Math.min(W*.9, 520), h = sub ? fs*5 : fs*3.2, cy = (F.y0 + F.y1)/2; ctx.fillStyle = 'rgba(5,8,25,.78)'; roundRect(W/2 - w/2, cy - h/2, w, h, 14); ctx.fill();
       glowOn(col, 18); text(t, W/2, cy - (sub ? fs*.8 : 0), fs*1.6, col, 'center', 800); glowOff(); if (sub) text(sub, W/2, cy + fs*1.1, fs*.85, '#e6ebff', 'center', 600); };
     const el = ((GA.tEnd || now) - GA.t0)/1000;
-    if (GA.phase === 'intro') msg('Niveau ' + (GA.lv + 1), '#ffd23f', L.txt + (GA.lv === 0 ? ' · détruis-les tous, ramasse les armes !' : ''));
+    if (GA.phase === 'intro') msg('Niveau ' + (GA.lv + 1), '#ffd23f', L.txt + (GA.lv === 0 ? ' – détruis-les tous, ramasse les armes !' : ''));
     else if (GA.phase === 'lvwin') msg('Niveau réussi !', '#6dff94', 'plus aucun astéroïde');
     else if (GA.phase === 'over') msg('Vaisseau détruit !', '#ff6b80', (TOUCH ? 'touche' : 'appuie sur espace') + ' pour recommencer le niveau');
-    else if (GA.phase === 'won') msg('Bravo, tous les niveaux sont réussis !', '#6dff94', Math.floor(el) + ' s · ' + (TOUCH ? 'touche' : 'appuie sur espace') + ' pour rejouer'); }
+    else if (GA.phase === 'won') msg('Bravo, tous les niveaux sont réussis !', '#6dff94', Math.floor(el) + ' s – ' + (TOUCH ? 'touche' : 'appuie sur espace') + ' pour rejouer'); }
   function gaRetry(){ const now = performance.now(); if (GA.phase === 'over' && now - GA.tPh > 800) gaLevel(GA.lv); else if (GA.phase === 'won' && now - GA.tPh > 1200) gaReset(); }
   if (!REC){
     window.addEventListener('keydown', e => { if (!GA.on) return; const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;

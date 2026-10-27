@@ -158,7 +158,7 @@ canvas{ position:absolute; inset:0; display:block; width:100%; height:100%; }
 <div class="stage" id="stage">
   <canvas id="c" aria-label="Animation 3D : des droites partent de l'œil vers les sommets d'un cube ; leurs intersections avec le plan de l'écran donnent l'image en perspective"></canvas>
   <div id="labels"></div>
-  <div class="title" id="title"><div><p style="margin:0 0 .6em">Application · intersection d’une droite et d’un plan</p><h1>Du robot 3D<br>à l’image sur l’écran</h1></div></div>
+  <div class="title" id="title"><div><p style="margin:0 0 .6em">Application – intersection d’une droite et d’un plan</p><h1>Du robot 3D<br>à l’image sur l’écran</h1></div></div>
   <div class="card" id="card" style="opacity:0">
     <div class="blk">
       <div class="line"><span class="m cE">E</span><span class="cE">(2 ; 0 ; 3)</span> l’œil&emsp;<span id="scr" style="opacity:0">écran&nbsp;: <span class="cS">x = 0</span></span></div>
@@ -337,8 +337,8 @@ canvas{ position:absolute; inset:0; display:block; width:100%; height:100%; }
     const o = {el, col, pos:new THREE.Vector3(), a:0, dx:0, dy:0}; labels.push(o); return o; }
   const LX = label('<span class="m">x</span>', '--x'), LY = label('<span class="m">y</span>', '--y'), LZ = label('<span class="m">z</span>', '--z'), LO = label('<span class="m">O</span>', '--muted');
   LX.pos.copy(M(4,0,0)); LY.pos.copy(M(0,6,0)); LZ.pos.copy(M(0,0,5.5)); LO.pos.copy(M(0,0,0)); LO.dx = 12; LO.dy = 14;
-  const LScr = label('écran · plan <b>yOz</b> · <span class="m">x</span> = 0', null, 'plane'); LScr.el.style.color = '#7fd8ff'; LScr.pos.copy(M(0, SY[1]-.2, SZ[1]+.1)); LScr.dy = -14;
-  const LE = label('<span class="m">E</span>(2 ; 0 ; 3) · œil', '--A'); LE.pos.copy(Mv(E)); LE.dy = 30;
+  const LScr = label('écran : plan <b>yOz</b> : <span class="m">x</span> = 0', null, 'plane'); LScr.el.style.color = '#7fd8ff'; LScr.pos.copy(M(0, SY[1]-.2, SZ[1]+.1)); LScr.dy = -14;
+  const LE = label('<span class="m">E</span>(2 ; 0 ; 3)  œil', '--A'); LE.pos.copy(Mv(E)); LE.dy = 30;
   const LPt = [IP, IQ].map(i => { const l = label('<span class="m">' + NAMES[i] + '</span>(' + V[i].map(fr).join(' ; ') + ')', '--C'); l.pos.copy(Mv(V[i])); l.dy = i === IP ? 22 : -22; l.dx = i === IP ? 30 : -30; return l; });
   const LPi = [IP, IQ].map(i => { const l = label('<span class="m">' + NAMES[i] + '’</span>(' + IMG[i].Q.map(fr).join(' ; ') + ')', null); l.el.style.color = '#7fd8ff'; l.pos.copy(Mv(IMG[i].Q)); l.dx = 62; l.dy = i === IP ? -10 : 12; return l; });
   const tmp = new THREE.Vector3();
