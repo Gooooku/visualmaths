@@ -132,20 +132,20 @@ table.cmp th{ font-size:.82em; color:var(--muted); font-weight:700; }
 <body>
 <div class="stage" id="stage">
   <canvas id="c" aria-label="Animation : deux applications d'équations du premier degré avec un paramètre — seuil de rentabilité et résistance d'une LED"></canvas>
-  <div class="title" id="title"><div><h1>Une équation, un paramètre</h1><p>Équations du 1<sup>er</sup> degré · deux métiers, une méthode</p></div></div>
+  <div class="title" id="title"><div><h1>Une équation, un paramètre</h1><p>Équations du 1<sup>er</sup> degré – deux métiers, une méthode</p></div></div>
   <div class="card" id="card" style="opacity:0">
     <div class="sec" id="s0">
       <h3>Un paramètre</h3>
       <div class="line big">2<span class="m cX">x</span> + <span class="m cPa">m</span> = 0</div>
-      <div class="line tag"><span class="m cX">x</span> : l’inconnue · <span class="m cPa">m</span> : le paramètre</div>
+      <div class="line tag"><span class="m cX">x</span> : l’inconnue et <span class="m cPa">m</span> : le paramètre</div>
       <div class="hr"></div>
       <div class="line" id="i0">2<span class="m cX">x</span> = −<span class="m cPa">m</span></div>
       <div class="line big" id="i1"><span class="m cX">x</span> = <span class="fr"><span>−<span class="m cPa">m</span></span><span>2</span></span></div>
       <div class="line tag" id="i2">une seule résolution, valable pour tous les <span class="m cPa">m</span></div>
     </div>
     <div class="sec" id="s1" style="display:none">
-      <h3>1 · Seuil de rentabilité</h3>
-      <div class="line"><span class="cO">coûts</span> = 2000 + 15<span class="m cX">x</span> · <span class="cV">recettes</span> = <span class="m cPa">p</span><span class="m cX">x</span></div>
+      <h3>1. Seuil de rentabilité</h3>
+      <div class="line"><span class="cO">coûts</span> = 2000 + 15<span class="m cX">x</span> et <span class="cV">recettes</span> = <span class="m cPa">p</span><span class="m cX">x</span></div>
       <div class="hr"></div>
       <div class="line" id="a0"><span class="m cPa">p</span><span class="m cX">x</span> = 2000 + 15<span class="m cX">x</span></div>
       <div class="line" id="a1">(<span class="m cPa">p</span> − 15)<span class="m cX">x</span> = 2000 <span class="tag">marge par pièce : <span class="m cPa">p</span> − 15</span></div>
@@ -157,7 +157,7 @@ table.cmp th{ font-size:.82em; color:var(--muted); font-weight:700; }
       <div class="row" id="a6"><span><span class="m cPa">p</span> = 10</span><span class="cR"><span class="m cX">x</span> = −400 : impossible</span></div>
     </div>
     <div class="sec" id="s2" style="display:none">
-      <h3>2 · Résistance d’une LED</h3>
+      <h3>2. Résistance d’une LED</h3>
       <div class="line"><span class="m cPa">U</span> = 2 + <span class="m cX">R</span> · 0,02 <span class="tag">(2 V ; 20 mA = 0,02 A)</span></div>
       <div class="hr"></div>
       <div class="line" id="b0"><span class="m cX">R</span> · 0,02 = <span class="m cPa">U</span> − 2</div>
@@ -176,7 +176,7 @@ table.cmp th{ font-size:.82em; color:var(--muted); font-weight:700; }
       <div class="row" id="d1"><span><span class="m cPa">p</span> − 15 = 0</span><span>⇔ <span class="m cPa">p</span> = 15</span></div>
       <div class="row" id="d3"><span>0,02 ≠ 0</span><span class="cG">toujours divisible</span></div>
       <div class="line" id="d4" style="white-space:normal">3. la solution a-t-elle un sens dans la réalité ?</div>
-      <div class="line tag" id="d5">−400 pièces · −25 Ω · 0 Ω : non !</div>
+      <div class="line tag" id="d5">−400 pièces  −25 Ω  0 Ω : non !</div>
     </div>
   </div>
   <div class="caption" id="caption" style="opacity:0"><i class="bar"></i><span id="captxt"></span></div>
@@ -416,7 +416,7 @@ table.cmp th{ font-size:.82em; color:var(--muted); font-weight:700; }
     titleEl.style.opacity = clamp((T-.2)/.6)*(1 - clamp((T-3.4)/.6));
     const a = area();
     if (T >= K.i[0] && T < K.p1.t) intro(a, T, win(T, K.i[0], K.p1.t));
-    heading(T, K.p1.t, '1 · SEUIL DE RENTABILITÉ', 'L’atelier'); heading(T, K.p2.t, '2 · ÉLECTRONIQUE', 'La LED'); 
+    heading(T, K.p1.t, '1. SEUIL DE RENTABILITÉ', 'L’atelier'); heading(T, K.p2.t, '2. ÉLECTRONIQUE', 'La LED'); 
     if (T >= K.p1.sc && T < K.p2.t) atelier(a, T, win(T, K.p1.sc, K.p2.t));
     if (T >= K.p2.sc && T < K.c[0] + 1) led(a, T, T < K.c[0] ? win(T, K.p2.sc, 999) : 1 - clamp((T - K.c[0])/.8));
     if (T >= K.c[0]) domains(T);

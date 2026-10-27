@@ -340,11 +340,11 @@ table.cmp th{ font-size:.82em; color:var(--muted); font-weight:700; }
       const ms = mr/26; G_GEMS.forEach((p, i) => { if (!got[i]) dot(mx + p[0]*ms, my - p[1]*ms, 2.2, i % 2 ? PB : CY); }); ctx.fillStyle = '#c98a3d'; ctx.fillRect(mx - 1.4*ms, my - 1.4*ms, 2.8*ms, 2.8*ms);
       ctx.save(); ctx.translate(mx + rb.x*ms, my - rb.z*ms); ctx.rotate(rb.h); ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.moveTo(0, -6); ctx.lineTo(4, 4); ctx.lineTo(-4, 4); ctx.closePath(); ctx.fill(); ctx.restore(); ctx.restore(); }
     if (xray){ label(x0 + w/2, y0 + sz*1.6, 'rayons X : le décor est défini par ses coins', PB, sz); }
-    if (PLAY.on && !PLAY.won){ ctx.globalAlpha = al; label(x0 + w/2, y0 + h - sz*1.4, 'flèches / ZQSD ou glisse le doigt · touche X : rayons X', '#ffffff', sz*.85); }
+    if (PLAY.on && !PLAY.won){ ctx.globalAlpha = al; label(x0 + w/2, y0 + h - sz*1.4, 'flèches / ZQSD ou glisse le doigt – touche X : rayons X', '#ffffff', sz*.85); }
     if (PLAY.on && PLAY.won){ const k = clamp((performance.now() - PLAY.wonAt)/600), big = Math.min(w*.14, h*.2)*(1.4 - .4*ease(k));
       ctx.globalAlpha = al*k; ctx.fillStyle = 'rgba(5,7,20,.55)'; ctx.fillRect(x0, y0, w, h);
       ctx.save(); glowOn(PB, 24); text('GAME OVER', x0 + w/2, y0 + h*.44, big, '#ffffff', 'center', 800); glowOff(); ctx.restore();
-      text('6 / 6 gemmes · bravo !', x0 + w/2, y0 + h*.44 + big*.85, big*.3, GRN, 'center', 800);
+      text('6 / 6 gemmes – bravo !', x0 + w/2, y0 + h*.44 + big*.85, big*.3, GRN, 'center', 800);
       text('touche R ou touche l’écran pour rejouer', x0 + w/2, y0 + h*.44 + big*1.3, big*.2, '#cfd6ff', 'center', 600); }
     ctx.restore(); }
   // ---------- la partie jouable (après la vidéo) ----------

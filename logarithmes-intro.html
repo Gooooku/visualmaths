@@ -126,7 +126,7 @@ table.cmp th{ font-size:.82em; color:var(--muted); font-weight:700; }
 <body>
 <div class="stage" id="stage">
   <canvas id="c" aria-label="Animation : histoire et idée des logarithmes, transformer une multiplication en addition"></canvas>
-  <div class="title" id="title"><div><h1>Pourquoi les logarithmes&nbsp;?</h1><p>Introduction · une idée qui a changé les calculs</p></div></div>
+  <div class="title" id="title"><div><h1>Pourquoi les logarithmes&nbsp;?</h1><p>Introduction – une idée qui a changé les calculs</p></div></div>
   <div class="card" id="card" style="opacity:0">
     <div class="sec" id="sA">
       <h3>Multiplier avec une addition</h3>
@@ -135,15 +135,15 @@ table.cmp th{ font-size:.82em; color:var(--muted); font-weight:700; }
       <div class="line" id="a2">3 + 5 = <b class="cG">8</b></div>
       <div class="line big" id="a3">8 × 32 = 2<sup>8</sup> = <b class="cG">256</b></div>
       <div class="hr"></div>
-      <div class="line" id="a4">log<sub>2</sub>(8) = 3 &nbsp;·&nbsp; log<sub>2</sub>(32) = 5</div>
+      <div class="line" id="a4">log<sub>2</sub>(8) = 3 et log<sub>2</sub>(32) = 5</div>
       <div class="line big" id="a5">log(<span class="m">a</span> × <span class="m">b</span>) = log <span class="m">a</span> + log <span class="m">b</span></div>
     </div>
     <div class="sec" id="sB" style="display:none">
       <h3>Quelques dates</h3>
-      <div class="line" id="b0"><b class="cG">1614</b> · John Napier invente les logarithmes</div>
-      <div class="line" id="b1"><b class="cG">1617</b> · Henry Briggs&nbsp;: tables en base 10</div>
-      <div class="line" id="b2"><b class="cG">1622</b> · la règle à calcul</div>
-      <div class="line" id="b3"><b class="cG">1627</b> · Kepler&nbsp;: tables des planètes</div>
+      <div class="line" id="b0"><b class="cG">1614</b> – John Napier invente les logarithmes</div>
+      <div class="line" id="b1"><b class="cG">1617</b> – Henry Briggs&nbsp;: tables en base 10</div>
+      <div class="line" id="b2"><b class="cG">1622</b> – la règle à calcul</div>
+      <div class="line" id="b3"><b class="cG">1627</b> – Kepler&nbsp;: tables des planètes</div>
     </div>
     <div class="sec" id="sC" style="display:none">
       <h3>Avec une table de logarithmes</h3>
@@ -361,7 +361,7 @@ table.cmp th{ font-size:.82em; color:var(--muted); font-weight:700; }
   function drawHist(T, al){ const a = area(), y = a.y1 - 30, x0 = a.x0 + 20, x1 = a.x1 - 20, X = yr => lerp(x0, x1, (yr - 1590)/50); ctx.globalAlpha = al;
     ctx.strokeStyle = 'rgba(230,235,255,.8)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x1, y); ctx.stroke();
     for (let yr=1590;yr<=1640;yr+=10){ ctx.beginPath(); ctx.moveTo(X(yr), y - 6); ctx.lineTo(X(yr), y + 6); ctx.stroke(); text(String(yr), X(yr), y + 18, 12, css('--muted'), 'center', 600); }
-    const EV = [[1614, K.h[0], 'John Napier', 'écossais'], [1617, K.h[1], 'Henry Briggs', 'anglais · base 10'], [1622, K.h[2], 'règle à calcul', 'William Oughtred'], [1627, K.h[3], 'Johannes Kepler', 'tables des planètes']];
+    const EV = [[1614, K.h[0], 'John Napier', 'écossais'], [1617, K.h[1], 'Henry Briggs', 'anglais – base 10'], [1622, K.h[2], 'règle à calcul', 'William Oughtred'], [1627, K.h[3], 'Johannes Kepler', 'tables des planètes']];
     let cur = -1; EV.forEach((e, i) => { if (T >= e[1]) cur = i; });
     EV.forEach(([yr, t0, nm, sub], i) => { if (T < t0) return; const k = back(clamp((T - t0)/.6)); dot(X(yr), y, 6*k, i === cur ? '#fff' : 'rgba(255,255,255,.55)', i === cur); if (i === cur) text(String(yr), X(yr), y - 18, Math.max(14, W*.016), '#fff', 'center', 800); });
     if (cur >= 0){ const [yr, t0, nm, sub] = EV[cur], k = ease(clamp((T - t0)/.8)), cx = (a.x0 + a.x1)/2, cy = a.y0 + (a.y1 - a.y0)*.38, bw = Math.min((a.x1 - a.x0)*.42, 320);
