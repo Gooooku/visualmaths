@@ -401,7 +401,7 @@ table.cmp th{ font-size:.82em; color:var(--muted); font-weight:700; }
   function drawClip(R, al){ if (al <= 0) return; const { x0, y0, w, h } = R; ctx.save(); ctx.globalAlpha = al; ctx.fillStyle = '#000'; ctx.fillRect(x0, y0, w, h);
     const HI = CLIP_HOLD != null ? HOLDIMG[Math.round(CLIP_HOLD*60)] : null, SRC = HI && HI.complete && HI.naturalWidth ? HI : (CLIP.readyState >= 2 && CLIP.videoWidth ? CLIP : null);
     if (SRC){ const vw = SRC.videoWidth || SRC.naturalWidth, vh = SRC.videoHeight || SRC.naturalHeight, s = Math.min(w/vw, h/vh), dw = vw*s, dh = vh*s; ctx.imageSmoothingEnabled = false; ctx.drawImage(SRC, x0 + (w - dw)/2, y0 + (h - dh)/2, dw, dh); ctx.imageSmoothingEnabled = true; }
-    const fs = Math.max(9, Math.min(11, w*.016)); text('Super Mario Bros. (1985) © Nintendo · extrait de jeu', x0 + 12, y0 + h - fs*1.2, fs, 'rgba(255,255,255,.75)', 'left', 600); ctx.restore(); }
+    const fs = Math.max(9, Math.min(11, w*.016)); text('Super Mario Bros. (1985) © Nintendo – extrait de jeu', x0 + 12, y0 + h - fs*1.2, fs, 'rgba(255,255,255,.75)', 'left', 600); ctx.restore(); }
   function questions(R, T, al){ if (al <= 0) return; const { x0, y0, w, h } = R, sz = Math.max(13, Math.min(w*.034, 22)), k = clamp((T - K.q)/.5); if (k <= 0) return;
     ctx.save(); ctx.globalAlpha = al*k; const t = 'Comment est-ce possible ?'; ctx.font = '800 ' + sz + 'px Manrope'; const bw = ctx.measureText(t).width + sz*4.2, bh = sz*2.6, bx = x0 + (w - bw)/2, by = y0 + h*.1;
     ctx.translate(0, (1 - ease(k))*14); ctx.fillStyle = 'rgba(10,14,40,.92)'; roundRect(bx, by, bw, bh, 14); ctx.fill(); ctx.strokeStyle = rgba(ORA, .7); ctx.lineWidth = 2; ctx.stroke();

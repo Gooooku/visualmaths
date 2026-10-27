@@ -328,7 +328,7 @@ table.cmp th{ font-size:.82em; color:var(--muted); font-weight:700; }
   function panel(T, S){
     const cOp = clamp((T-K.blue)/.6); card.style.opacity = cOp; card.style.transform = 'translateY(' + (1-cOp)*10 + 'px)';
     if (S){ const e = S.e; const dirs = {'1,0':'→', '-1,0':'←', '0,1':'↑', '0,-1':'↓'};
-      $('blueL').innerHTML = 'se déplace <b class="cBl">au hasard</b>' + (T >= T0 ? '\u00a0: tirage → <b class="cBl">' + (dirs[e.bdir.join(',')] || '·') + '</b>' : '');
+      $('blueL').innerHTML = 'se déplace <b class="cBl">au hasard</b>' + (T >= T0 ? '\u00a0: tirage → <b class="cBl">' + (dirs[e.bdir.join(',')] || '…') + '</b>' : '');
       const r = e.red, b = e.bip, dx = Math.abs(r[0] - b[0]), dy = Math.abs(r[1] - b[1]);
       $('redD').innerHTML = T >= K.red ? '<span class="m">d</span> = |' + r[0] + ' − ' + b[0] + '| + |' + r[1] + ' − ' + b[1] + '| = ' + dx + ' + ' + dy + ' = <b class="' + (dx + dy < 5 ? 'cZ' : 'cS') + '">' + (dx + dy) + '</b>' : '&nbsp;';
       $('redF').style.opacity = clamp((T-K.red)/.5);
@@ -440,7 +440,7 @@ table.cmp th{ font-size:.82em; color:var(--muted); font-weight:700; }
     else if (GM.phase === 'lvwin') msg('Niveau réussi !', '#6dff94', 'toutes les étoiles sont ramassées');
     else if (GM.phase === 'caught') msg('Attrapé !', '#ff6b80', GM.lives > 0 ? 'il reste ' + GM.lives + ' vie' + (GM.lives > 1 ? 's' : '') : '');
     else if (GM.phase === 'over') msg('Perdu !', '#ff6b80', (TOUCH ? 'touche' : 'appuie sur espace') + ' pour recommencer le niveau');
-    else if (GM.phase === 'won') msg('Bravo, tous les niveaux sont réussis !', '#6dff94', Math.floor(el) + ' s · ' + (TOUCH ? 'touche' : 'appuie sur espace') + ' pour rejouer'); }
+    else if (GM.phase === 'won') msg('Bravo, tous les niveaux sont réussis !', '#6dff94', Math.floor(el) + ' s – ' + (TOUCH ? 'touche' : 'appuie sur espace') + ' pour rejouer'); }
   function gmRetry(){ if (GM.phase === 'over' && performance.now() - GM.tPh > 800){ gmLevel(GM.lv); } else if (GM.phase === 'won' && performance.now() - GM.tPh > 1200) gmReset(); }
   function padDir(p){ const P = GM.pad; if (!P) return null; const dx = p[0] - P.cx, dy = p[1] - P.cy, d = Math.hypot(dx, dy); if (d > P.r*1.25 || d < P.r*.12) return null;
     return Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? DIRS.R : DIRS.L) : (dy > 0 ? DIRS.D : DIRS.U); }

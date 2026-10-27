@@ -126,7 +126,7 @@ table.cmp th{ font-size:.82em; color:var(--muted); font-weight:700; }
 <body>
 <div class="stage" id="stage">
   <canvas id="c" aria-label="Animation : un circuit de jeu vidéo dont chaque virage est une courbe de Bézier cubique ; zoom sur un virage, construction point par point, puis tour complet en voiture"></canvas>
-  <div class="title" id="title"><div><h1>Les courbes de Bézier</h1><p>Application · fonctions polynomiales de degré 3</p></div></div>
+  <div class="title" id="title"><div><h1>Les courbes de Bézier</h1><p>Application – fonctions polynomiales de degré 3</p></div></div>
   <div class="card" id="card" style="opacity:0">
     <div class="sec" id="sA">
       <h3>Les 4 points de contrôle</h3>
@@ -354,7 +354,7 @@ table.cmp th{ font-size:.82em; color:var(--muted); font-weight:700; }
           const p = bez(SEGS[k], tt), p2 = bez(SEGS[k], Math.min(1, tt + .01)), dx = p2[0] - p[0], dy = p2[1] - p[1], dl = Math.hypot(dx, dy) || 1, q = [p[0] - dy/dl*off, p[1] + dx/dl*off];
           ctx.save(); ctx.globalAlpha = kScene*kr; ctx.translate(G.X(q[0]), G.Y(q[1])); ctx.rotate(Math.atan2(-dy, dx)); glowOn(col, 10); ctx.fillStyle = col; roundRect(-G.s*.42, -G.s*.2, G.s*.84, G.s*.4, G.s*.1); ctx.fill(); glowOff();
           ctx.fillStyle = '#1b2240'; roundRect(-G.s*.08, -G.s*.15, G.s*.26, G.s*.3, G.s*.06); ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,.35)'; for (let k2=1;k2<5;k2++) ctx.fillRect(-G.s*.42 - k2*G.s*.18, -G.s*.05, G.s*.1, G.s*.1); ctx.restore(); });
-        ctx.globalAlpha = kScene*kr; text('COURSE · 1 TOUR', a.x1 - 16, a.y0 + 18, 14, '#fff', 'right', 800);
+        ctx.globalAlpha = kScene*kr; text('COURSE – 1 TOUR', a.x1 - 16, a.y0 + 18, 14, '#fff', 'right', 800);
         if (el*.92 >= NA - .05){ const kw = back(clamp((el - (NA - .05)/.92)/.6)); for (let i=0;i<30;i++){ const ph2 = ((el - (NA - .05)/.92)*.6 + i*.137) % 1; ctx.fillStyle = ['#ff5a6e','#ffd23f','#4fc3ff','#6dff94','#c77dff'][i % 5]; ctx.fillRect(a.x0 + ((i*.377) % 1)*(a.x1 - a.x0), a.y0 + ph2*(a.y1 - a.y0), 6, 10); } ctx.globalAlpha = kScene; text('Victoire de la voiture rouge\u00a0!', (a.x0 + a.x1)/2, a.y0 + (a.y1 - a.y0)*.5, Math.max(18, G.s*.9)*kw, '#ff5a6e', 'center', 800); } }
       ctx.globalAlpha = 1; ctx.restore(); }
     // ---- la lettre « S » en courbes de Bézier ----
@@ -362,7 +362,7 @@ table.cmp th{ font-size:.82em; color:var(--muted); font-weight:700; }
       const G = { X: x => cxL + (x - (PTL ? 2.45 : 3.3))*sL, Y: y => cyL - (y - (PTL ? 1.5 : 3))*sL, s: sL };
       LETTER.forEach((Qs, j) => { const kk = clamp(k2*3 - j); if (kk <= 0) return; ctx.strokeStyle = '#fff'; ctx.lineWidth = G.s*.42; ctx.lineCap = 'round'; ctx.beginPath(); for (let i=0;i<=60;i++){ const p = bez(Qs, kk*i/60); i ? ctx.lineTo(G.X(p[0]), G.Y(p[1])) : ctx.moveTo(G.X(p[0]), G.Y(p[1])); } ctx.stroke(); ctx.lineCap = 'butt';
         if (T >= K.letters[1]){ seg(G, Qs[0], Qs[1], 'rgba(255,169,77,.9)', 1.5); seg(G, Qs[3], Qs[2], 'rgba(255,169,77,.9)', 1.5); handle(G, Qs[1], css('--c1')); handle(G, Qs[2], css('--c1')); dot(G.X(Qs[0][0]), G.Y(Qs[0][1]), 6, css('--c0'), true); dot(G.X(Qs[3][0]), G.Y(Qs[3][1]), 6, css('--c0'), true); } });
-      text('Aa', PTL ? cxL : G.X(7.4), PTL ? G.Y(-1.6) : G.Y(4.2), G.s*1.4, 'rgba(255,255,255,.85)', 'center', 800); text('polices · logos · dessins', PTL ? cxL : G.X(7.4), PTL ? G.Y(-2.9) : G.Y(2.8), Math.max(12, G.s*.28), css('--muted'), 'center', 800);
+      text('Aa', PTL ? cxL : G.X(7.4), PTL ? G.Y(-1.6) : G.Y(4.2), G.s*1.4, 'rgba(255,255,255,.85)', 'center', 800); text('polices – logos – dessins', PTL ? cxL : G.X(7.4), PTL ? G.Y(-2.9) : G.Y(2.8), Math.max(12, G.s*.28), css('--muted'), 'center', 800);
       ctx.globalAlpha = 1; }
     // ---------- panneau ----------
     const part = T < K.ctrl[1] ? null : T < K.formula[0] ? 'A' : T < K.dezoom[0] ? 'B' : null; const cOp = part ? clamp((T - K.ctrl[1])/.6) : 0; card.style.opacity = cOp; card.style.transform = 'translateY(' + (1-cOp)*10 + 'px)';

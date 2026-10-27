@@ -156,7 +156,7 @@ table.cmp th{ font-size:.82em; color:var(--muted); font-weight:700; }
     </div>
     <div class="sec" id="s3" style="display:none">
       <h3>Doom (1993)</h3>
-      <div class="row" id="c1"><span>avancer · pas de côté</span><span><span class="cX">50</span> · <span class="cP">40</span></span></div>
+      <div class="row" id="c1"><span>avancer  pas de côté</span><span><span class="cX">50</span>  <span class="cP">40</span></span></div>
       <div class="line" id="c2">√(<span class="cX">50</span>² + <span class="cP">40</span>²) ≈ <b class="cC">64</b> au lieu de 50</div>
       <div class="row bad" id="c3"><span><span class="fr"><span>64</span><span>50</span></span> ≈ 1,28</span><span><b>+28 %</b></span></div>
       <div class="line tag" id="c5" style="white-space:normal">les joueurs avaient découvert l’astuce : le <b>straferunning</b></div>
@@ -174,7 +174,7 @@ table.cmp th{ font-size:.82em; color:var(--muted); font-weight:700; }
     </div>
     <div class="sec" id="s5" style="display:none">
       <h3>Quake (1996) : toute diagonale</h3>
-      <div class="row" id="q1"><span>avancer · pas de côté</span><span><span class="cX">50</span> · <span class="cP">40</span></span></div>
+      <div class="row" id="q1"><span>avancer  pas de côté</span><span><span class="cX">50</span>  <span class="cP">40</span></span></div>
       <div class="row bad" id="q2"><span>longueur √(50² + 40²)</span><span>≈ 64 ✗</span></div>
       <div class="line" id="q3">× <span class="fr"><span><b class="cO">vitesse max</b></span><span><b class="cO">longueur</b></span></span> = <span class="fr"><span>50</span><span>64</span></span> ≈ <b class="cO">0,78</b></div>
       <div class="line" id="q4">(50 ; 40) → (<b>39</b> ; <b>31,2</b>)</div>
@@ -388,8 +388,8 @@ table.cmp th{ font-size:.82em; color:var(--muted); font-weight:700; }
     for (let i = 1; i <= np; i++){ const v = Math.min(i*stepP, Rr*Math.SQRT1_2), q = X([v, v]); dotC(q[0], q[1], 2, rgba(PB, .6)); }
     hero(X(pb), BLU, sz*.75); hero(X(pp), PB, sz*.75);
     const tB = t0 + 30/FPS, tP = t0 + Math.ceil(Rr/(stepP*Math.SQRT2) - 1e-9)/FPS;
-    if (T >= tP && T > t0){ const q = X([Rr*Math.SQRT1_2, Rr*Math.SQRT1_2]); label(q[0] + sz*2.4, q[1] - sz*2.6, corr ? (T >= tB ? '= ' : '') + fr((tP - t0)*FPS, 0) + ' images' : '1ᵉʳ · ' + fr((tP - t0)*FPS, 0) + ' images', PB, sz*.8); }
-    if (T >= tB && T > t0){ const q = X([Rr, 0]); label(q[0], q[1] + sz*1.6, (corr ? '' : '2ᵉ · ') + '30 images', BLU, sz*.8); }
+    if (T >= tP && T > t0){ const q = X([Rr*Math.SQRT1_2, Rr*Math.SQRT1_2]); label(q[0] + sz*2.4, q[1] - sz*2.6, corr ? (T >= tB ? '= ' : '') + fr((tP - t0)*FPS, 0) + ' images' : '1ᵉʳ : ' + fr((tP - t0)*FPS, 0) + ' images', PB, sz*.8); }
+    if (T >= tB && T > t0){ const q = X([Rr, 0]); label(q[0], q[1] + sz*1.6, (corr ? '' : '2ᵉ : ') + '30 images', BLU, sz*.8); }
     ctx.restore(); return { X, sc, ox, oy, lw }; }
   function loupe(R, T, al, mode){ // triangle d'un pas, agrandi
     const { x0, y0, w, h } = R, sz = Math.max(11, Math.min(w*.026, 16)), lw = portrait() ? w*.56 : w*.6, bx = x0 + lw + sz*.5, bw = w - lw - sz, by = y0 + h*.06, bh = h*.66;
@@ -602,17 +602,17 @@ table.cmp th{ font-size:.82em; color:var(--muted); font-weight:700; }
     // aide / commandes
     const touch = matchMedia('(pointer: coarse)').matches;
     { // rappel discret des commandes, toujours visible en haut à droite
-      const L = touch || portrait() ? ['joystick : avancer / pas de côté', 'glisser à droite : tourner', 'toucher : tirer'] : ['↑ / W : avancer · ↓ / S : reculer', '← → / A D : pas de côté', 'Q E ou souris : tourner', 'Espace : tirer · C : correction'];
+      const L = touch || portrait() ? ['joystick : avancer / pas de côté', 'glisser à droite : tourner', 'toucher : tirer'] : ['↑ / W : avancer – ↓ / S : reculer', '← → / A D : pas de côté', 'Q E ou souris : tourner', 'Espace : tirer – C : correction'];
       const fs = Math.max(9, Math.min(12, w*.012)), lh = fs*1.45, bw = Math.min(w*.42, fs*17), bx = x0 + w - bw - 8, by = y0 + 8;
       ctx.save(); ctx.globalAlpha = .78; ctx.fillStyle = 'rgba(12,10,8,.6)'; roundRect(bx, by, bw, lh*L.length + fs*.8, 6); ctx.fill();
       L.forEach((t, k) => text(t, bx + fs*.6, by + fs*.4 + lh*(k + .5), fs, '#e8dcc8', 'left', 600)); ctx.restore(); }
-    if (!PLAY.won && !PLAY.dead && el < 12){ ctx.globalAlpha = clamp((12 - el)/1); const hl = touch || portrait() ? ['joystick à gauche : ↑ et → en même temps = diagonale', 'glisse à droite : tourner · touche : tirer'] : ['↑ / W : avancer · ← → / A D : pas de côté · ↑ + → : diagonale !', 'Q E ou souris (clic glissé) : tourner · Espace : tirer · C : correction'];
+    if (!PLAY.won && !PLAY.dead && el < 12){ ctx.globalAlpha = clamp((12 - el)/1); const hl = touch || portrait() ? ['joystick à gauche : ↑ et → en même temps = diagonale', 'glisse à droite : tourner – touche : tirer'] : ['↑ / W : avancer – ← → / A D : pas de côté – ↑ + → : diagonale !', 'Q E ou souris (clic glissé) : tourner – Espace : tirer – C : correction'];
       hl.forEach((t, i) => label(x0 + w/2, y0 + V.h*(portrait() ? .36 : .2) + i*sz*1.9, t, '#ffffff', sz*.78)); ctx.globalAlpha = 1; }
     if (touch){ const jx = x0 + w*.18, jy = y0 + V.h*.7; ctx.strokeStyle = 'rgba(255,240,220,.35)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(jx, jy, 45, 0, Math.PI*2); ctx.stroke();
       const jj = PLAY.joy || [0, 0]; dotC(jx + Math.max(-45, Math.min(45, jj[0])), jy + Math.max(-45, Math.min(45, jj[1])), 18, 'rgba(255,240,220,.45)'); }
     if (PLAY.won || PLAY.dead){ const k = clamp((now - PLAY.tEnd)/600), big = Math.min(w*.13, V.h*.18)*(1.4 - .4*ease(k)); ctx.fillStyle = 'rgba(10,5,3,' + .55*k + ')'; ctx.fillRect(x0, y0, w, V.h);
       ctx.save(); ctx.globalAlpha = k; glowOn(PLAY.won ? '#ffb347' : '#e0281e', 24); text(PLAY.won ? 'BRAVO !' : 'GAME OVER', x0 + w/2, y0 + V.h*.42, big, '#ffffff', 'center', 800); glowOff();
-      text(PLAY.won ? '5 robots en ' + fr(el, 1) + ' s · correction ' + (PLAY.corr ? 'ON' : 'OFF') : 'les robots ont gagné…', x0 + w/2, y0 + V.h*.56, sz*1.1, '#f0e6d6', 'center', 700);
+      text(PLAY.won ? '5 robots en ' + fr(el, 1) + ' s – correction ' + (PLAY.corr ? 'ON' : 'OFF') : 'les robots ont gagné…', x0 + w/2, y0 + V.h*.56, sz*1.1, '#f0e6d6', 'center', 700);
       text('R ou touche l’écran pour rejouer', x0 + w/2, y0 + V.h*.64, sz*.9, '#cfc6b8', 'center', 600); ctx.restore(); }
     ctx.restore(); }
   if (!REC){ const KEYS = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'z', 'w', 's', 'q', 'a', 'd', 'e', ' '];
