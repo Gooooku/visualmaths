@@ -130,7 +130,7 @@ table.tr{ border-collapse:collapse; width:100%; font-variant-numeric:tabular-num
 <body>
 <div class="stage" id="stage">
   <canvas id="c" aria-label="Tour de magie : le magicien s'adresse au spectateur ; le calcul littéral montre que le résultat vaut toujours 4"></canvas>
-  <div class="title" id="title"><div><h1>Le tour de magie</h1><p>Calcul littéral · Bip lit dans tes pensées</p></div></div>
+  <div class="title" id="title"><div><h1>Le tour de magie</h1><p>Calcul littéral – Bip lit dans tes pensées</p></div></div>
   <div class="card" id="card" style="opacity:0">
     <div class="sec" id="sA">
       <h3>Les consignes</h3>
@@ -169,7 +169,7 @@ table.tr{ border-collapse:collapse; width:100%; font-variant-numeric:tabular-num
       <div class="line" id="g7">4 → <b class="cG">D</b> → <b>Danemark</b> → <b class="cG">K</b> → <b>kiwi</b></div>
     </div>
   </div>
-  <div id="pauseBox"><div class="in"><span>À vous&nbsp;: a) testez avec deux nombres · b) prouvez avec <i>n</i></span><button id="nextBtn">Voir la correction ▶</button></div></div>
+  <div id="pauseBox"><div class="in"><span>À vous&nbsp;: a) testez avec deux nombres – b) prouvez avec <i>n</i></span><button id="nextBtn">Voir la correction ▶</button></div></div>
   <div id="credit" style="position:absolute;left:12px;top:10px;z-index:5;font:600 11px Manrope,sans-serif;color:#cfd6ff;opacity:0;transition:opacity .6s;pointer-events:none">Musique : « AI Platforms » – The_Mountain (Pixabay)</div>
   <div class="caption" id="caption" style="opacity:0"><i class="bar"></i><span id="captxt"></span></div>
   <div class="ctrl"><a class="home" href="index.html" aria-label="Retour à l'accueil">← Accueil</a><button id="voice" aria-pressed="false">Activer la voix</button><button id="sound" aria-pressed="false">Activer le son</button><button id="pause">Pause</button><button id="replay">Rejouer</button></div>
@@ -323,7 +323,7 @@ table.tr{ border-collapse:collapse; width:100%; font-variant-numeric:tabular-num
     drawBip(a.x0 + fs*2.1, hy0 + hh*.56, hh*.26, T, 0);
     text('Bip', a.x0 + fs*3.9, hy0 + hh*.4, fs*1.05, '#fff', 'left', 800);
     const typing = CHAT.some(m => m.who === 'bip' && T >= m.t - .9 && T < m.t);
-    dot(a.x0 + fs*4.1, hy0 + hh*.7, fs*.22, '#6dff94', true); text(typing ? 'écrit…' : 'IA · en ligne', a.x0 + fs*4.6, hy0 + hh*.7, fs*.72, typing ? '#6dff94' : css('--muted'), 'left', 600);
+    dot(a.x0 + fs*4.1, hy0 + hh*.7, fs*.22, '#6dff94', true); text(typing ? 'écrit…' : 'IA – en ligne', a.x0 + fs*4.6, hy0 + hh*.7, fs*.72, typing ? '#6dff94' : css('--muted'), 'left', 600);
     // message épinglé : la prédiction, verrouillée depuis le début
     const py = hy0 + hh + fs*.5, ph = fs*2.6, unlocked = T >= K.reveal, ku = ease(clamp((T - K.reveal)/1.2));
     ctx.fillStyle = 'rgba(255,210,63,.08)'; roundRect(a.x0 + pad, py, aw - 2*pad, ph, 12); ctx.fill(); ctx.strokeStyle = 'rgba(255,210,63,.35)'; ctx.lineWidth = 1.2; ctx.stroke();
