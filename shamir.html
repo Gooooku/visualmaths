@@ -127,19 +127,19 @@ table.gen{ border-collapse:collapse; width:100%; font-variant-numeric:tabular-nu
 <body>
 <div class="stage" id="stage">
   <canvas id="c" aria-label="Animation : partager un code secret entre cinq personnes en le cachant dans l'ordonnée à l'origine d'une fonction ; il faut deux points pour une droite, trois pour une parabole"></canvas>
-  <div class="title" id="title"><div><h1>Le secret de Shamir</h1><p>Application · fonctions</p></div></div>
+  <div class="title" id="title"><div><h1>Le secret de Shamir</h1><p>Application – fonctions</p></div></div>
   <div class="card" id="card" style="opacity:0">
     <div class="sec" id="s1">
-      <h3>Degré 1 · il faut 2 points</h3>
+      <h3>Degré 1 – il faut 2 points</h3>
       <div class="line"><span class="m">f</span>(<span class="m">x</span>) = <span class="m">ax</span> + <span class="m">b</span></div>
-      <div class="line"><span class="m">b</span> = <b class="cS">42</b> <span class="mu">(secret)</span> · <span class="m">a</span> = 7 <span class="mu">(au hasard)</span></div>
+      <div class="line"><span class="m">b</span> = <b class="cS">42</b> <span class="mu">(secret)</span> et <span class="m">a</span> = 7 <span class="mu">(au hasard)</span></div>
       <div class="hr"></div>
-      <div class="line" id="d0">Bruno (2 ; 56) · David (4 ; 70)</div>
+      <div class="line" id="d0">Bruno (2 ; 56)  David (4 ; 70)</div>
       <div class="line" id="d1">pente = <span class="fr"><span>70 − 56</span><span>4 − 2</span></span> = <b>7</b></div>
       <div class="line" id="d2"><span class="m">f</span>(0) = 56 − 2 × 7 = <b class="cS">42</b></div>
     </div>
     <div class="sec" id="s2" style="display:none">
-      <h3 id="s2t">Degré 2 · il faut 3 points</h3>
+      <h3 id="s2t">Degré 2 – il faut 3 points</h3>
       <div class="line" id="s2f"></div>
       <div class="line" id="s2h"></div>
       <div class="hr"></div>
@@ -147,9 +147,9 @@ table.gen{ border-collapse:collapse; width:100%; font-variant-numeric:tabular-nu
         <div style="display:flex; align-items:center; gap:.3em">
           <span id="brace" style="font-family:'STIX Two Text', serif; font-size:4.4em; line-height:.9; font-weight:400; color:#cfd6ff">{</span>
           <div>
-            <div class="line" id="y0">4<span class="m">a</span> + 2<span class="m">b</span> + <span class="m">c</span> = 56 <span class="mu" style="font-size:.85em">· Bruno</span></div>
-            <div class="line" id="y1">16<span class="m">a</span> + 4<span class="m">b</span> + <span class="m">c</span> = 86 <span class="mu" style="font-size:.85em">· David</span></div>
-            <div class="line" id="y2">25<span class="m">a</span> + 5<span class="m">b</span> + <span class="m">c</span> = 107 <span class="mu" style="font-size:.85em">· Emma</span></div>
+            <div class="line" id="y0">4<span class="m">a</span> + 2<span class="m">b</span> + <span class="m">c</span> = 56 <span class="mu" style="font-size:.85em">  Bruno</span></div>
+            <div class="line" id="y1">16<span class="m">a</span> + 4<span class="m">b</span> + <span class="m">c</span> = 86 <span class="mu" style="font-size:.85em">  David</span></div>
+            <div class="line" id="y2">25<span class="m">a</span> + 5<span class="m">b</span> + <span class="m">c</span> = 107 <span class="mu" style="font-size:.85em">  Emma</span></div>
           </div>
         </div>
         <div class="line" id="y3">→ <span class="m">a</span> = 2, <span class="m">b</span> = 3, <b class="cS"><span class="m">c</span> = 42</b></div>
@@ -158,10 +158,10 @@ table.gen{ border-collapse:collapse; width:100%; font-variant-numeric:tabular-nu
         <div style="display:flex; align-items:center; gap:.3em">
           <span id="brace3" style="font-family:'STIX Two Text', serif; font-size:5.6em; line-height:.9; font-weight:400; color:#cfd6ff">{</span>
           <div>
-            <div class="line" id="z0"><span class="m">a</span> + <span class="m">b</span> + <span class="m">c</span> + <span class="m">d</span> = 1 <span class="mu" style="font-size:.85em">· Alice</span></div>
-            <div class="line" id="z1">8<span class="m">a</span> + 4<span class="m">b</span> + 2<span class="m">c</span> + <span class="m">d</span> = −10 <span class="mu" style="font-size:.85em">· Bruno</span></div>
-            <div class="line" id="z2">27<span class="m">a</span> + 9<span class="m">b</span> + 3<span class="m">c</span> + <span class="m">d</span> = −3 <span class="mu" style="font-size:.85em">· Chloé</span></div>
-            <div class="line" id="z3">125<span class="m">a</span> + 25<span class="m">b</span> + 5<span class="m">c</span> + <span class="m">d</span> = 17 <span class="mu" style="font-size:.85em">· Emma</span></div>
+            <div class="line" id="z0"><span class="m">a</span> + <span class="m">b</span> + <span class="m">c</span> + <span class="m">d</span> = 1 <span class="mu" style="font-size:.85em">  Alice</span></div>
+            <div class="line" id="z1">8<span class="m">a</span> + 4<span class="m">b</span> + 2<span class="m">c</span> + <span class="m">d</span> = −10 <span class="mu" style="font-size:.85em">  Bruno</span></div>
+            <div class="line" id="z2">27<span class="m">a</span> + 9<span class="m">b</span> + 3<span class="m">c</span> + <span class="m">d</span> = −3 <span class="mu" style="font-size:.85em">  Chloé</span></div>
+            <div class="line" id="z3">125<span class="m">a</span> + 25<span class="m">b</span> + 5<span class="m">c</span> + <span class="m">d</span> = 17 <span class="mu" style="font-size:.85em">  Emma</span></div>
           </div>
         </div>
         <div class="line" id="z4">→ <span class="m">a</span> = −2, <span class="m">b</span> = 21, <span class="m">c</span> = −60, <b class="cS"><span class="m">d</span> = 42</b></div>
@@ -437,9 +437,9 @@ table.gen{ border-collapse:collapse; width:100%; font-variant-numeric:tabular-nu
     const cOp = part ? clamp((T - K.d1[0])/.6) : 0; card.style.opacity = cOp; card.style.transform = 'translateY(' + (1-cOp)*10 + 'px)';
     [1, 2, 3].forEach(n => $('s' + n).style.display = part === n ? '' : 'none');
     if (part === 1){ $('d0').style.opacity = clamp((T - K.d1[4])/.5); $('d1').style.opacity = clamp((T - K.d1[5])/.5); $('d2').style.opacity = clamp((T - K.d1[5] - 1.5)/.5); }
-    if (part === 2){ const deg3 = T >= K.d3[0]; $('s2t').textContent = deg3 ? 'Degré 3 · il faut 4 points' : 'Degré 2 · il faut 3 points';
+    if (part === 2){ const deg3 = T >= K.d3[0]; $('s2t').textContent = deg3 ? 'Degré 3 – il faut 4 points' : 'Degré 2 – il faut 3 points';
       $('s2f').innerHTML = deg3 ? '<span class="m">f</span>(<span class="m">x</span>) = <span class="m">ax</span><sup>3</sup> + <span class="m">bx</span><sup>2</sup> + <span class="m">cx</span> + <span class="m">d</span>' : '<span class="m">f</span>(<span class="m">x</span>) = <span class="m">ax</span><sup>2</sup> + <span class="m">bx</span> + <span class="m">c</span>';
-      $('s2h').innerHTML = deg3 ? '<span class="m">d</span> = <b class="cS">42</b> <span class="mu">(secret)</span> · <span class="m">a</span>, <span class="m">b</span>, <span class="m">c</span> <span class="mu">au hasard</span>' : '<span class="m">c</span> = <b class="cS">42</b> <span class="mu">(secret)</span> · <span class="m">a</span>, <span class="m">b</span> <span class="mu">au hasard</span>';
+      $('s2h').innerHTML = deg3 ? '<span class="m">d</span> = <b class="cS">42</b> <span class="mu">(secret)</span> et <span class="m">a</span>, <span class="m">b</span>, <span class="m">c</span> <span class="mu">au hasard</span>' : '<span class="m">c</span> = <b class="cS">42</b> <span class="mu">(secret)</span> et <span class="m">a</span>, <span class="m">b</span> <span class="mu">au hasard</span>';
       $('sys').style.display = deg3 ? 'none' : ''; $('sys3').style.display = deg3 && T >= K.d3[3] ? '' : 'none';
       if (deg3){ ['z0','z1','z2','z3'].forEach((id, i) => $(id).style.opacity = clamp((T - K.d3[3] - .3 - i*.5)/.5)); $('brace3').style.opacity = clamp((T - K.d3[3])/.5); $('z4').style.opacity = clamp((T - K.d3[4])/.5); } ['y0','y1','y2'].forEach((id, i) => $(id).style.opacity = clamp((T - K.d2[3] - i*.6)/.5)); $('brace').style.opacity = clamp((T - K.d2[3])/.5); $('y3').style.opacity = clamp((T - K.d2[4])/.5);
       $('e0').innerHTML = deg3 ? (T < K.d3[3] ? '3 points\u00a0: plusieurs courbes possibles' : '') : (T < K.d2[3] ? '2 points\u00a0: une infinité de paraboles' : '');

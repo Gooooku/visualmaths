@@ -138,11 +138,11 @@ table.cmp th{ font-size:.82em; color:var(--muted); font-weight:700; }
   <div class="card" id="card" style="opacity:0">
     <div class="sec" id="s1">
       <h3>Le garde vous voit-il ?</h3>
-      <div class="row" id="a0"><span>garde</span><span><b>G</b>(5 ; 3) · repère à moins de <b class="cR">10 m</b></span></div>
+      <div class="row" id="a0"><span>garde</span><span><b>G</b>(5 ; 3)  repère à moins de <b class="cR">10 m</b></span></div>
       <div class="hr"></div>
-      <div class="row" id="a1"><span>J(17 ; 12)</span><span><span class="cX">12</span>² + <span class="cP">9</span>² = 225 · <span class="m">d</span> = <b>15</b> · <b class="cG">caché</b></span></div>
-      <div class="row" id="a2"><span>J(13 ; 9)</span><span><span class="cX">8</span>² + <span class="cP">6</span>² = 100 · <span class="m">d</span> = <b>10</b> · <b class="cO">limite</b></span></div>
-      <div class="row" id="a3"><span>J(11 ; 10)</span><span><span class="cX">6</span>² + <span class="cP">7</span>² = 85 · <span class="m">d</span> ≈ <b>9,2</b> · <b class="cR">repéré</b></span></div>
+      <div class="row" id="a1"><span>J(17 ; 12)</span><span><span class="cX">12</span>² + <span class="cP">9</span>² = 225  <span class="m">d</span> = <b>15</b>  <b class="cG">caché</b></span></div>
+      <div class="row" id="a2"><span>J(13 ; 9)</span><span><span class="cX">8</span>² + <span class="cP">6</span>² = 100  <span class="m">d</span> = <b>10</b>  <b class="cO">limite</b></span></div>
+      <div class="row" id="a3"><span>J(11 ; 10)</span><span><span class="cX">6</span>² + <span class="cP">7</span>² = 85  <span class="m">d</span> ≈ <b>9,2</b>  <b class="cR">repéré</b></span></div>
       <div class="hr"></div>
       <div class="line" id="a4"><span class="m">d</span><sup>2</sup> = (<span class="cX">écart en x</span>)<sup>2</sup> + (<span class="cP">écart en y</span>)<sup>2</sup></div>
       <div class="line big" id="a5"><span class="m">d</span> = √((<span class="m">x</span><sub>2</sub> − <span class="m">x</span><sub>1</sub>)<sup>2</sup> + (<span class="m">y</span><sub>2</sub> − <span class="m">y</span><sub>1</sub>)<sup>2</sup>)</div>
@@ -151,9 +151,9 @@ table.cmp th{ font-size:.82em; color:var(--muted); font-weight:700; }
       <h3>L’astuce des programmeurs</h3>
       <div class="line tag" style="white-space:normal">au lieu de <span class="m">d</span> &lt; 10, on teste <span class="m">d</span><sup>2</sup> &lt; 100 : pas de racine</div>
       <div class="hr"></div>
-      <div class="row" id="b1"><span><span class="m">d</span><sup>2</sup> = 225</span><span>225 &gt; 100 · <b class="cG">caché</b></span></div>
-      <div class="row" id="b2"><span><span class="m">d</span><sup>2</sup> = 100</span><span>100 n’est pas &lt; 100 · <b class="cO">pas encore</b></span></div>
-      <div class="row" id="b3"><span><span class="m">d</span><sup>2</sup> = 85</span><span>85 &lt; 100 · <b class="cR">repéré</b></span></div>
+      <div class="row" id="b1"><span><span class="m">d</span><sup>2</sup> = 225</span><span>225 &gt; 100  <b class="cG">caché</b></span></div>
+      <div class="row" id="b2"><span><span class="m">d</span><sup>2</sup> = 100</span><span>100 n’est pas &lt; 100  <b class="cO">pas encore</b></span></div>
+      <div class="row" id="b3"><span><span class="m">d</span><sup>2</sup> = 85</span><span>85 &lt; 100  <b class="cR">repéré</b></span></div>
       <div class="hr"></div>
       <div class="line" id="b4" style="white-space:normal">Unity : <span class="code">(joueur − garde).sqrMagnitude &lt; 10 * 10</span></div>
       <div class="line tag" id="b5" style="white-space:normal">sqrMagnitude = le carré de la distance, sans racine</div>
@@ -443,8 +443,8 @@ table.cmp th{ font-size:.82em; color:var(--muted); font-weight:700; }
     ctx.restore();
     const msg = (t, col, sz) => label(v.x0 + v.w/2, v.y0 + v.h*.45, t, col, sz || Math.max(18, v.s*1.1)), el = ((GM.won ? GM.tEnd : now) - GM.t0)/1000;
     if (GM.caught) msg('REPÉRÉ !', '#ff5a6e'); else if (GM.lvWin) msg(GM.lv < IL.length - 1 ? 'Niveau réussi !' : 'Mission accomplie !', '#4dff8c');
-    else if (GM.won){ msg('Mission accomplie !', '#4dff8c'); label(v.x0 + v.w/2, v.y0 + v.h*.6, fr(el, 0) + ' s · ' + GM.alerts + ' alerte' + (GM.alerts > 1 ? 's' : '') + ' · touche pour rejouer', '#e6ebff', Math.max(13, v.s*.6)); }
-    else if (now - GM.lvT0 < 3500) label(v.x0 + v.w/2, v.y0 + v.h*.1, 'Niveau ' + (GM.lv + 1) + ' · ' + L.nom, '#ffd23f', Math.max(15, v.s*.8));
+    else if (GM.won){ msg('Mission accomplie !', '#4dff8c'); label(v.x0 + v.w/2, v.y0 + v.h*.6, fr(el, 0) + ' s – ' + GM.alerts + ' alerte' + (GM.alerts > 1 ? 's' : '') + ' – touche pour rejouer', '#e6ebff', Math.max(13, v.s*.6)); }
+    else if (now - GM.lvT0 < 3500) label(v.x0 + v.w/2, v.y0 + v.h*.1, 'Niveau ' + (GM.lv + 1) + ' – ' + L.nom, '#ffd23f', Math.max(15, v.s*.8));
     gmHud(Ly, L, now); }
   // le radar : une petite carte avec les gardes et leurs cônes de vision
   function radarMap(x0, y0, w, L, now){ const h = w*16.5/24, rv = view({ x0, x1:x0 + w, y0, y1:y0 + h }); ctx.save(); ctx.fillStyle = 'rgba(6,30,24,.92)'; roundRect(x0, y0, w, h, 8); ctx.fill(); ctx.strokeStyle = '#4dffa8'; ctx.lineWidth = 1.2; roundRect(x0, y0, w, h, 8); ctx.stroke(); roundRect(x0, y0, w, h, 8); ctx.clip();
@@ -467,7 +467,7 @@ table.cmp th{ font-size:.82em; color:var(--muted); font-weight:700; }
     // bouton : afficher les cônes et les triangles
     const bw = PT ? h.w - 20 : h.w - 24, bh = sz*2.3, bx = h.x + (h.w - bw)/2, by = h.y + h.h - bh - 10; GM.btn = { x:bx, y:by, w:bw, h:bh };
     ctx.fillStyle = GM.show ? 'rgba(255,210,63,.22)' : 'rgba(255,255,255,.1)'; roundRect(bx, by, bw, bh, 10); ctx.fill(); text(GM.show ? 'Masquer les cônes et les triangles' : 'Afficher les cônes et les triangles', bx + bw/2, by + bh/2, sz*.95, GM.show ? '#ffd23f' : '#cfd6ff', 'center', 800);
-    if (!PT){ let yy = by - sz*3.3; ['flèches ou ZQSD : se déplacer · C : cônes', 'un garde qui t’aperçoit vient voir où tu étais'].forEach(t => { text(t, x, yy, sz*.8, '#8792c4', 'left', 600); yy += sz*1.3; }); }
+    if (!PT){ let yy = by - sz*3.3; ['flèches ou ZQSD : se déplacer – C : cônes', 'un garde qui t’aperçoit vient voir où tu étais'].forEach(t => { text(t, x, yy, sz*.8, '#8792c4', 'left', 600); yy += sz*1.3; }); }
     else { const jy = Ly.joy.y, jy1 = Ly.joy.y1; if (!GM.joy) text('Glisse le doigt ici pour te déplacer', W/2, (jy + jy1)/2, 13, '#8792c4', 'center', 700); }
     if (GM.joy){ const o = GM.joy.o, c = GM.joy.cur || o; ctx.save(); ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(o[0], o[1], 40, 0, 7); ctx.stroke(); const dx = c[0] - o[0], dy = c[1] - o[1], l = Math.hypot(dx, dy), k = l > 40 ? 40/l : 1; dot(o[0] + dx*k, o[1] + dy*k, 16, 'rgba(255,255,255,.55)'); ctx.restore(); } }
   function wrapText(t, x, y, w, sz, col, lh){ ctx.font = '600 ' + sz + 'px Manrope, system-ui, sans-serif'; const words = t.split(' '), lines = []; let cur = ''; words.forEach(wd => { const tt = cur ? cur + ' ' + wd : wd; if (ctx.measureText(tt).width > w && cur){ lines.push(cur); cur = wd; } else cur = tt; }); if (cur) lines.push(cur); lines.forEach((l, i) => text(l, x, y + i*lh, sz, col, 'left', 600)); return lines; }
@@ -491,7 +491,7 @@ table.cmp th{ font-size:.82em; color:var(--muted); font-weight:700; }
       else { if (!MGS.paused) MGS.pause(); if (Math.abs(MGS.currentTime - tgt) > .05 && !MGS.seeking) MGS.currentTime = tgt; } } catch(e){} }
   function drawMgs(a, al){ if (al <= 0) return; const aw = a.x1 - a.x0, ah = a.y1 - a.y0, w = Math.min(aw, ah*640/384), h = w*384/640, x0 = a.x0 + (aw - w)/2, y0 = a.y0 + (ah - h)/2; ctx.save(); ctx.globalAlpha = al; ctx.fillStyle = '#000'; roundRect(x0, y0, w, h, 14); ctx.fill(); ctx.clip();
     if (MGS.readyState >= 2 && MGS.videoWidth){ const s = Math.min(w/MGS.videoWidth, h/MGS.videoHeight), dw = MGS.videoWidth*s, dh = MGS.videoHeight*s; ctx.drawImage(MGS, x0 + (w - dw)/2, y0 + (h - dh)/2, dw, dh); }
-    const fs = Math.max(9, Math.min(11, w*.016)); text('Metal Gear Solid (1998) © Konami · extrait de jeu', x0 + 12, y0 + h - fs*1.2, fs, 'rgba(255,255,255,.75)', 'left', 600); ctx.restore(); }
+    const fs = Math.max(9, Math.min(11, w*.016)); text('Metal Gear Solid (1998) © Konami – extrait de jeu', x0 + 12, y0 + h - fs*1.2, fs, 'rgba(255,255,255,.75)', 'left', 600); ctx.restore(); }
   // ---------- rendu ----------
   const titleEl = $('title'), card = $('card'), captxt = $('captxt'), capEl = $('caption');
   let capIdx = -2;
