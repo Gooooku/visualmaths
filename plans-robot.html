@@ -476,7 +476,7 @@ canvas{ position:absolute; inset:0; display:block; width:100%; height:100%; }
   function out(pan){ const C = AU.ctx; if (!C.createStereoPanner) return AU.master; const p = C.createStereoPanner(); p.pan.value = pan||0; p.connect(AU.master); return p; }
   function pad(k){ const C = AU.ctx, t = C.currentTime, notes = CHORDS[((k%4)+4)%4||0], dur = 8.5;
     const lp = C.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1300;
-    const g = C.createGain(); g.gain.setValueAtTime(.0001, t); g.gain.linearRampToValueAtTime(.028, t+2.2); g.gain.setValueAtTime(.025, t+dur-2.4); g.gain.linearRampToValueAtTime(.0001, t+dur);
+    const g = C.createGain(); g.gain.setValueAtTime(.0001, t); g.gain.linearRampToValueAtTime(.009, t+2.2); g.gain.setValueAtTime(.008, t+dur-2.4); g.gain.linearRampToValueAtTime(.0001, t+dur);
     lp.connect(g); g.connect(out(0));
     notes.forEach(n => { const f = n < 50 ? midi(n+12) : midi(n); [-12, 0, 13].forEach(det => { const o = C.createOscillator(); o.type = 'triangle'; o.frequency.value = f; o.detune.value = det; o.connect(lp); o.start(t); o.stop(t+dur); }); });
     const b = C.createOscillator(), bg = C.createGain(); b.frequency.value = midi(notes[0]-12); bg.gain.setValueAtTime(.0001, t); bg.gain.linearRampToValueAtTime(.09, t+1); bg.gain.linearRampToValueAtTime(.0001, t+7);
@@ -497,7 +497,7 @@ canvas{ position:absolute; inset:0; display:block; width:100%; height:100%; }
   function audioTick(a, b){ if (!AU.on || b <= a) return; FX.forEach(([tm, fn]) => { if (tm > a && tm <= b) fn(); });
     if (Math.floor(b/CHS) > Math.floor(a/CHS) && b < END - 1) pad(Math.floor(b/CHS));
     if (b > 4 && b < END - 2){ for (let i=Math.floor(a/ARP)+1;i<=Math.floor(b/ARP);i++){ const n = CHORDS[Math.floor(i*ARP/CHS)%4], pat = [n[1],n[2],n[3],n[4],n[3],n[2]];
-      tone(midi(pat[i%6]+12), .04*Math.min(1, (i*ARP-4)/3), 1, .35*Math.sin(i*.9)); } } }
+      tone(midi(pat[i%6]+12), .013*Math.min(1, (i*ARP-4)/3), 1, .35*Math.sin(i*.9)); } } }
   function masterTo(v){ if (!AU.ctx) return; const t = AU.ctx.currentTime; AU.master.gain.cancelScheduledValues(t); AU.master.gain.setTargetAtTime(v, t, .15); }
 
   // ---------- voix off ----------
