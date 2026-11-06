@@ -27,8 +27,8 @@
   }
 }
 :root[data-theme="light"]{
-  --bg1:#f4f6ff; --bg2:#dfe4fb; --ink:#141a3a; --muted:#5a6390; --glass:rgba(255,255,255,.7); --stroke:rgba(20,26,58,.12);
-  --x:#e2404f; --y:#12a36a; --z:#2f6fe0; --A:#c98a00; --v:#0098c7; --P:#d81b7a; --B:#7c4ddb; --grid:#b8c0e6;
+  --bg1:#f6f7fb; --bg2:#ffffff; --ink:#141a3a; --muted:#4f5a85; --glass:rgba(255,255,255,.94); --stroke:rgba(20,26,58,.24);
+  --x:#c8102e; --y:#0e8a3a; --z:#1f5fd6; --A:#a86b00; --v:#0066b3; --P:#c0157a; --B:#6a2fc9; --grid:#9aa4d0;
   color-scheme: light;
 }
 :root{ box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); }
@@ -156,6 +156,13 @@ body:not(.rec) .caption{ bottom:calc(var(--u)*4.5 + 26px); }
   .card{ font-size:15px !important; } .card .count{ font-size:.85em; }
 }
 </style>
+<script>/*stats*/if (/(^|\.)visualmaths\.ch$/.test(location.hostname)){ var gc = document.createElement('script'); gc.async = true; gc.src = 'https://gc.zgo.at/count.js'; gc.setAttribute('data-goatcounter', 'https://visualmaths.goatcounter.com/count'); document.head.appendChild(gc); }</script>
+<style>
+:root[data-theme="light"] .ctrl button, :root[data-theme="light"] .ctrl a.home{ background:#141a3a !important; color:#ffffff !important; border-color:#141a3a !important; }
+:root[data-theme="light"] .card{ box-shadow:0 6px 22px rgba(20,26,58,.12); backdrop-filter:none !important; -webkit-backdrop-filter:none !important; }
+#theme{ --ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='4.5'/%3E%3Cpath d='M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8'/%3E%3C/svg%3E"); }
+#theme[aria-pressed="true"]{ --ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z'/%3E%3C/svg%3E"); }
+</style>
 </head>
 <body>
 <div class="stage" id="stage">
@@ -201,7 +208,7 @@ body:not(.rec) .caption{ bottom:calc(var(--u)*4.5 + 26px); }
   </div>
   <div id="credit" style="position:absolute;left:12px;top:10px;z-index:5;font:600 11px Manrope,sans-serif;color:#cfd6ff;opacity:0;transition:opacity .6s;pointer-events:none">Musique : « AI Platforms » – The_Mountain (Pixabay)</div>
   <div class="caption" id="caption"><i class="bar"></i><span id="captxt"></span></div>
-  <div class="ctrl"><a class="home" href="index.html" aria-label="Retour à l'accueil">← Accueil</a><button id="rot" aria-pressed="false">Rotation auto : non</button><button id="voice" aria-pressed="false">Activer la voix</button><button id="sound" aria-pressed="false">Activer le son</button><button id="pause">Pause</button><button id="replay">Rejouer</button></div>
+  <div class="ctrl"><a class="home" href="index.html" aria-label="Retour à l'accueil">← Accueil</a><button id="rot" aria-pressed="false">Rotation auto : non</button><button id="voice" aria-pressed="false">Activer la voix</button><button id="sound" aria-pressed="false">Activer le son</button><button id="theme" aria-pressed="false">☀ Clair</button><button id="pause">Pause</button><button id="replay">Rejouer</button></div>
   <div class="seek"><input type="range" id="seek" min="0" max="69" step="0.1" value="0" aria-label="Position dans l'animation"><span id="clock">0:00 / 1:09</span></div>
 </div>
 
@@ -823,5 +830,9 @@ body:not(.rec) .caption{ bottom:calc(var(--u)*4.5 + 26px); }
   bx.insertAdjacentHTML('beforeend', '<button type="button" id="startBtn">\u25B6 Lancer la vid\u00e9o</button>'); ov.appendChild(bx); st.appendChild(ov);
   document.getElementById('startBtn').addEventListener('click', function(e){ e.stopPropagation(); go(); if (P) P.__vmStarted = true;
     if (v && !on(v)) v.click(); if (pz && !playingNow()) pz.click(); ov.remove(); }); })();</script>
+<script>(function(){ var b = document.getElementById('theme'), R = document.documentElement; if (!b) return;
+  function set(light){ R.setAttribute('data-theme', light ? 'light' : 'dark'); b.setAttribute('aria-pressed', light ? 'true' : 'false'); b.textContent = light ? '☾ Sombre' : '☀ Clair'; b.title = light ? 'Revenir au fond sombre' : 'Fond clair (salle éclairée, beamer)'; }
+  set(false);
+  b.addEventListener('click', function(e){ e.stopPropagation(); set(R.getAttribute('data-theme') !== 'light'); }); })();</script>
 </body>
 </html>

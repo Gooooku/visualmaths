@@ -16,19 +16,19 @@
 <style>
 :root{
   --bg1:#0a0f22; --bg2:#1a2150; --ink:#eef1ff; --muted:#8e97c4; --glass:rgba(255,255,255,.06); --stroke:rgba(255,255,255,.14);
-  --x:#ff7a85; --y:#5ee3a1; --z:#6fa8ff; --A:#ffc857; --B:#b69cff; --C:#ff4fa3; --uc:#3ee6ff; --w:#ffae55; --grid:#3a4478;
+  --x:#ff7a85; --y:#5ee3a1; --z:#6fa8ff; --A:#ffc857; --B:#b69cff; --C:#ff4fa3; --uc:#3ee6ff; --scr:#7fd8ff; --w:#ffae55; --grid:#3a4478;
   color-scheme: dark;
 }
 @media (prefers-color-scheme: light){
   :root:not([data-theme="dark"]){
     --bg1:#f4f6ff; --bg2:#dfe4fb; --ink:#141a3a; --muted:#5a6390; --glass:rgba(255,255,255,.7); --stroke:rgba(20,26,58,.12);
-    --x:#e2404f; --y:#12a36a; --z:#2f6fe0; --A:#c98a00; --B:#7c4ddb; --C:#d81b7a; --uc:#0098c7; --w:#d9730a; --grid:#b8c0e6;
+    --x:#e2404f; --y:#12a36a; --z:#2f6fe0; --A:#c98a00; --B:#7c4ddb; --C:#d81b7a; --uc:#0098c7; --scr:#0a6fa8; --w:#d9730a; --grid:#b8c0e6;
     color-scheme: light;
   }
 }
 :root[data-theme="light"]{
-  --bg1:#f4f6ff; --bg2:#dfe4fb; --ink:#141a3a; --muted:#5a6390; --glass:rgba(255,255,255,.7); --stroke:rgba(20,26,58,.12);
-  --x:#e2404f; --y:#12a36a; --z:#2f6fe0; --A:#c98a00; --B:#7c4ddb; --C:#d81b7a; --uc:#0098c7; --w:#d9730a; --grid:#b8c0e6;
+  --bg1:#f6f7fb; --bg2:#ffffff; --ink:#141a3a; --muted:#4f5a85; --glass:rgba(255,255,255,.94); --stroke:rgba(20,26,58,.24);
+  --x:#c8102e; --y:#0e8a3a; --z:#1f5fd6; --A:#a86b00; --B:#6a2fc9; --C:#c0157a; --uc:#0066b3; --scr:#0049a6; --w:#c25400; --grid:#9aa4d0;
   color-scheme: light;
 }
 :root{ box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); }
@@ -40,7 +40,7 @@ body{ height:100%; margin:0; background:var(--bg1); color:var(--ink); overflow:h
 .vec{ position:relative; display:inline-block; }
 .vec.w::after{ transform:translateX(-50%) scaleX(2.1); }
 .vec::after{ content:"→"; position:absolute; left:52%; top:-.58em; transform:translateX(-50%); font-size:.72em; font-style:normal; line-height:1; }
-.cv{ color:var(--uc); } .cE{ color:var(--A); } .cP{ color:var(--C); } .cS{ color:#7fd8ff; }
+.cv{ color:var(--uc); } .cE{ color:var(--A); } .cP{ color:var(--C); } .cS{ color:var(--scr); font-weight:700; }
 .cx{ color:var(--x); } .cy{ color:var(--y); } .cz{ color:var(--z); } .cA{ color:var(--A); } .cB{ color:var(--B); } .cC{ color:var(--C); }
 .stage{ position:relative; width:100%; height:100%; overflow:hidden; touch-action:none;
   background: radial-gradient(120% 90% at 70% 20%, var(--bg2) 0%, var(--bg1) 62%); --u:min(1vw, 1.78vh); }
@@ -153,6 +153,13 @@ canvas{ position:absolute; inset:0; display:block; width:100%; height:100%; }
   #card #blkR[style*="opacity: 0;"], #card #blkR[style="opacity:0"], #card #blkX[style*="opacity: 0;"], #card #blkX[style="opacity:0"]{ display:none !important; }
 }
 </style>
+<script>/*stats*/if (/(^|\.)visualmaths\.ch$/.test(location.hostname)){ var gc = document.createElement('script'); gc.async = true; gc.src = 'https://gc.zgo.at/count.js'; gc.setAttribute('data-goatcounter', 'https://visualmaths.goatcounter.com/count'); document.head.appendChild(gc); }</script>
+<style>
+:root[data-theme="light"] .ctrl button, :root[data-theme="light"] .ctrl a.home{ background:#141a3a !important; color:#ffffff !important; border-color:#141a3a !important; }
+:root[data-theme="light"] .card{ box-shadow:0 6px 22px rgba(20,26,58,.12); backdrop-filter:none !important; -webkit-backdrop-filter:none !important; }
+#theme{ --ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='4.5'/%3E%3Cpath d='M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8'/%3E%3C/svg%3E"); }
+#theme[aria-pressed="true"]{ --ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z'/%3E%3C/svg%3E"); }
+</style>
 </head>
 <body>
 <div class="stage" id="stage">
@@ -177,7 +184,7 @@ canvas{ position:absolute; inset:0; display:block; width:100%; height:100%; }
   </div>
   <div class="caption" id="caption" style="opacity:0"><i class="bar"></i><span id="captxt"></span></div>
   <div class="final" id="final" style="opacity:0">C’est ce principe géométrique qui permet à un ordinateur de transformer un monde en 3D en une image 2D affichée sur votre écran.</div>
-  <div class="ctrl"><a class="home" href="index.html" aria-label="Retour à l'accueil">← Accueil</a><button id="rot" aria-pressed="false">Rotation auto : non</button><button id="voice" aria-pressed="false">Activer la voix</button><button id="sound" aria-pressed="false">Activer le son</button><button id="pause">Pause</button><button id="replay">Rejouer</button></div>
+  <div class="ctrl"><a class="home" href="index.html" aria-label="Retour à l'accueil">← Accueil</a><button id="rot" aria-pressed="false">Rotation auto : non</button><button id="voice" aria-pressed="false">Activer la voix</button><button id="sound" aria-pressed="false">Activer le son</button><button id="theme" aria-pressed="false">☀ Clair</button><button id="pause">Pause</button><button id="replay">Rejouer</button></div>
   <div class="seek"><input type="range" id="seek" min="0" max="84" step="0.1" value="0" aria-label="Position dans l'animation"><span id="clock">0:00 / 1:24</span></div>
 </div>
 <script src="three.min.js"></script>
@@ -337,10 +344,10 @@ canvas{ position:absolute; inset:0; display:block; width:100%; height:100%; }
     const o = {el, col, pos:new THREE.Vector3(), a:0, dx:0, dy:0}; labels.push(o); return o; }
   const LX = label('<span class="m">x</span>', '--x'), LY = label('<span class="m">y</span>', '--y'), LZ = label('<span class="m">z</span>', '--z'), LO = label('<span class="m">O</span>', '--muted');
   LX.pos.copy(M(4,0,0)); LY.pos.copy(M(0,6,0)); LZ.pos.copy(M(0,0,5.5)); LO.pos.copy(M(0,0,0)); LO.dx = 12; LO.dy = 14;
-  const LScr = label('écran : plan <b>yOz</b> : <span class="m">x</span> = 0', null, 'plane'); LScr.el.style.color = '#7fd8ff'; LScr.pos.copy(M(0, SY[1]-.2, SZ[1]+.1)); LScr.dy = -14;
+  const LScr = label('écran : plan <b>yOz</b> : <span class="m">x</span> = 0', null, 'plane'); LScr.col = '--scr'; LScr.pos.copy(M(0, SY[1]-.2, SZ[1]+.1)); LScr.dy = -14;
   const LE = label('<span class="m">E</span>(2 ; 0 ; 3)  œil', '--A'); LE.pos.copy(Mv(E)); LE.dy = 30;
   const LPt = [IP, IQ].map(i => { const l = label('<span class="m">' + NAMES[i] + '</span>(' + V[i].map(fr).join(' ; ') + ')', '--C'); l.pos.copy(Mv(V[i])); l.dy = i === IP ? 22 : -22; l.dx = i === IP ? 30 : -30; return l; });
-  const LPi = [IP, IQ].map(i => { const l = label('<span class="m">' + NAMES[i] + '’</span>(' + IMG[i].Q.map(fr).join(' ; ') + ')', null); l.el.style.color = '#7fd8ff'; l.pos.copy(Mv(IMG[i].Q)); l.dx = 62; l.dy = i === IP ? -10 : 12; return l; });
+  const LPi = [IP, IQ].map(i => { const l = label('<span class="m">' + NAMES[i] + '’</span>(' + IMG[i].Q.map(fr).join(' ; ') + ')', null); l.col = '--scr'; l.pos.copy(Mv(IMG[i].Q)); l.dx = 62; l.dy = i === IP ? -10 : 12; return l; });
   const tmp = new THREE.Vector3();
   function placeLabels(){ const w = stage.clientWidth, h = stage.clientHeight;
     for (const l of labels){ tmp.copy(l.pos).project(camera); const vis = l.a > .01 && tmp.z < 1; l.el.style.opacity = vis ? l.a : 0;
@@ -349,9 +356,9 @@ canvas{ position:absolute; inset:0; display:block; width:100%; height:100%; }
     AX.forEach(ax => { ax.pos.material.color = c(ax.col); ax.neg.material.color = c(ax.col); ax.cone.material.color = c(ax.col); });
     cubeEdges.forEach(e => e.m.material.color = c('--A')); vDots.forEach(s => { s.material.color = c('--A'); s.material.blending = blend; });
     rays.forEach(r => r.material.color = c('--C')); raysBack.forEach(r => r.material.color = c('--C'));
-    pix.forEach(s => { s.material.color = new THREE.Color('#7fd8ff'); s.material.blending = blend; }); imgEdges.forEach(e => e.m.material.color = new THREE.Color(dark ? '#9fe4ff' : '#0a86b8'));
+    pix.forEach(s => { s.material.color = new THREE.Color(dark ? '#7fd8ff' : '#0049a6'); s.material.blending = blend; }); imgEdges.forEach(e => e.m.material.color = new THREE.Color(dark ? '#9fe4ff' : '#0a86b8'));
     eyeHalo.material.color = c('--A'); eyeHalo.material.blending = blend;
-    flames.concat(imgFlames).forEach(s => { s.material.color = new THREE.Color('#ff4fa3'); s.material.blending = blend; }); screen.material.color = new THREE.Color(dark ? '#7fd8ff' : '#1d8fc0');
+    flames.concat(imgFlames).forEach(s => { s.material.color = new THREE.Color('#ff4fa3'); s.material.blending = blend; }); screen.material.color = new THREE.Color(dark ? '#7fd8ff' : '#2a7fd0');
     labels.forEach(l => { if (l.col) l.el.style.color = css(l.col); }); }
 
   // ---------- panneau ----------
@@ -575,5 +582,9 @@ canvas{ position:absolute; inset:0; display:block; width:100%; height:100%; }
   bx.insertAdjacentHTML('beforeend', '<button type="button" id="startBtn">\u25B6 Lancer la vid\u00e9o</button>'); ov.appendChild(bx); st.appendChild(ov);
   document.getElementById('startBtn').addEventListener('click', function(e){ e.stopPropagation(); go(); if (P) P.__vmStarted = true;
     if (v && !on(v)) v.click(); if (pz && !playingNow()) pz.click(); ov.remove(); }); })();</script>
+<script>(function(){ var b = document.getElementById('theme'), R = document.documentElement; if (!b) return;
+  function set(light){ R.setAttribute('data-theme', light ? 'light' : 'dark'); b.setAttribute('aria-pressed', light ? 'true' : 'false'); b.textContent = light ? '☾ Sombre' : '☀ Clair'; b.title = light ? 'Revenir au fond sombre' : 'Fond clair (salle éclairée, beamer)'; }
+  set(false);
+  b.addEventListener('click', function(e){ e.stopPropagation(); set(R.getAttribute('data-theme') !== 'light'); }); })();</script>
 </body>
 </html>

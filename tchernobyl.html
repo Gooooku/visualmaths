@@ -289,8 +289,8 @@ table.cmp th{ font-size:.82em; color:var(--muted); font-weight:700; }
   })();
   function setTheme(light){ THEME.light = light; const st = document.getElementById('stage'); if (st) st.classList.toggle('light', light);
     const b = document.getElementById('theme'); if (b){ b.setAttribute('aria-pressed', light ? 'true' : 'false'); b.textContent = light ? '☾ Sombre' : '☀ Clair'; b.title = light ? 'Revenir au fond sombre' : 'Fond clair (salle éclairée, beamer)'; }
-    try { localStorage.setItem('vm-theme', light ? 'light' : 'dark'); } catch(e){} }
-  (function(){ let l = false; try { l = localStorage.getItem('vm-theme') === 'light'; } catch(e){} setTheme(l);
+    }
+  (function(){ setTheme(false);
     const b = document.getElementById('theme'); if (b) b.addEventListener('click', e => { e.stopPropagation(); setTheme(!THEME.light); }); })();
 
   // ---------- outils ----------
