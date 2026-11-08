@@ -125,7 +125,7 @@ footer p{ margin:0 0 6px; }
   <footer>
     <p class="f-sign">VisualMaths – conçu par D.R, enseignant de mathématiques</p>
     <p>Réalisé avec l’aide de l’IA (Claude, Anthropic) · voix de synthèse VoxCPM</p>
-    <p>Musiques&nbsp;: Kevin MacLeod (incompetech.com), licence CC BY 4.0, moodmode, The_Mountain, Kulakovka et eBunny (Pixabay) – effets sonores&nbsp;: Pixabay<br>Images de jeux vidéo (Doom, Quake, Super Mario Bros., Super Mario 64, Metal Gear Solid, Sea of Thieves)&nbsp;: © leurs éditeurs, utilisées à titre d’illustration pédagogique</p>
+    <p>Musiques&nbsp;: Kevin MacLeod (incompetech.com), licence CC BY 4.0, moodmode, The_Mountain, Kulakovka, eBunny et Hitslab (Pixabay) – effets sonores&nbsp;: Pixabay<br>Images de jeux vidéo (Doom, Quake, Super Mario Bros., Super Mario 64, Metal Gear Solid, Sea of Thieves, Uncharted 4)&nbsp;: © leurs éditeurs, utilisées à titre d’illustration pédagogique<br>Modèles 3D&nbsp;: jerryblessed et pixellabs (Pixabay)</p>
     <p>Statistiques de visite anonymes (GoatCounter, sans cookies)</p>
   </footer>
 </div>
@@ -248,7 +248,14 @@ const ANNEES = [
     titre: "4ᵉ année",
     chapitres: [
       {
-        titre: "Géométrie vectorielle",
+        titre: "Produit scalaire",
+        description: "Le produit scalaire de deux vecteurs et son lien avec l’angle qui les sépare.",
+        videos: [
+          { titre: "La lumière dans les jeux vidéo", texte: "Comment un jeu calcule la luminosité de chaque point ? Le produit scalaire entre la normale et la direction du soleil. Puis à toi de jouer dans le temple !", lien: "produit-scalaire.html", image: "thumb-produit-scalaire.jpg", duree: "3 min 20", tag: "application", jeu: true }
+        ]
+      },
+      {
+        titre: "Géométrie vectorielle en 3D",
         description: "Points, vecteurs, droites et plans dans l’espace.",
         videos: [
           { titre: "Points et vecteurs dans l’espace", texte: "Placer un point dans un repère 3D, dessiner un vecteur, calculer les composantes de AB.", lien: "points-vecteurs.html", image: "thumb-points.jpg", duree: "2 min 23", tag: "theorie" },
@@ -257,8 +264,7 @@ const ANNEES = [
           { titre: "Le rayon d’énergie", texte: "On remplace les coordonnées de la cible dans les équations : le rayon va-t-il la toucher ?", lien: "droite-rayon.html", image: "thumb-rayon.jpg", duree: "1 min 06", tag: "application" },
           { titre: "Intersections avec les plans de coordonnées", texte: "Les plans xOy, xOz et yOz, puis les points où une droite les traverse.", lien: "plans-intersections.html", image: "thumb-plans.jpg", duree: "1 min 41", tag: "theorie" },
           { titre: "L’ombre de l’obélisque", texte: "Où tombe l’ombre du sommet ? Le rayon de soleil coupe le sol… et révèle un trésor.", lien: "plans-obelisque.html", image: "thumb-obelisque.jpg", duree: "1 min 16", tag: "application" },
-          { titre: "Du robot 3D à l’écran", texte: "Comment un ordinateur transforme un objet 3D en image : chaque pixel est l’intersection d’un rayon avec l’écran.", lien: "plans-robot.html", image: "thumb-robot.jpg", duree: "1 min 36", tag: "application" },
-          { titre: "La lumière dans les jeux vidéo", texte: "Comment un jeu calcule la luminosité de chaque point ? Le produit scalaire entre la normale et la direction du soleil. Puis à toi de jouer dans le temple !", lien: "produit-scalaire.html", image: "thumb-produit-scalaire.jpg", duree: "3 min 20", tag: "application", jeu: true }
+          { titre: "Du robot 3D à l’écran", texte: "Comment un ordinateur transforme un objet 3D en image : chaque pixel est l’intersection d’un rayon avec l’écran.", lien: "plans-robot.html", image: "thumb-robot.jpg", duree: "1 min 36", tag: "application" }
         ]
       },
       {
